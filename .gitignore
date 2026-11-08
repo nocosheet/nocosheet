@@ -4,6 +4,7 @@ dist
 .wrangler
 .cloudflare
 .void-wrangler.jsonc
+.tanstack/
 .env
 .env.*
 !.env.example

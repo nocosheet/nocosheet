@@ -1,7 +1,12 @@
 {
   "name": "nocosheet",
   "version": "1.0.0",
+  "private": true,
   "description": "",
+  "keywords": [],
+  "license": "ISC",
+  "author": "",
+  "type": "module",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -10,9 +15,14 @@
     "preview": "vp preview",
     "postinstall": "void prepare"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "dependencies": {
+    "@tanstack/react-query": "^5.107.1",
+    "@tanstack/react-router": "^1.170.46",
+    "hono": "^4.11.9",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "zod": "^4.6.7"
+  },
   "devDependencies": {
     "@tanstack/react-devtools": "^0.10.14",
     "@tanstack/react-query-devtools": "^5.107.1",
@@ -25,15 +35,5 @@
     "vite": "npm:@voidzero-dev/vite-plus-core@^1.4.0",
     "vite-plus": "^1.4.0",
     "void": "^1.6.2"
-  },
-  "private": true,
-  "type": "module",
-  "dependencies": {
-    "@tanstack/react-query": "^5.107.1",
-    "@tanstack/react-router": "^1.170.46",
-    "hono": "^4.11.9",
-    "react": "^19.3.1",
-    "react-dom": "^19.3.1",
-    "zod": "^4.6.7"
   }
 }
