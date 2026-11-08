@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/")({
@@ -5,5 +6,9 @@ export const Route = createFileRoute("/")({
 });
 
 function Home() {
-  return <div>Home</div>;
+  return (
+    <div className="p-4">
+      <Button>Click</Button>
+    </div>
+  )
 }
