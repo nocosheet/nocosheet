@@ -11,7 +11,7 @@
     },
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "types": ["void/env"]
+    "types": ["void/env", "vite/client"]
   },
   "include": ["src", "routes", "middleware", "crons", "queues", "db"]
 }

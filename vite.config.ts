@@ -1,4 +1,5 @@
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
+import tailwindcss from '@tailwindcss/vite'
 import react from "@vitejs/plugin-react";
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite-plus";
@@ -10,7 +11,7 @@ export default defineConfig({
       "@": fileURLToPath(new URL("./src", import.meta.url)),
     },
   },
-  plugins: [tanstackRouter({ target: "react", autoCodeSplitting: true }), react(), voidPlugin()],
+  plugins: [tailwindcss(), tanstackRouter({ target: "react", autoCodeSplitting: true }), react(), voidPlugin()],
   fmt: {
     ignorePatterns: ["src/routeTree.gen.ts", "pnpm-lock.yaml", ".void/**", ".cloudflare/**"],
     sortPackageJson: true,
