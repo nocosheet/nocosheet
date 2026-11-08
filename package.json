@@ -1,0 +1,28 @@
+{
+  "name": "nocosheet",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "vp dev",
+    "build": "vp build",
+    "preview": "vp preview",
+    "postinstall": "void prepare"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "void": "^1.6.2",
+    "vite": "npm:@voidzero-dev/vite-plus-core@^1.4.0",
+    "typescript": "^7.0.2",
+    "vite-plus": "^1.4.0"
+  },
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "hono": "^4.11.9",
+    "zod": "^4.6.7"
+  }
+}
