@@ -13,5 +13,5 @@
     "skipLibCheck": true,
     "types": ["void/env", "vite/client"]
   },
-  "include": ["src", "routes", "middleware", "crons", "queues", "db"]
+  "include": ["src", "routes", "middleware", "crons", "queues", "db", "auth.ts"]
 }
