@@ -49,6 +49,10 @@ export const tableInputSchema = z.object({
   hasUpdatedBy: z.boolean(),
 });
 
+export const tablesDeleteSchema = z.object({
+  ids: z.array(z.number().int().positive()).min(1).max(100),
+});
+
 export type TableInput = z.input<typeof tableInputSchema>;
 export type TableValues = z.output<typeof tableInputSchema>;
 

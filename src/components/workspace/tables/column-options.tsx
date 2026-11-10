@@ -96,8 +96,16 @@ function RelationOptions({
   options: Options;
   onChange: (o: Options) => void;
 }) {
-  const { data: tables = [] } = useQuery(tablesQueryOptions(useWorkspace().id));
-  const items = tables.map((table) => ({ value: String(table.id), label: table.name }));
+  const { data } = useQuery(
+    tablesQueryOptions(useWorkspace().id, {
+      page: 1,
+      pageSize: 100,
+      sort: "name",
+      order: "asc",
+      q: "",
+    }),
+  );
+  const items = (data?.rows ?? []).map((table) => ({ value: String(table.id), label: table.name }));
 
   return (
     <>

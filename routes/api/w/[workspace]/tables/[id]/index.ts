@@ -1,13 +1,12 @@
-import { columnTable, resourceTable } from "@db/schema";
+import { columnTable } from "@db/schema";
 import { HTTPException } from "hono/http-exception";
 import { defineHandler } from "void";
 import { and, asc, count, db, eq, isNull, sql } from "void/db";
 import { z } from "zod";
 
 import { requireAdmin } from "@/lib/auth/require-admin";
-import { buildDropTable } from "@/lib/tables/ddl";
 import { physicalTableName, quoteIdent } from "@/lib/tables/naming";
-import { findTable } from "@/lib/tables/server";
+import { deleteTables, findTable } from "@/lib/tables/server";
 
 const params = z.object({ workspace: z.string(), id: z.coerce.number().int().positive() });
 
@@ -41,10 +40,7 @@ export const DELETE = defineHandler(
     if (Number(rows) > 0)
       throw new HTTPException(409, { message: "Only an unfinished table can be discarded." });
 
-    await db.batch([
-      db.run(sql.raw(buildDropTable(physicalName))),
-      db.delete(resourceTable).where(eq(resourceTable.id, table.id)),
-    ]);
+    await deleteTables(workspace, [table.id]);
     return { ok: true };
   }),
 );

@@ -2,15 +2,28 @@ import { mutationOptions, queryOptions } from "@tanstack/react-query";
 
 import { fetch } from "void/client";
 
+import type { TablesQuery } from "@/lib/tables/query";
 import type { ColumnInput, TableInput } from "@/lib/tables/validation";
 
 import { unwrapFetch } from "./api-error";
 import { workspaceKeys } from "./keys";
 
-export const tablesQueryOptions = (workspace: string) =>
+export const tablesQueryOptions = (workspace: string, query: TablesQuery) =>
   queryOptions({
-    queryKey: workspaceKeys.tables(),
-    queryFn: () => unwrapFetch(fetch("/api/w/:workspace/tables", { params: { workspace } })),
+    queryKey: workspaceKeys.tableList(query),
+    queryFn: () =>
+      unwrapFetch(
+        fetch("/api/w/:workspace/tables", {
+          params: { workspace },
+          query: {
+            page: query.page,
+            pageSize: query.pageSize,
+            sort: query.sort,
+            order: query.order,
+            ...(query.q ? { q: query.q } : {}),
+          },
+        }),
+      ),
     staleTime: 30_000,
   });
 
@@ -37,6 +50,18 @@ export const deleteTableMutationOptions = mutationOptions({
       fetch("/api/w/:workspace/tables/:id", {
         method: "DELETE",
         params: { workspace, id: String(id) },
+      }),
+    ),
+});
+
+export const deleteTablesMutationOptions = mutationOptions({
+  mutationKey: workspaceKeys.mutation("delete-tables"),
+  mutationFn: ({ workspace, ids }: { workspace: string; ids: number[] }) =>
+    unwrapFetch(
+      fetch("/api/w/:workspace/tables", {
+        method: "DELETE",
+        params: { workspace },
+        body: { ids },
       }),
     ),
 });

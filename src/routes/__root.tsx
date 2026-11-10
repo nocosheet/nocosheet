@@ -4,6 +4,8 @@ import { ReactQueryDevtoolsPanel } from "@tanstack/react-query-devtools";
 import { Outlet, createRootRouteWithContext } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 
+import { NuqsAdapter } from "nuqs/adapters/tanstack-router";
+
 import { ToastProvider } from "@/components/ui/toast";
 import { sessionQueryOptions } from "@/data/auth/session";
 
@@ -17,7 +19,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 function RootComponent() {
   return (
     <ToastProvider>
-      <Outlet />
+      <NuqsAdapter>
+        <Outlet />
+      </NuqsAdapter>
       <TanStackDevtools
         plugins={[
           { name: "TanStack Query", render: <ReactQueryDevtoolsPanel /> },

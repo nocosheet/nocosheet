@@ -1,31 +1,67 @@
-import { resourceTable, tableTable } from "@db/schema";
+import { columnTable, resourceTable, tableTable } from "@db/schema";
 import { defineHandler } from "void";
 import { requireAuth } from "void/auth";
-import { asc, db, isNull, sql } from "void/db";
+import { and, asc, count, db, desc, isNull, or, sql } from "void/db";
 
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { buildCreateTable } from "@/lib/tables/ddl";
 import { physicalTableName, toTableName } from "@/lib/tables/naming";
-import { conflictOrBadRequest } from "@/lib/tables/server";
-import { tableInputSchema } from "@/lib/tables/validation";
+import { resolveTablesQuery, tablesSearchSchema } from "@/lib/tables/query";
+import { conflictOrBadRequest, deleteTables } from "@/lib/tables/server";
+import { tableInputSchema, tablesDeleteSchema } from "@/lib/tables/validation";
 
-export const GET = defineHandler(() =>
-  db
-    .select({
-      id: tableTable.id,
-      name: tableTable.name,
-      tableName: tableTable.tableName,
-      icon: tableTable.icon,
-      groupName: tableTable.groupName,
-      description: tableTable.description,
-      idType: tableTable.idType,
-      titleColumnId: tableTable.titleColumnId,
-      position: tableTable.position,
-    })
-    .from(tableTable)
-    .where(isNull(tableTable.deletedAt))
-    .orderBy(asc(tableTable.position)),
-);
+export const GET = defineHandler.withValidator({ query: tablesSearchSchema })(async (
+  _c,
+  { query },
+) => {
+  const { page, pageSize, sort, order, q } = resolveTablesQuery(query);
+
+  const columnCount = sql<number>`(select count(*) from ${columnTable} where ${columnTable.tableId} = ${tableTable}.id and ${columnTable.deletedAt} is null)`;
+  const pattern = q ? `%${q.replaceAll(/[\\%_]/g, "\\$&")}%` : null;
+
+  const where = and(
+    isNull(tableTable.deletedAt),
+    pattern
+      ? or(
+          sql`${tableTable.name} like ${pattern} escape '\\'`,
+          sql`${tableTable.tableName} like ${pattern} escape '\\'`,
+          sql`${tableTable.description} like ${pattern} escape '\\'`,
+        )
+      : undefined,
+  );
+
+  const sortExpression = {
+    name: sql`lower(${tableTable.name})`,
+    groupName: sql`lower(${tableTable.groupName})`,
+    columnCount,
+    updatedAt: tableTable.updatedAt,
+  }[sort];
+  const direction = order === "desc" ? desc : asc;
+
+  const [rows, [{ total }]] = await db.batch([
+    db
+      .select({
+        id: tableTable.id,
+        name: tableTable.name,
+        tableName: tableTable.tableName,
+        icon: tableTable.icon,
+        groupName: tableTable.groupName,
+        description: tableTable.description,
+        idType: tableTable.idType,
+        titleColumnId: tableTable.titleColumnId,
+        columnCount,
+        updatedAt: tableTable.updatedAt,
+      })
+      .from(tableTable)
+      .where(where)
+      .orderBy(direction(sortExpression), asc(tableTable.id))
+      .limit(pageSize)
+      .offset((page - 1) * pageSize),
+    db.select({ total: count() }).from(tableTable).where(where),
+  ]);
+
+  return { rows, total };
+});
 
 export const POST = defineHandler(
   requireAdmin,
@@ -63,5 +99,13 @@ export const POST = defineHandler(
     } catch (error) {
       conflictOrBadRequest(error, "A table with this name already exists.");
     }
+  }),
+);
+
+export const DELETE = defineHandler(
+  requireAdmin,
+  defineHandler.withValidator({ body: tablesDeleteSchema })(async (c, { body }) => {
+    await deleteTables(c.get("workspaceId"), body.ids);
+    return { ok: true };
   }),
 );
