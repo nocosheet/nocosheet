@@ -1,4 +1,5 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { notFound } from "@tanstack/react-router";
 
 import { SettingsRow } from "@/components/shared/settings-row";
 import { RoleBadge } from "@/components/shared/user-badges";
@@ -11,7 +12,6 @@ import {
   CardFrameHeader,
   CardFrameTitle,
 } from "@/components/ui/card";
-import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
 import { membersQueryOptions } from "@/data/workspace/members";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 import { useWorkspace } from "@/hooks/use-workspace";
@@ -30,16 +30,7 @@ export function MemberDetail({ userId }: MemberDetailProps) {
     select: (members) => members.find((item) => item.id === userId),
   });
 
-  if (!member) {
-    return (
-      <Empty>
-        <EmptyHeader>
-          <EmptyTitle>Member not found</EmptyTitle>
-          <EmptyDescription>This account doesn't exist or was removed.</EmptyDescription>
-        </EmptyHeader>
-      </Empty>
-    );
-  }
+  if (!member) throw notFound();
 
   if (isAdmin) return <MemberAdminDetail userId={userId} />;
 
