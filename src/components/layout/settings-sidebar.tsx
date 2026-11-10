@@ -1,55 +1,25 @@
-import { Link } from "@tanstack/react-router";
+import { Sidebar, SidebarContent, SidebarHeader, SidebarRail } from "@/components/ui/sidebar";
 
-import { ArrowLeftIcon } from "lucide-react";
-
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarRail,
-} from "@/components/ui/sidebar";
-
+import { NavBack } from "./sidebar/nav-back";
 import { NavSettings } from "./sidebar/nav-settings";
-import { NavUser } from "./sidebar/nav-user";
+import { WorkspaceSwitcher } from "./sidebar/workspace-switcher";
 
 type SettingsSidebarProps = {
   workspace: string;
   user: { name: string; email: string; image?: string | null };
 };
 
-/** Inset sidebar for everything under `/w/$workspace/settings`. */
+/** Inset sidebar for everything under `/w/$workspace/settings`, laid out like the app sidebar. */
 export function SettingsSidebar({ workspace, user }: SettingsSidebarProps) {
   return (
     <Sidebar variant="inset" collapsible="icon">
       <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              tooltip="Back to app"
-              render={
-                <Link
-                  to="/w/$workspace"
-                  params={{ workspace }}
-                  viewTransition={{ types: ["sidebar-back"] }}
-                />
-              }
-            >
-              <ArrowLeftIcon />
-              <span className="font-medium">Back to app</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+        <WorkspaceSwitcher workspace={workspace} user={user} />
       </SidebarHeader>
       <SidebarContent>
         <NavSettings workspace={workspace} />
+        <NavBack workspace={workspace} />
       </SidebarContent>
-      <SidebarFooter>
-        <NavUser user={user} />
-      </SidebarFooter>
       <SidebarRail />
     </Sidebar>
   );

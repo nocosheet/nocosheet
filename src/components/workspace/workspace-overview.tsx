@@ -34,6 +34,7 @@ const START_ACTIONS = [
     icon: PlusIcon,
     title: "New table",
     description: "Start from scratch with your own fields.",
+    route: "new-table",
   },
   {
     icon: FileSpreadsheetIcon,
@@ -74,28 +75,41 @@ export function WorkspaceOverview({ workspace }: { workspace: string }) {
       </div>
 
       <section className="grid gap-4 sm:grid-cols-3">
-        {START_ACTIONS.map(({ icon: Icon, title, description }) => (
-          <Card
-            key={title}
-            render={<button type="button" />}
-            className="cursor-pointer gap-3 p-5 text-start transition-colors hover:bg-accent/40"
-            onClick={() =>
-              toastManager.add({
-                type: "info",
-                title: `${title} is coming soon`,
-                description,
-              })
-            }
-          >
-            <span className="flex size-9 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-              <Icon className="size-4.5" />
-            </span>
-            <div className="flex flex-col gap-0.5">
-              <span className="font-medium text-sm">{title}</span>
-              <span className="text-muted-foreground text-sm">{description}</span>
-            </div>
-          </Card>
-        ))}
+        {START_ACTIONS.map((action) => {
+          const { icon: Icon, title, description } = action;
+          const opensWizard = "route" in action && isAdmin;
+          return (
+            <Card
+              key={title}
+              render={
+                opensWizard ? (
+                  <Link to="/w/$workspace/tables/new" params={{ workspace }} search={{ step: 1 }} />
+                ) : (
+                  <button type="button" />
+                )
+              }
+              className="cursor-pointer gap-3 p-5 text-start transition-colors hover:bg-accent/40"
+              onClick={
+                opensWizard
+                  ? undefined
+                  : () =>
+                      toastManager.add(
+                        "route" in action
+                          ? { type: "info", title: "Only admins can create tables" }
+                          : { type: "info", title: `${title} is coming soon`, description },
+                      )
+              }
+            >
+              <span className="flex size-9 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                <Icon className="size-4.5" />
+              </span>
+              <div className="flex flex-col gap-0.5">
+                <span className="font-medium text-sm">{title}</span>
+                <span className="text-muted-foreground text-sm">{description}</span>
+              </div>
+            </Card>
+          );
+        })}
       </section>
 
       <CardFrame>
