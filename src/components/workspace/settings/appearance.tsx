@@ -13,8 +13,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { usePreference } from "@/hooks/use-preference";
-import type { SidebarDefault, Theme } from "@/lib/preferences";
+import { useAccent } from "@/hooks/use-accent";
+import { useSidebarDefault, type SidebarDefault } from "@/hooks/use-sidebar-default";
+import { useTheme, type Theme } from "@/hooks/use-theme";
 
 import { AccentPicker } from "./accent-picker";
 
@@ -30,9 +31,9 @@ const sidebarDefaults: { value: SidebarDefault; label: string }[] = [
 ];
 
 export function SettingsAppearance() {
-  const [theme, setTheme] = usePreference("theme");
-  const [sidebarDefault, setSidebarDefault] = usePreference("sidebarDefault");
-  const [accent, setAccent] = usePreference("accent");
+  const { theme, setTheme } = useTheme();
+  const { sidebarDefault, setSidebarDefault } = useSidebarDefault();
+  const { accent, setAccent } = useAccent();
 
   return (
     <CardFrame>

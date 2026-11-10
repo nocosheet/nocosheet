@@ -1,7 +1,7 @@
 import { Field, FieldItem, FieldLabel } from "@/components/ui/field";
 import { Fieldset, FieldsetLegend } from "@/components/ui/fieldset";
 import { Radio, RadioGroup } from "@/components/ui/radio-group";
-import { ACCENTS, type Accent } from "@/lib/preferences";
+import { ACCENTS, type Accent } from "@/lib/accents";
 
 type AccentPickerProps = {
   value: Accent;

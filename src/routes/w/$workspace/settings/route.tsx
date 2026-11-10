@@ -4,7 +4,7 @@ import { ImpersonationBanner } from "@/components/layout/impersonation-banner";
 import { SettingsSidebar } from "@/components/layout/settings-sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { useSession } from "@/hooks/use-session";
-import { getPreferences } from "@/lib/preferences";
+import { readSidebarDefaultOpen } from "@/hooks/use-sidebar-default";
 
 export const Route = createFileRoute("/w/$workspace/settings")({
   staticData: { crumb: "Settings" },
@@ -16,7 +16,7 @@ function SettingsLayout() {
   const session = useSession();
 
   return (
-    <SidebarProvider defaultOpen={getPreferences().sidebarDefault === "expanded"}>
+    <SidebarProvider defaultOpen={readSidebarDefaultOpen()}>
       <SettingsSidebar workspace={workspace} user={session!.user} />
       <SidebarInset>
         <ImpersonationBanner />
