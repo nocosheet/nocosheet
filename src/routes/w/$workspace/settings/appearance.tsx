@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import { WorkspaceContent, WorkspaceHeader } from "@/components/layout/workspace-header";
-import { SettingsAppearance } from "@/components/workspace/settings-appearance";
+import { SettingsAppearance } from "@/components/workspace/settings/appearance";
 
 export const Route = createFileRoute("/w/$workspace/settings/appearance")({
   staticData: { crumb: "Appearance" },

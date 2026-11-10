@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import { WorkspaceContent, WorkspaceHeader } from "@/components/layout/workspace-header";
-import { AddMemberDialog } from "@/components/workspace/member-admin/add-member-dialog";
-import { MembersList } from "@/components/workspace/members-list";
+import { AddMemberDialog } from "@/components/workspace/settings/members/add-member-dialog";
+import { MembersList } from "@/components/workspace/settings/members/members-list";
 import { useWorkspace } from "@/hooks/use-workspace";
 
 export const Route = createFileRoute("/w/$workspace/settings/members/")({

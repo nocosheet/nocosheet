@@ -22,7 +22,7 @@ import { MemberSecurity } from "./member-security";
 import { MemberSessions } from "./member-sessions";
 
 /** Everything an admin can do to a member; rendered instead of the read-only view. */
-export function MemberAdminDetail({ userId }: { userId: string }) {
+export function MemberDetail({ userId }: { userId: string }) {
   const session = useSession();
   const { copyToClipboard, isCopied } = useCopyToClipboard();
   const { data: member } = useSuspenseQuery(adminUserQueryOptions(userId));

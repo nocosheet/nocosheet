@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import { WorkspaceContent, WorkspaceHeader } from "@/components/layout/workspace-header";
-import { SettingsIntegrations } from "@/components/workspace/settings-integrations";
+import { SettingsIntegrations } from "@/components/workspace/settings/integrations";
 
 export const Route = createFileRoute("/w/$workspace/settings/integrations")({
   staticData: { crumb: "Integrations" },

@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import { WorkspaceContent, WorkspaceHeader } from "@/components/layout/workspace-header";
-import { SettingsApi } from "@/components/workspace/settings-api";
+import { SettingsApi } from "@/components/workspace/settings/api";
 
 export const Route = createFileRoute("/w/$workspace/settings/api")({
   staticData: { crumb: "API" },

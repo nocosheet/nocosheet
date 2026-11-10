@@ -3,11 +3,11 @@ import { useState } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 
-import { SearchIcon } from "lucide-react";
+import { CheckIcon, CopyIcon, SearchIcon } from "lucide-react";
 
 import { RoleBadge } from "@/components/shared/user-badges";
 import { UserIdentity } from "@/components/shared/user-identity";
-import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardFrame,
@@ -17,9 +17,31 @@ import {
 } from "@/components/ui/card";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { membersQueryOptions } from "@/data/workspace/members";
+import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
+import { useWorkspace } from "@/hooks/use-workspace";
 import { formatRelativeTime } from "@/lib/format-relative-time";
+import { cn } from "@/lib/utils";
+
+function CopyIdButton({ id }: { id: string }) {
+  const { copyToClipboard, isCopied } = useCopyToClipboard();
+
+  return (
+    <Button
+      type="button"
+      variant="ghost"
+      size="icon-xs"
+      className="relative z-10"
+      aria-label="Copy user ID"
+      title="Copy user ID"
+      onClick={() => copyToClipboard(id)}
+    >
+      {isCopied ? <CheckIcon /> : <CopyIcon />}
+    </Button>
+  );
+}
 
 export function MembersList({ workspace }: { workspace: string }) {
+  const { isAdmin } = useWorkspace();
   const [query, setQuery] = useState("");
   const { data: members } = useSuspenseQuery(membersQueryOptions);
 
@@ -60,20 +82,32 @@ export function MembersList({ workspace }: { workspace: string }) {
           </p>
         ) : (
           visible.map((member) => (
-            <Link
+            <div
               key={member.id}
-              to="/w/$workspace/settings/members/$userId"
-              params={{ workspace, userId: member.id }}
-              className="flex items-center justify-between gap-4 p-4 not-last:border-b hover:bg-accent/40 md:px-6"
+              className={cn(
+                "relative flex items-center justify-between gap-4 p-4 not-last:border-b md:px-6",
+                isAdmin && "hover:bg-accent/40",
+              )}
             >
-              <UserIdentity user={member} />
+              {isAdmin ? (
+                <Link
+                  to="/w/$workspace/settings/members/$userId"
+                  params={{ workspace, userId: member.id }}
+                  className="min-w-0 after:absolute after:inset-0"
+                >
+                  <UserIdentity user={member} />
+                </Link>
+              ) : (
+                <UserIdentity user={member} />
+              )}
               <div className="flex shrink-0 items-center gap-3">
                 <RoleBadge user={member} />
                 <span className="hidden text-muted-foreground text-sm sm:inline">
                   Joined {formatRelativeTime(member.createdAt)}
                 </span>
+                <CopyIdButton id={member.id} />
               </div>
-            </Link>
+            </div>
           ))
         )}
       </Card>

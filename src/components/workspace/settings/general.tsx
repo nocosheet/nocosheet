@@ -13,7 +13,7 @@ import { membersQueryOptions } from "@/data/workspace/members";
 import { useWorkspace } from "@/hooks/use-workspace";
 import { DEFAULT_WORKSPACE, DEFAULT_WORKSPACE_NAME } from "@/lib/workspace";
 
-export function WorkspaceSettings() {
+export function SettingsGeneral() {
   const { data: members } = useSuspenseQuery(membersQueryOptions);
   const { isAdmin: admin } = useWorkspace();
 

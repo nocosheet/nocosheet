@@ -1,8 +1,8 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 
+import { ImpersonationBanner } from "@/components/layout/impersonation-banner";
 import { WorkspaceSidebar } from "@/components/layout/workspace-sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { ImpersonationBanner } from "@/components/workspace/member-admin/impersonation-banner";
 import { useSession } from "@/hooks/use-session";
 import { getPreferences } from "@/lib/preferences";
 

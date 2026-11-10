@@ -23,8 +23,8 @@ import { toastManager } from "@/components/ui/toast";
 import { adminKeys } from "@/data/admin/keys";
 import { updateUserMutationOptions } from "@/data/admin/update-user";
 import { workspaceKeys } from "@/data/workspace/keys";
-import { getInitials } from "@/lib/initials";
 import { DEFAULT_ROLE } from "@/lib/auth/access";
+import { getInitials } from "@/lib/initials";
 
 import { RoleSelect, type MemberRole } from "./role-select";
 

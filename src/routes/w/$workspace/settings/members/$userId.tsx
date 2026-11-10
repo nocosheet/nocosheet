@@ -1,13 +1,21 @@
-import { createFileRoute, notFound } from "@tanstack/react-router";
+import { createFileRoute, notFound, redirect } from "@tanstack/react-router";
 
 import { WorkspaceContent, WorkspaceHeader } from "@/components/layout/workspace-header";
-import { MemberDetail } from "@/components/workspace/member-detail";
-import { MemberNotFound } from "@/components/workspace/member-not-found";
+import { MemberDetail } from "@/components/workspace/settings/members/member-detail";
+import { MemberNotFound } from "@/components/workspace/settings/members/member-not-found";
 import { adminUserQueryOptions } from "@/data/admin/user";
 import { adminUserSessionsQueryOptions } from "@/data/admin/user-sessions";
 import { membersQueryOptions } from "@/data/workspace/members";
 
 export const Route = createFileRoute("/w/$workspace/settings/members/$userId")({
+  beforeLoad: ({ context, params }) => {
+    if (!context.workspace.isAdmin) {
+      throw redirect({
+        to: "/w/$workspace/settings/members",
+        params: { workspace: params.workspace },
+      });
+    }
+  },
   loader: async ({ context, params }) => {
     const members = await context.queryClient.query({
       ...membersQueryOptions,
@@ -17,15 +25,13 @@ export const Route = createFileRoute("/w/$workspace/settings/members/$userId")({
     const member = members.find((item) => item.id === params.userId);
     if (!member) throw notFound();
 
-    if (context.workspace.isAdmin) {
-      await Promise.allSettled([
-        context.queryClient.query({ ...adminUserQueryOptions(params.userId), staleTime: "static" }),
-        context.queryClient.query({
-          ...adminUserSessionsQueryOptions(params.userId),
-          staleTime: "static",
-        }),
-      ]);
-    }
+    await Promise.allSettled([
+      context.queryClient.query({ ...adminUserQueryOptions(params.userId), staleTime: "static" }),
+      context.queryClient.query({
+        ...adminUserSessionsQueryOptions(params.userId),
+        staleTime: "static",
+      }),
+    ]);
 
     return { memberName: member.name };
   },

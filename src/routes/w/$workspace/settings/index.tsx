@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import { WorkspaceContent, WorkspaceHeader } from "@/components/layout/workspace-header";
-import { WorkspaceSettings } from "@/components/workspace/workspace-settings";
+import { SettingsGeneral } from "@/components/workspace/settings/general";
 
 export const Route = createFileRoute("/w/$workspace/settings/")({
   staticData: { crumb: "General" },
@@ -14,7 +14,7 @@ function SettingsPage() {
     <>
       <WorkspaceHeader workspace={workspace} />
       <WorkspaceContent className="max-w-3xl">
-        <WorkspaceSettings />
+        <SettingsGeneral />
       </WorkspaceContent>
     </>
   );

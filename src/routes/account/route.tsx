@@ -2,7 +2,7 @@ import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 
 import { AccountTabs } from "@/components/account/account-tabs";
 import { AppHeader } from "@/components/layout/app-header";
-import { ImpersonationBanner } from "@/components/workspace/member-admin/impersonation-banner";
+import { ImpersonationBanner } from "@/components/layout/impersonation-banner";
 import { accountsQueryOptions } from "@/data/auth/accounts";
 
 export const Route = createFileRoute("/account")({

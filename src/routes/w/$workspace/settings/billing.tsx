@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import { WorkspaceContent, WorkspaceHeader } from "@/components/layout/workspace-header";
-import { SettingsBilling } from "@/components/workspace/settings-billing";
+import { SettingsBilling } from "@/components/workspace/settings/billing";
 
 export const Route = createFileRoute("/w/$workspace/settings/billing")({
   staticData: { crumb: "Billing" },

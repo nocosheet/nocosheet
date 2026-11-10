@@ -1,8 +1,8 @@
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 
 import { AppHeader } from "@/components/layout/app-header";
+import { ImpersonationBanner } from "@/components/layout/impersonation-banner";
 import { Button } from "@/components/ui/button";
-import { ImpersonationBanner } from "@/components/workspace/member-admin/impersonation-banner";
 import { DEFAULT_WORKSPACE } from "@/lib/workspace";
 
 export const Route = createFileRoute("/")({
