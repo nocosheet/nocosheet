@@ -41,7 +41,7 @@ const START_ACTIONS = [
   {
     icon: LayoutTemplateIcon,
     title: "Use a template",
-    description: "Begin with a ready-made CRM, tracker or inventory.",
+    description: "Ready-made CRM, tracker or inventory.",
   },
 ] as const;
 

@@ -242,3 +242,78 @@
     @apply font-sans font-mono;
     }
 }
+[data-slot="sidebar-container"] {
+  view-transition-name: app-sidebar;
+}
+
+@keyframes sidebar-slide-out-left {
+  to {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+}
+
+@keyframes sidebar-slide-in-right {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes sidebar-slide-out-right {
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes sidebar-slide-in-left {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+}
+
+:root:active-view-transition-type(sidebar-forward, sidebar-back) {
+  &::view-transition-old(root),
+  &::view-transition-new(root) {
+    animation: none;
+    mix-blend-mode: normal;
+  }
+
+  &::view-transition-old(app-sidebar),
+  &::view-transition-new(app-sidebar) {
+    animation-duration: 260ms;
+    animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
+    animation-fill-mode: both;
+    mix-blend-mode: normal;
+  }
+}
+
+:root:active-view-transition-type(sidebar-forward) {
+  &::view-transition-old(app-sidebar) {
+    animation-name: sidebar-slide-out-left;
+  }
+
+  &::view-transition-new(app-sidebar) {
+    animation-name: sidebar-slide-in-right;
+  }
+}
+
+:root:active-view-transition-type(sidebar-back) {
+  &::view-transition-old(app-sidebar) {
+    animation-name: sidebar-slide-out-right;
+  }
+
+  &::view-transition-new(app-sidebar) {
+    animation-name: sidebar-slide-in-left;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}

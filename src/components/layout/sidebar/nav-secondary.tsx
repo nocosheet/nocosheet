@@ -20,7 +20,13 @@ export function NavSecondary({ workspace }: { workspace: string }) {
             <SidebarMenuButton
               size="sm"
               tooltip="Settings"
-              render={<Link to="/w/$workspace/settings" params={{ workspace }} />}
+              render={
+                <Link
+                  to="/w/$workspace/settings"
+                  params={{ workspace }}
+                  viewTransition={{ types: ["sidebar-forward"] }}
+                />
+              }
             >
               <SettingsIcon />
               <span>Settings</span>

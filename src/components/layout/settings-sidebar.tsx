@@ -30,7 +30,13 @@ export function SettingsSidebar({ workspace, user }: SettingsSidebarProps) {
           <SidebarMenuItem>
             <SidebarMenuButton
               tooltip="Back to app"
-              render={<Link to="/w/$workspace" params={{ workspace }} />}
+              render={
+                <Link
+                  to="/w/$workspace"
+                  params={{ workspace }}
+                  viewTransition={{ types: ["sidebar-back"] }}
+                />
+              }
             >
               <ArrowLeftIcon />
               <span className="font-medium">Back to app</span>
