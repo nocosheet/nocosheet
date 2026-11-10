@@ -281,6 +281,11 @@
     mix-blend-mode: normal;
   }
 
+  &::view-transition-group(app-sidebar),
+  &::view-transition-image-pair(app-sidebar) {
+    overflow: clip;
+  }
+
   &::view-transition-old(app-sidebar),
   &::view-transition-new(app-sidebar) {
     animation-duration: 260ms;
