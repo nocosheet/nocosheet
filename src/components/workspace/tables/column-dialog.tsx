@@ -1,9 +1,10 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 import { useForm } from "@tanstack/react-form";
 
 import { ChevronDownIcon } from "lucide-react";
 
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Collapsible, CollapsiblePanel, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -59,31 +60,37 @@ export function ColumnDialog({
   onOpenChange,
   formKey,
   initial,
-  takenNames,
+  storedName,
+  taken,
   onSave,
 }: {
   formKey: number;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   initial: ColumnDraft | null;
-  takenNames: string[];
-  onSave: (column: ColumnDraft) => void;
+  storedName?: string;
+  taken: string[];
+  onSave: (column: ColumnDraft) => Promise<unknown>;
 }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogPopup className="max-w-xl">
         <DialogHeader>
-          <DialogTitle>{initial?.name ? "Edit column" : "Add a column"}</DialogTitle>
+          <DialogTitle>{initial ? "Edit column" : "Add a column"}</DialogTitle>
           <DialogDescription>
-            Choose how this column stores and validates its values.
+            {initial
+              ? "Rename the column or change how it is indexed. Its type can't change."
+              : "Choose how this column stores and validates its values."}
           </DialogDescription>
         </DialogHeader>
         <ColumnForm
           key={formKey}
           initial={initial ?? newColumnDraft()}
-          takenNames={takenNames}
-          onSave={(column) => {
-            onSave(column);
+          locked={initial !== null}
+          storedName={storedName}
+          taken={taken}
+          onSave={async (column) => {
+            await onSave(column);
             onOpenChange(false);
           }}
         />
@@ -94,30 +101,46 @@ export function ColumnDialog({
 
 function ColumnForm({
   initial,
-  takenNames,
+  locked,
+  storedName,
+  taken,
   onSave,
 }: {
   initial: ColumnDraft;
-  takenNames: string[];
-  onSave: (column: ColumnDraft) => void;
+  locked: boolean;
+  storedName?: string;
+  taken: string[];
+  onSave: (column: ColumnDraft) => Promise<unknown>;
 }) {
+  const [error, setError] = useState<string | null>(null);
+
   const schema = useMemo(
     () =>
       columnDraftSchema.superRefine((column, ctx) => {
-        if (takenNames.includes(toColumnName(column.name)))
+        if (
+          taken.includes(column.name.trim().toLowerCase()) ||
+          (!locked && taken.includes(toColumnName(column.name)))
+        )
           ctx.addIssue({
             code: "custom",
             path: ["name"],
             message: "A column with this name already exists",
           });
       }),
-    [takenNames],
+    [taken, locked],
   );
 
   const form = useForm({
     defaultValues: initial,
     validators: { onSubmit: formSchema<ColumnDraft>(schema) },
-    onSubmit: ({ value }) => onSave({ ...value, name: value.name.trim() }),
+    onSubmit: async ({ value }) => {
+      setError(null);
+      try {
+        await onSave({ ...value, name: value.name.trim() });
+      } catch (failure) {
+        setError(failure instanceof Error ? failure.message : "Something went wrong");
+      }
+    },
   });
 
   return (
@@ -162,7 +185,8 @@ function ColumnForm({
                     onChange={(event) => field.handleChange(event.target.value)}
                   />
                   <FieldDescription>
-                    Stored as <code>{toColumnName(field.state.value) || "…"}</code>
+                    Stored as{" "}
+                    <code>{locked ? storedName : toColumnName(field.state.value) || "…"}</code>
                   </FieldDescription>
                   <FieldError match={field.state.meta.isTouched && !field.state.meta.isValid}>
                     {field.state.meta.errors.map((item) => item?.message).join(", ")}
@@ -190,6 +214,7 @@ function ColumnForm({
               <Field name={field.name}>
                 <FieldLabel>Type</FieldLabel>
                 <FormatSelect
+                  disabled={locked}
                   value={field.state.value}
                   onValueChange={(format) => {
                     field.handleChange(format);
@@ -206,83 +231,85 @@ function ColumnForm({
             )}
           </form.Field>
 
-          <div className="flex flex-wrap items-start gap-4 empty:hidden">
-            <form.Subscribe selector={(state) => state.values.format}>
-              {(format) => (
-                <form.Field name="options">
-                  {(field) => (
-                    <>
-                      <ColumnOptions
-                        format={format}
-                        options={field.state.value}
-                        onChange={field.handleChange}
-                      />
-                      {field.state.meta.errors.length > 0 && (
-                        <Field name={field.name} invalid className="basis-full">
-                          <FieldError match>
+          {!locked && (
+            <div className="flex flex-wrap items-start gap-4 empty:hidden">
+              <form.Subscribe selector={(state) => state.values.format}>
+                {(format) => (
+                  <form.Field name="options">
+                    {(field) => (
+                      <>
+                        <ColumnOptions
+                          format={format}
+                          options={field.state.value}
+                          onChange={field.handleChange}
+                        />
+                        {field.state.meta.errors.length > 0 && (
+                          <Field name={field.name} invalid className="basis-full">
+                            <FieldError match>
+                              {field.state.meta.errors.map((item) => item?.message).join(", ")}
+                            </FieldError>
+                          </Field>
+                        )}
+                      </>
+                    )}
+                  </form.Field>
+                )}
+              </form.Subscribe>
+
+              <form.Subscribe
+                selector={(state) => ({
+                  format: state.values.format,
+                  options: state.values.options,
+                  computed: state.values.generatedExpression.trim().length > 0,
+                })}
+              >
+                {({ format, options, computed }) => {
+                  const kind = FORMATS[format].defaultKind;
+                  if (!kind || computed) return null;
+                  return (
+                    <form.Field name="defaultValue">
+                      {(field) => (
+                        <Field name={field.name} className="min-w-40 flex-1">
+                          <FieldLabel>Default value</FieldLabel>
+                          {kind === "text" ? (
+                            <Input
+                              autoComplete="off"
+                              placeholder="Optional"
+                              value={field.state.value}
+                              onChange={(event) => field.handleChange(event.target.value)}
+                            />
+                          ) : (
+                            <DefaultSelect
+                              items={
+                                kind === "boolean"
+                                  ? BOOLEAN_DEFAULTS
+                                  : [
+                                      { value: "none", label: "No default" },
+                                      ...((options.choices as SelectChoice[] | undefined) ?? [])
+                                        .filter((choice) => choice.value)
+                                        .map((choice) => ({
+                                          value: choice.value,
+                                          label: choice.label,
+                                        })),
+                                    ]
+                              }
+                              value={field.state.value || "none"}
+                              onValueChange={(value) =>
+                                field.handleChange(value === "none" ? "" : value)
+                              }
+                            />
+                          )}
+                          <FieldError match={field.state.meta.errors.length > 0}>
                             {field.state.meta.errors.map((item) => item?.message).join(", ")}
                           </FieldError>
                         </Field>
                       )}
-                    </>
-                  )}
-                </form.Field>
-              )}
-            </form.Subscribe>
-
-            <form.Subscribe
-              selector={(state) => ({
-                format: state.values.format,
-                options: state.values.options,
-                computed: state.values.generatedExpression.trim().length > 0,
-              })}
-            >
-              {({ format, options, computed }) => {
-                const kind = FORMATS[format].defaultKind;
-                if (!kind || computed) return null;
-                return (
-                  <form.Field name="defaultValue">
-                    {(field) => (
-                      <Field name={field.name} className="min-w-40 flex-1">
-                        <FieldLabel>Default value</FieldLabel>
-                        {kind === "text" ? (
-                          <Input
-                            autoComplete="off"
-                            placeholder="Optional"
-                            value={field.state.value}
-                            onChange={(event) => field.handleChange(event.target.value)}
-                          />
-                        ) : (
-                          <DefaultSelect
-                            items={
-                              kind === "boolean"
-                                ? BOOLEAN_DEFAULTS
-                                : [
-                                    { value: "none", label: "No default" },
-                                    ...((options.choices as SelectChoice[] | undefined) ?? [])
-                                      .filter((choice) => choice.value)
-                                      .map((choice) => ({
-                                        value: choice.value,
-                                        label: choice.label,
-                                      })),
-                                  ]
-                            }
-                            value={field.state.value || "none"}
-                            onValueChange={(value) =>
-                              field.handleChange(value === "none" ? "" : value)
-                            }
-                          />
-                        )}
-                        <FieldError match={field.state.meta.errors.length > 0}>
-                          {field.state.meta.errors.map((item) => item?.message).join(", ")}
-                        </FieldError>
-                      </Field>
-                    )}
-                  </form.Field>
-                );
-              }}
-            </form.Subscribe>
-          </div>
+                    </form.Field>
+                  );
+                }}
+              </form.Subscribe>
+            </div>
+          )}
 
           <form.Subscribe selector={(state) => state.values.format}>
             {(format) => (
@@ -306,67 +333,78 @@ function ColumnForm({
             )}
           </form.Subscribe>
 
-          <Collapsible>
-            <CollapsibleTrigger
-              render={<Button type="button" variant="ghost" size="sm" className="-ms-2" />}
-            >
-              <ChevronDownIcon />
-              Advanced
-            </CollapsibleTrigger>
-            <CollapsiblePanel>
-              <div className="flex flex-col gap-4 pt-3">
-                <form.Field name="checkExpression">
-                  {(field) => (
-                    <Field name={field.name}>
-                      <FieldLabel>Check expression</FieldLabel>
-                      <Input
-                        autoComplete="off"
-                        className="font-mono"
-                        placeholder="price >= 0"
-                        value={field.state.value}
-                        onChange={(event) => field.handleChange(event.target.value)}
-                      />
-                      <FieldDescription>
-                        A SQL condition every value must satisfy. Refer to columns by their stored
-                        name.
-                      </FieldDescription>
-                      <FieldError match={field.state.meta.errors.length > 0}>
-                        {field.state.meta.errors.map((item) => item?.message).join(", ")}
-                      </FieldError>
-                    </Field>
-                  )}
-                </form.Field>
-                <form.Field name="generatedExpression">
-                  {(field) => (
-                    <Field name={field.name}>
-                      <FieldLabel>Computed value</FieldLabel>
-                      <Input
-                        autoComplete="off"
-                        className="font-mono"
-                        placeholder="price * quantity"
-                        value={field.state.value}
-                        onChange={(event) => field.handleChange(event.target.value)}
-                      />
-                      <FieldDescription>
-                        Makes this a virtual column calculated from the other columns, so it can't
-                        be edited.
-                      </FieldDescription>
-                      <FieldError match={field.state.meta.errors.length > 0}>
-                        {field.state.meta.errors.map((item) => item?.message).join(", ")}
-                      </FieldError>
-                    </Field>
-                  )}
-                </form.Field>
-              </div>
-            </CollapsiblePanel>
-          </Collapsible>
+          {!locked && (
+            <Collapsible>
+              <CollapsibleTrigger
+                render={<Button type="button" variant="ghost" size="sm" className="-ms-2" />}
+              >
+                <ChevronDownIcon />
+                Advanced
+              </CollapsibleTrigger>
+              <CollapsiblePanel>
+                <div className="flex flex-col gap-4 pt-3">
+                  <form.Field name="checkExpression">
+                    {(field) => (
+                      <Field name={field.name}>
+                        <FieldLabel>Check expression</FieldLabel>
+                        <Input
+                          autoComplete="off"
+                          className="font-mono"
+                          placeholder="price >= 0"
+                          value={field.state.value}
+                          onChange={(event) => field.handleChange(event.target.value)}
+                        />
+                        <FieldDescription>
+                          A SQL condition every value must satisfy. Refer to columns by their stored
+                          name.
+                        </FieldDescription>
+                        <FieldError match={field.state.meta.errors.length > 0}>
+                          {field.state.meta.errors.map((item) => item?.message).join(", ")}
+                        </FieldError>
+                      </Field>
+                    )}
+                  </form.Field>
+                  <form.Field name="generatedExpression">
+                    {(field) => (
+                      <Field name={field.name}>
+                        <FieldLabel>Computed value</FieldLabel>
+                        <Input
+                          autoComplete="off"
+                          className="font-mono"
+                          placeholder="price * quantity"
+                          value={field.state.value}
+                          onChange={(event) => field.handleChange(event.target.value)}
+                        />
+                        <FieldDescription>
+                          Makes this a virtual column calculated from the other columns, so it can't
+                          be edited.
+                        </FieldDescription>
+                        <FieldError match={field.state.meta.errors.length > 0}>
+                          {field.state.meta.errors.map((item) => item?.message).join(", ")}
+                        </FieldError>
+                      </Field>
+                    )}
+                  </form.Field>
+                </div>
+              </CollapsiblePanel>
+            </Collapsible>
+          )}
         </Form>
+        {error && (
+          <Alert variant="error" className="mt-4">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
       </DialogPanel>
       <DialogFooter>
         <DialogClose render={<Button variant="ghost" />}>Cancel</DialogClose>
-        <Button type="submit" form="column-form">
-          Save column
-        </Button>
+        <form.Subscribe selector={(state) => state.isSubmitting}>
+          {(submitting) => (
+            <Button type="submit" form="column-form" loading={submitting}>
+              Save column
+            </Button>
+          )}
+        </form.Subscribe>
       </DialogFooter>
     </>
   );

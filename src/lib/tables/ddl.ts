@@ -113,6 +113,27 @@ export function buildCreateTable(spec: CreateTableSpec) {
   return `CREATE TABLE ${quoteIdent(spec.physicalName)} (\n  ${[id, ...trackingDefinitions(spec)].join(",\n  ")}\n)`;
 }
 
+export type IndexKind = "uq" | "idx";
+
+export const indexKind = (flags: {
+  isUnique: boolean;
+  isFilterable: boolean;
+  isSortable: boolean;
+}): IndexKind | null =>
+  flags.isUnique ? "uq" : flags.isFilterable || flags.isSortable ? "idx" : null;
+
+const indexName = (physicalName: string, columnName: string, kind: IndexKind) =>
+  quoteIdent(`${physicalName}__${columnName}_${kind}`);
+
+export const buildCreateIndex = (physicalName: string, columnName: string, kind: IndexKind) =>
+  `CREATE ${kind === "uq" ? "UNIQUE " : ""}INDEX ${indexName(physicalName, columnName, kind)} ON ${quoteIdent(physicalName)} (${quoteIdent(columnName)})`;
+
+export const buildDropIndex = (physicalName: string, columnName: string, kind: IndexKind) =>
+  `DROP INDEX IF EXISTS ${indexName(physicalName, columnName, kind)}`;
+
+export const buildDropColumn = (physicalName: string, columnName: string) =>
+  `ALTER TABLE ${quoteIdent(physicalName)} DROP COLUMN ${quoteIdent(columnName)}`;
+
 export function buildAddColumn(
   physicalName: string,
   column: ColumnValues,
@@ -122,16 +143,8 @@ export function buildAddColumn(
     `ALTER TABLE ${quoteIdent(physicalName)} ADD COLUMN ${columnDefinition(column, targets)}`,
   ];
 
-  const name = toColumnName(column.name);
-  if (column.isUnique) {
-    statements.push(
-      `CREATE UNIQUE INDEX ${quoteIdent(`${physicalName}__${name}_uq`)} ON ${quoteIdent(physicalName)} (${quoteIdent(name)})`,
-    );
-  } else if (column.isFilterable || column.isSortable) {
-    statements.push(
-      `CREATE INDEX ${quoteIdent(`${physicalName}__${name}_idx`)} ON ${quoteIdent(physicalName)} (${quoteIdent(name)})`,
-    );
-  }
+  const kind = indexKind(column);
+  if (kind) statements.push(buildCreateIndex(physicalName, toColumnName(column.name), kind));
 
   return statements;
 }

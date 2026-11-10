@@ -12,9 +12,11 @@ import { FORMATS, formatsByGroup, type ColumnFormat } from "@/lib/tables/formats
 export function FormatSelect({
   value,
   onValueChange,
+  disabled,
 }: {
   value: ColumnFormat;
   onValueChange: (value: ColumnFormat) => void;
+  disabled?: boolean;
 }) {
   const items = Object.entries(FORMATS).map(([format, { label }]) => ({ value: format, label }));
 
@@ -23,6 +25,7 @@ export function FormatSelect({
       value={value}
       onValueChange={(next) => onValueChange(next as ColumnFormat)}
       items={items}
+      disabled={disabled}
     >
       <SelectTrigger aria-label="Type">
         <SelectValue />

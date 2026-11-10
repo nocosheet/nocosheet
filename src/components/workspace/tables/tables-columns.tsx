@@ -1,12 +1,28 @@
+import { Link } from "@tanstack/react-router";
 import type { ColumnDef } from "@tanstack/react-table";
 
 import { DataTableColumnHeader } from "@/components/shared/data-table/data-table-column-header";
 import type { dataTableFeatures } from "@/components/shared/data-table/features";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useWorkspace } from "@/hooks/use-workspace";
 import { formatRelativeTime } from "@/lib/format-relative-time";
 
 import { NamedIcon } from "./named-icon";
+
+function TableName({ id, name }: { id: number; name: string }) {
+  const { id: workspace, isAdmin } = useWorkspace();
+  if (!isAdmin) return <span className="truncate font-medium">{name}</span>;
+  return (
+    <Link
+      to="/w/$workspace/tables/$table/definition"
+      params={{ workspace, table: String(id) }}
+      className="truncate font-medium hover:underline"
+    >
+      {name}
+    </Link>
+  );
+}
 import type { TablesRow } from "./tables-table";
 
 const ID_TYPE_LABELS = { increment: "Auto-increment", uuid: "UUID" } as const;
@@ -46,7 +62,7 @@ export const tablesColumns: ColumnDef<typeof dataTableFeatures, TablesRow>[] = [
       <div className="flex items-center gap-3">
         <NamedIcon name={row.original.icon} className="size-4 shrink-0 text-muted-foreground" />
         <div className="flex min-w-0 flex-col">
-          <span className="truncate font-medium">{row.original.name}</span>
+          <TableName id={row.original.id} name={row.original.name} />
           {row.original.description && (
             <span className="truncate text-muted-foreground text-xs">
               {row.original.description}

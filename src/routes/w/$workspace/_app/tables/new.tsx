@@ -59,7 +59,6 @@ function NewTablePage() {
           ) : (
             <ColumnsStep
               tableId={tableId}
-              tableName={table.name}
               onDiscarded={() => navigate({ to: "/w/$workspace/tables", params: { workspace } })}
               onFinished={() => navigate({ to: "/w/$workspace/tables", params: { workspace } })}
             />

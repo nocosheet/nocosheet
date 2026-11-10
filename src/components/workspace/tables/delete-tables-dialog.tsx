@@ -23,11 +23,15 @@ import { deleteTablesMutationOptions } from "@/data/workspace/tables";
 export function DeleteTablesDialog({
   workspace,
   ids,
+  label,
+  size,
   onDeleted,
 }: {
   workspace: string;
   ids: number[];
-  onDeleted: (count: number) => void;
+  label?: string;
+  size?: "default" | "sm";
+  onDeleted: (count: number) => Promise<unknown> | void;
 }) {
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
@@ -37,10 +41,10 @@ export function DeleteTablesDialog({
   const deleteTables = useMutation({
     ...deleteTablesMutationOptions,
     onSuccess: async () => {
+      setOpen(false);
+      await onDeleted(count);
       await queryClient.invalidateQueries({ queryKey: workspaceKeys.tables() });
       toastManager.add({ type: "success", title: `${count} ${noun} deleted` });
-      setOpen(false);
-      onDeleted(count);
     },
   });
 
@@ -52,9 +56,9 @@ export function DeleteTablesDialog({
         if (!next) deleteTables.reset();
       }}
     >
-      <AlertDialogTrigger render={<Button variant="destructive-outline" />}>
+      <AlertDialogTrigger render={<Button variant="destructive-outline" size={size} />}>
         <TrashIcon />
-        Delete ({count})
+        {label ?? `Delete (${count})`}
       </AlertDialogTrigger>
       <AlertDialogPopup>
         <AlertDialogHeader>

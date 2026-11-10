@@ -33,3 +33,35 @@ export const newColumnDraft = (): ColumnDraft => ({
   checkExpression: "",
   generatedExpression: "",
 });
+
+export const columnToDraft = (column: {
+  name: string;
+  description: string | null;
+  icon: string | null;
+  format: string;
+  options: Record<string, unknown>;
+  isRequired: boolean;
+  isFilterable: boolean;
+  isSortable: boolean;
+  isSearchable: boolean;
+  isUnique: boolean;
+  isHidden: boolean;
+  defaultValue: string | null;
+  checkExpression: string | null;
+  generatedExpression: string | null;
+}): ColumnDraft => ({
+  name: column.name,
+  description: column.description ?? "",
+  icon: column.icon,
+  format: column.format as ColumnFormat,
+  options: column.options,
+  isRequired: column.isRequired,
+  isFilterable: column.isFilterable,
+  isSortable: column.isSortable,
+  isSearchable: column.isSearchable,
+  isUnique: column.isUnique,
+  isHidden: column.isHidden,
+  defaultValue: column.defaultValue ?? "",
+  checkExpression: column.checkExpression ?? "",
+  generatedExpression: column.generatedExpression ?? "",
+});

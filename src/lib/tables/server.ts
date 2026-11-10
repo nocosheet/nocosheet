@@ -15,6 +15,27 @@ export async function findTable(id: number) {
   return row;
 }
 
+export async function findColumn(tableId: number, columnId: number) {
+  const [row] = await db
+    .select()
+    .from(columnTable)
+    .where(
+      and(
+        eq(columnTable.id, columnId),
+        eq(columnTable.tableId, tableId),
+        isNull(columnTable.deletedAt),
+      ),
+    )
+    .limit(1);
+  if (!row) throw new HTTPException(404, { message: "Column not found." });
+  return row;
+}
+
+export const defined = <T extends object>(values: T) =>
+  Object.fromEntries(Object.entries(values).filter(([, value]) => value !== undefined)) as {
+    [K in keyof T]?: Exclude<T[K], undefined>;
+  };
+
 export function conflictOrBadRequest(error: unknown, message: string): never {
   const detail = error instanceof Error ? error.message : String(error);
   if (/UNIQUE constraint failed|already exists|duplicate column name/i.test(detail))

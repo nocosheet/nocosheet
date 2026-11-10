@@ -3,7 +3,12 @@ import { mutationOptions, queryOptions } from "@tanstack/react-query";
 import { fetch } from "void/client";
 
 import type { TablesQuery } from "@/lib/tables/query";
-import type { ColumnInput, TableInput } from "@/lib/tables/validation";
+import type {
+  ColumnInput,
+  ColumnPatchInput,
+  TableInput,
+  TableUpdateInput,
+} from "@/lib/tables/validation";
 
 import { unwrapFetch } from "./api-error";
 import { workspaceKeys } from "./keys";
@@ -43,17 +48,6 @@ export const createTableMutationOptions = mutationOptions({
     ),
 });
 
-export const deleteTableMutationOptions = mutationOptions({
-  mutationKey: workspaceKeys.mutation("delete-table"),
-  mutationFn: ({ workspace, id }: { workspace: string; id: number }) =>
-    unwrapFetch(
-      fetch("/api/w/:workspace/tables/:id", {
-        method: "DELETE",
-        params: { workspace, id: String(id) },
-      }),
-    ),
-});
-
 export const deleteTablesMutationOptions = mutationOptions({
   mutationKey: workspaceKeys.mutation("delete-tables"),
   mutationFn: ({ workspace, ids }: { workspace: string; ids: number[] }) =>
@@ -66,24 +60,67 @@ export const deleteTablesMutationOptions = mutationOptions({
     ),
 });
 
-export const createColumnsMutationOptions = mutationOptions({
-  mutationKey: workspaceKeys.mutation("create-columns"),
+export const updateTableMutationOptions = mutationOptions({
+  mutationKey: workspaceKeys.mutation("update-table"),
   mutationFn: ({
     workspace,
     id,
-    columns,
-    titleColumn,
+    values,
   }: {
     workspace: string;
     id: number;
-    columns: ColumnInput[];
-    titleColumn: string | null;
+    values: TableUpdateInput;
   }) =>
+    unwrapFetch(
+      fetch("/api/w/:workspace/tables/:id", {
+        method: "PATCH",
+        params: { workspace, id: String(id) },
+        body: values,
+      }),
+    ),
+});
+
+export const createColumnMutationOptions = mutationOptions({
+  mutationKey: workspaceKeys.mutation("create-column"),
+  mutationFn: ({ workspace, id, column }: { workspace: string; id: number; column: ColumnInput }) =>
     unwrapFetch(
       fetch("/api/w/:workspace/tables/:id/columns", {
         method: "POST",
         params: { workspace, id: String(id) },
-        body: { columns, titleColumn },
+        body: column,
+      }),
+    ),
+});
+
+export const updateColumnMutationOptions = mutationOptions({
+  mutationKey: workspaceKeys.mutation("update-column"),
+  mutationFn: ({
+    workspace,
+    id,
+    columnId,
+    patch,
+  }: {
+    workspace: string;
+    id: number;
+    columnId: number;
+    patch: ColumnPatchInput;
+  }) =>
+    unwrapFetch(
+      fetch("/api/w/:workspace/tables/:id/columns/:column", {
+        method: "PATCH",
+        params: { workspace, id: String(id), column: String(columnId) },
+        body: patch,
+      }),
+    ),
+});
+
+export const deleteColumnMutationOptions = mutationOptions({
+  mutationKey: workspaceKeys.mutation("delete-column"),
+  mutationFn: ({ workspace, id, columnId }: { workspace: string; id: number; columnId: number }) =>
+    unwrapFetch(
+      fetch("/api/w/:workspace/tables/:id/columns/:column", {
+        method: "DELETE",
+        params: { workspace, id: String(id), column: String(columnId) },
       }),
     ),
 });

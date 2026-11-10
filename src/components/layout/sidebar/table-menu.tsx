@@ -1,12 +1,14 @@
 import { useState } from "react";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 
 import {
   ExternalLinkIcon,
   LinkIcon,
   MoreHorizontalIcon,
   StarIcon,
+  SlidersHorizontalIcon,
   StarOffIcon,
   Trash2Icon,
 } from "lucide-react";
@@ -109,6 +111,17 @@ export function TableMenu({ table, workspace }: { table: SidebarTable; workspace
           {isAdmin && (
             <>
               <MenuSeparator />
+              <MenuLinkItem
+                render={
+                  <Link
+                    to="/w/$workspace/tables/$table/definition"
+                    params={{ workspace, table: String(table.id) }}
+                  />
+                }
+              >
+                <SlidersHorizontalIcon />
+                Edit definition
+              </MenuLinkItem>
               <MenuItem variant="destructive" onClick={() => setConfirmOpen(true)}>
                 <Trash2Icon />
                 Delete

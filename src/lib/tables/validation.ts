@@ -8,7 +8,6 @@ import {
   FORMATS,
   RELATION_ON_DELETE,
   SEARCHABLE_FORMATS,
-  TITLE_FORMATS,
   type ColumnFormat,
 } from "./formats";
 import { ICON_NAME_PATTERN } from "./icons";
@@ -151,33 +150,45 @@ function validateOptions(
   }
 }
 
-export const columnsInputSchema = z
-  .object({
-    columns: z.array(columnInputSchema).min(1).max(100),
-    titleColumn: z.string().nullish(),
-  })
-  .superRefine(({ columns, titleColumn }, ctx) => {
-    const seen = new Set<string>();
-    columns.forEach((column, index) => {
-      const key = toColumnName(column.name);
-      if (seen.has(key))
-        ctx.addIssue({
-          code: "custom",
-          path: ["columns", index, "name"],
-          message: "Column names must be unique",
-        });
-      seen.add(key);
-    });
+const nullableText = (max: number) =>
+  z
+    .string()
+    .trim()
+    .max(max)
+    .transform((value) => value || null)
+    .nullable()
+    .optional();
 
-    if (!titleColumn) return;
-    const match = columns.find((column) => toColumnName(column.name) === titleColumn);
-    if (!match || !TITLE_FORMATS.includes(match.format))
-      ctx.addIssue({
-        code: "custom",
-        path: ["titleColumn"],
-        message: "Pick a column that can be used as the title",
-      });
-  });
+const nullableIcon = z
+  .string()
+  .max(64)
+  .regex(ICON_NAME_PATTERN, "Unknown icon")
+  .nullable()
+  .optional();
+
+export const columnPatchSchema = z.object({
+  name: columnFields.shape.name.optional(),
+  description: nullableText(500),
+  icon: nullableIcon,
+  isRequired: z.boolean().optional(),
+  isFilterable: z.boolean().optional(),
+  isSortable: z.boolean().optional(),
+  isSearchable: z.boolean().optional(),
+  isUnique: z.boolean().optional(),
+  isHidden: z.boolean().optional(),
+  position: z.number().int().nonnegative().optional(),
+});
+
+export const tableUpdateSchema = z.object({
+  name: tableInputSchema.shape.name.optional(),
+  icon: nullableIcon,
+  groupName: nullableText(64),
+  description: nullableText(500),
+  titleColumn: z.string().nullable().optional(),
+});
+
+export type ColumnPatchInput = z.input<typeof columnPatchSchema>;
+export type TableUpdateInput = z.input<typeof tableUpdateSchema>;
 
 export const defaultOptions = (format: ColumnFormat): Record<string, unknown> => {
   switch (format) {
