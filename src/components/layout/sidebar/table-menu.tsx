@@ -1,5 +1,7 @@
 import { useState } from "react";
 
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+
 import {
   ExternalLinkIcon,
   LinkIcon,
@@ -9,6 +11,7 @@ import {
   Trash2Icon,
 } from "lucide-react";
 
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   AlertDialog,
   AlertDialogClose,
@@ -29,13 +32,39 @@ import {
 } from "@/components/ui/menu";
 import { SidebarMenuAction, useSidebar } from "@/components/ui/sidebar";
 import { toastManager } from "@/components/ui/toast";
-import { placeholderTables } from "@/lib/placeholder-tables-store";
-import type { PlaceholderTable } from "@/lib/sidebar-placeholders";
+import { setFavoriteMutationOptions } from "@/data/workspace/favorite";
+import { workspaceKeys } from "@/data/workspace/keys";
+import { deleteTablesMutationOptions } from "@/data/workspace/tables";
+import { useWorkspace } from "@/hooks/use-workspace";
+import type { SidebarTable } from "@/lib/tables/sidebar";
 
 /** The "…" menu on a sidebar table row: favorite, copy link, open in a new tab, delete. */
-export function TableMenu({ table, workspace }: { table: PlaceholderTable; workspace: string }) {
+export function TableMenu({ table, workspace }: { table: SidebarTable; workspace: string }) {
   const { isMobile } = useSidebar();
+  const { isAdmin } = useWorkspace();
+  const queryClient = useQueryClient();
   const [confirmOpen, setConfirmOpen] = useState(false);
+
+  const setFavorite = useMutation({
+    ...setFavoriteMutationOptions,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: workspaceKeys.sidebar() }),
+    onError: (error) =>
+      toastManager.add({
+        type: "error",
+        title: "Couldn't update favorites",
+        description: error.message,
+      }),
+  });
+
+  const deleteTable = useMutation({
+    ...deleteTablesMutationOptions,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: workspaceKeys.tables() });
+      setConfirmOpen(false);
+      toastManager.add({ type: "success", title: `${table.name} deleted` });
+    },
+  });
+
   const path = `/w/${workspace}/tables`;
 
   const copyLink = async () => {
@@ -60,7 +89,11 @@ export function TableMenu({ table, workspace }: { table: PlaceholderTable; works
           align={isMobile ? "end" : "start"}
           className="min-w-52"
         >
-          <MenuItem onClick={() => placeholderTables.toggleFavorite(table.id)}>
+          <MenuItem
+            onClick={() =>
+              setFavorite.mutate({ workspace, id: table.id, favorite: !table.favorite })
+            }
+          >
             {table.favorite ? <StarOffIcon /> : <StarIcon />}
             {table.favorite ? "Remove from Favorites" : "Add to Favorites"}
           </MenuItem>
@@ -73,30 +106,45 @@ export function TableMenu({ table, workspace }: { table: PlaceholderTable; works
             <ExternalLinkIcon />
             Open in new tab
           </MenuLinkItem>
-          <MenuSeparator />
-          <MenuItem variant="destructive" onClick={() => setConfirmOpen(true)}>
-            <Trash2Icon />
-            Delete
-          </MenuItem>
+          {isAdmin && (
+            <>
+              <MenuSeparator />
+              <MenuItem variant="destructive" onClick={() => setConfirmOpen(true)}>
+                <Trash2Icon />
+                Delete
+              </MenuItem>
+            </>
+          )}
         </MenuPopup>
       </Menu>
-      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+      <AlertDialog
+        open={confirmOpen}
+        onOpenChange={(next) => {
+          setConfirmOpen(next);
+          if (!next) deleteTable.reset();
+        }}
+      >
         <AlertDialogPopup>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete {table.name}?</AlertDialogTitle>
             <AlertDialogDescription>
-              This removes the table and all of its records. This can't be undone.
+              This permanently deletes the table along with its columns, views, widgets and every
+              record. This can't be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
+          {deleteTable.error && (
+            <div className="px-6 pb-2">
+              <Alert variant="error">
+                <AlertDescription>{deleteTable.error.message}</AlertDescription>
+              </Alert>
+            </div>
+          )}
           <AlertDialogFooter>
             <AlertDialogClose render={<Button variant="ghost" />}>Cancel</AlertDialogClose>
             <Button
               variant="destructive"
-              onClick={() => {
-                placeholderTables.remove(table.id);
-                setConfirmOpen(false);
-                toastManager.add({ type: "success", title: `${table.name} deleted` });
-              }}
+              loading={deleteTable.isPending}
+              onClick={() => deleteTable.mutate({ workspace, ids: [table.id] })}
             >
               Delete table
             </Button>

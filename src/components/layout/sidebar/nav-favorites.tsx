@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 
 import { ChevronUpIcon, MoreHorizontalIcon } from "lucide-react";
@@ -12,7 +13,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { usePlaceholderTables } from "@/lib/placeholder-tables-store";
+import { NamedIcon } from "@/components/workspace/tables/named-icon";
+import { sidebarQueryOptions } from "@/data/workspace/sidebar";
 
 import { TableMenu } from "./table-menu";
 
@@ -20,8 +22,11 @@ const VISIBLE = 3;
 
 export function NavFavorites({ workspace }: { workspace: string }) {
   const [expanded, setExpanded] = useState(false);
-  const favorites = usePlaceholderTables().filter((table) => table.favorite);
+  const { data } = useSuspenseQuery(sidebarQueryOptions(workspace));
+  const favorites = data.favorites;
   const visible = expanded ? favorites : favorites.slice(0, VISIBLE);
+
+  if (favorites.length === 0) return null;
 
   return (
     <SidebarGroup>
@@ -34,7 +39,7 @@ export function NavFavorites({ workspace }: { workspace: string }) {
                 tooltip={table.name}
                 render={<Link to="/w/$workspace/tables" params={{ workspace }} />}
               >
-                <table.icon />
+                <NamedIcon name={table.icon} />
                 <span>{table.name}</span>
               </SidebarMenuButton>
               <TableMenu table={table} workspace={workspace} />

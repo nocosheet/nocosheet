@@ -21,11 +21,13 @@ import {
   CardPanel,
 } from "@/components/ui/card";
 import { toastManager } from "@/components/ui/toast";
+import { NamedIcon } from "@/components/workspace/tables/named-icon";
 import { membersQueryOptions } from "@/data/workspace/members";
+import { sidebarQueryOptions } from "@/data/workspace/sidebar";
 import { useSession } from "@/hooks/use-session";
 import { useWorkspace } from "@/hooks/use-workspace";
+import { formatRelativeTime } from "@/lib/format-relative-time";
 import { getInitials } from "@/lib/initials";
-import { usePlaceholderTables } from "@/lib/placeholder-tables-store";
 
 const START_ACTIONS = [
   {
@@ -51,7 +53,10 @@ export function WorkspaceOverview({ workspace }: { workspace: string }) {
   const { data: members } = useSuspenseQuery(membersQueryOptions);
   const session = useSession();
   const { isAdmin } = useWorkspace();
-  const tables = usePlaceholderTables();
+  const { data: sidebar } = useSuspenseQuery(sidebarQueryOptions(workspace));
+  const tables = sidebar.groups
+    .flatMap((group) => group.tables)
+    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
 
   const firstName = session?.user.name?.split(" ")[0];
   const shownMembers = members.slice(0, MAX_AVATARS);
@@ -108,7 +113,7 @@ export function WorkspaceOverview({ workspace }: { workspace: string }) {
           </CardFrameAction>
         </CardFrameHeader>
         <Card>
-          {tables.slice(0, 5).map(({ id, name, icon: Icon, records, updated }) => (
+          {tables.slice(0, 5).map(({ id, name, icon, groupName, updatedAt }) => (
             <Link
               key={id}
               to="/w/$workspace/tables"
@@ -116,15 +121,15 @@ export function WorkspaceOverview({ workspace }: { workspace: string }) {
               className="flex items-center gap-3 p-4 transition-colors not-last:border-b hover:bg-accent/40 md:px-6"
             >
               <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-                <Icon className="size-4" />
+                <NamedIcon name={icon} className="size-4" />
               </span>
               <div className="flex min-w-0 flex-1 flex-col">
                 <span className="truncate font-medium text-sm">{name}</span>
-                <span className="text-muted-foreground text-xs">
-                  {records.toLocaleString()} records
-                </span>
+                <span className="text-muted-foreground text-xs">{groupName ?? "No group"}</span>
               </div>
-              <span className="shrink-0 text-muted-foreground text-xs">Edited {updated}</span>
+              <span className="shrink-0 text-muted-foreground text-xs">
+                Edited {formatRelativeTime(updatedAt)}
+              </span>
             </Link>
           ))}
           {tables.length === 0 && (

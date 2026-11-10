@@ -1,5 +1,6 @@
 import { Fragment, useEffect, useState } from "react";
 
+import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 
 import {
@@ -37,9 +38,16 @@ import {
   CommandSeparator,
 } from "@/components/ui/command";
 import { Kbd, KbdGroup } from "@/components/ui/kbd";
-import { usePlaceholderTables } from "@/lib/placeholder-tables-store";
+import { NamedIcon } from "@/components/workspace/tables/named-icon";
+import { sidebarQueryOptions } from "@/data/workspace/sidebar";
 
-type Item = { value: string; label: string; icon: LucideIcon; path: string };
+type Item = {
+  value: string;
+  label: string;
+  icon?: LucideIcon;
+  tableIcon?: string | null;
+  path: string;
+};
 type Group = { value: string; items: Item[] };
 
 const pages: Item[] = [
@@ -61,16 +69,17 @@ const settings: Item[] = [
 export function SearchDialog({ workspace }: { workspace: string }) {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
-  const placeholders = usePlaceholderTables();
+  const { data: sidebar } = useQuery(sidebarQueryOptions(workspace));
+  const tables = sidebar?.groups.flatMap((group) => group.tables) ?? [];
 
   const groups: Group[] = [
     { value: "Pages", items: pages },
     {
       value: "Tables",
-      items: placeholders.map((table) => ({
+      items: tables.map((table) => ({
         value: `table-${table.id}`,
         label: table.name,
-        icon: table.icon,
+        tableIcon: table.icon,
         path: "/tables",
       })),
     },
@@ -129,7 +138,7 @@ export function SearchDialog({ workspace }: { workspace: string }) {
                           className="gap-2.5 [&>svg]:size-4 [&>svg]:shrink-0 [&>svg]:text-muted-foreground"
                           onClick={() => handleItemClick(item)}
                         >
-                          <item.icon />
+                          {item.icon ? <item.icon /> : <NamedIcon name={item.tableIcon} />}
                           <span className="flex-1">{item.label}</span>
                         </CommandItem>
                       )}
