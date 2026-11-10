@@ -62,8 +62,9 @@ export function DeleteTablesDialog({
             Delete {count} {noun}?
           </AlertDialogTitle>
           <AlertDialogDescription>
-            This permanently deletes the selected {noun} along with their columns, views, widgets
-            and every record. This can't be undone.
+            {count === 1
+              ? "This permanently deletes the selected table along with its columns, views, widgets and every record. This can't be undone."
+              : "This permanently deletes the selected tables along with their columns, views, widgets and every record. This can't be undone."}
           </AlertDialogDescription>
         </AlertDialogHeader>
         {deleteTables.error && (

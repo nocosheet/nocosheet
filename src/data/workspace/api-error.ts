@@ -5,8 +5,9 @@ export async function unwrapFetch<T>(request: Promise<T>): Promise<T> {
     return await request;
   } catch (error) {
     if (error instanceof FetchError) {
-      const data = error.data as { error?: string; message?: string } | undefined;
-      throw new Error(data?.error ?? data?.message ?? error.message);
+      const data = error.data as string | { error?: string; message?: string } | undefined;
+      if (typeof data === "string" && data.trim()) throw new Error(data);
+      if (typeof data === "object") throw new Error(data?.error ?? data?.message ?? error.message);
     }
     throw error;
   }
