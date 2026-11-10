@@ -53,7 +53,7 @@ export function ProfilePhoto({ user }: ProfilePhotoProps) {
         <input
           ref={inputRef}
           type="file"
-          accept={Object.keys(AVATAR_TYPES).join(",")}
+          accept={AVATAR_TYPES.join(",")}
           className="hidden"
           onChange={(event) => {
             const file = event.target.files?.[0];

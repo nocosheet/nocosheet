@@ -14,7 +14,6 @@ export const updateUserMutationOptions = mutationOptions({
       email?: string;
       emailVerified?: boolean;
       role?: "admin" | "user";
-      image?: null;
     };
   }) => unwrapAuthResult(await auth.admin.updateUser(values)),
 });

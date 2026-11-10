@@ -6,12 +6,13 @@ import { sendEmail } from "void/email";
 import { storage } from "void/storage";
 
 import { kvSecondaryStorage } from "./src/lib/auth-secondary-storage";
-import { avatarKeyFromUrl } from "./src/lib/avatar";
+import { avatarKey, isAvatarUrl } from "./src/lib/avatar";
 import { hasRole } from "./src/lib/roles";
 
+const SIGNUP_DISABLED_MESSAGE = "Sign-up is disabled. Ask an administrator for access.";
 const LAST_ADMIN_MESSAGE = "This is the last admin. Make someone else an admin first.";
 
-export default defineAuth(({ defaults }) => ({
+export default defineAuth(({ defaults, env }) => ({
   ...defaults,
   secondaryStorage: kvSecondaryStorage,
   rateLimit: { ...defaults.rateLimit, storage: "secondary-storage" },
@@ -24,6 +25,9 @@ export default defineAuth(({ defaults }) => ({
   emailAndPassword: {
     ...defaults.emailAndPassword,
     enabled: true,
+    get disableSignUp() {
+      return !env.VITE_ENABLE_SIGNUP;
+    },
     requireEmailVerification: true,
     sendResetPassword: async ({ user, url }) => {
       await sendEmail({
@@ -36,39 +40,12 @@ export default defineAuth(({ defaults }) => ({
   databaseHooks: {
     user: {
       create: {
-        // First-run setup: the very first account becomes the admin. It is also marked verified so
-        // setup works before outgoing email is configured.
-        before: async (user, ctx) => {
-          const existing = await ctx?.context.adapter.count({ model: "user" });
-          if (existing === 0) {
-            return { data: { ...user, role: "admin", emailVerified: true } };
-          }
-        },
-      },
-      update: {
-        before: async (data, ctx) => {
-          // Only the admin endpoints carry a target user id in the body.
-          const userId = ctx?.path?.startsWith("/admin/") ? ctx.body?.userId : undefined;
-          if (!userId || !ctx) return;
-          const target = await ctx.context.internalAdapter.findUserById(userId);
-          if (!target) return;
-
-          if (data.role !== undefined && hasRole(target, "admin") && !hasRole(data, "admin")) {
-            const admins = await ctx.context.adapter.count({
-              model: "user",
-              where: [{ field: "role", operator: "contains", value: "admin" }],
+        before: async (_user, ctx) => {
+          if (!env.VITE_ENABLE_SIGNUP && !ctx?.path?.startsWith("/admin/")) {
+            throw APIError.from("FORBIDDEN", {
+              code: "SIGNUP_DISABLED",
+              message: SIGNUP_DISABLED_MESSAGE,
             });
-            if (admins <= 1)
-              throw APIError.from("BAD_REQUEST", {
-                code: "LAST_ADMIN",
-                message: LAST_ADMIN_MESSAGE,
-              });
-          }
-
-          // Removing a photo through the admin API must also free the stored file.
-          if (data.image === null) {
-            const key = avatarKeyFromUrl(target.image);
-            if (key) await storage.delete(key);
           }
         },
       },
@@ -83,8 +60,7 @@ export default defineAuth(({ defaults }) => ({
             throw APIError.from("BAD_REQUEST", { code: "LAST_ADMIN", message: LAST_ADMIN_MESSAGE });
         },
         after: async (user) => {
-          const key = avatarKeyFromUrl(user.image);
-          if (key) await storage.delete(key);
+          if (isAvatarUrl(user.image)) await storage.delete(avatarKey(user.id));
         },
       },
     },

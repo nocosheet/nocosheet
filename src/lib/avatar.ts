@@ -1,15 +1,10 @@
-export const AVATAR_URL_PREFIX = "/api/avatars/";
-export const AVATAR_KEY_PREFIX = "avatars/";
 export const AVATAR_MAX_BYTES = 2 * 1024 * 1024;
-export const AVATAR_TYPES: Record<string, string> = {
-  "image/png": "png",
-  "image/jpeg": "jpg",
-  "image/webp": "webp",
-  "image/gif": "gif",
-};
+export const AVATAR_TYPES = ["image/png", "image/jpeg", "image/webp", "image/gif"];
 
-/** Maps an avatar URL we issued back to its R2 key; null for external or missing URLs. */
-export function avatarKeyFromUrl(url: string | null | undefined) {
-  if (!url?.startsWith(AVATAR_URL_PREFIX)) return null;
-  return `${AVATAR_KEY_PREFIX}${url.slice(AVATAR_URL_PREFIX.length)}`;
-}
+export const avatarKey = (userId: string) => `avatars/${userId}`;
+
+export const avatarUrl = (userId: string, version: number) =>
+  `/api/avatar?id=${userId}&v=${version}`;
+
+export const isAvatarUrl = (url: string | null | undefined) =>
+  Boolean(url?.startsWith("/api/avatar?"));

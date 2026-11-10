@@ -4,8 +4,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 
 import { SettingsRow } from "@/components/shared/settings-row";
-import { UserIdentity } from "@/components/shared/user-identity";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -23,6 +23,7 @@ import { toastManager } from "@/components/ui/toast";
 import { adminKeys } from "@/data/admin/keys";
 import { updateUserMutationOptions } from "@/data/admin/update-user";
 import { workspaceKeys } from "@/data/workspace/keys";
+import { getInitials } from "@/lib/initials";
 import { isAdmin } from "@/lib/roles";
 
 import { RoleSelect, type MemberRole } from "./role-select";
@@ -69,14 +70,6 @@ export function MemberProfileForm({ member, isSelf }: MemberProfileFormProps) {
       toastManager.add({ type: "success", title: "Member updated" });
     },
   });
-  const removePhoto = useMutation({
-    ...updateUserMutationOptions,
-    onSuccess: async () => {
-      await refresh();
-      toastManager.add({ type: "success", title: "Photo removed" });
-    },
-  });
-
   const form = useForm({
     defaultValues: initial,
     validators: { onSubmit: schema },
@@ -106,21 +99,11 @@ export function MemberProfileForm({ member, isSelf }: MemberProfileFormProps) {
         </CardFrameDescription>
       </CardFrameHeader>
       <Card>
-        <SettingsRow title="Photo" description="Shown next to their name across the workspace.">
-          <div className="flex items-center justify-between gap-3">
-            <UserIdentity user={member} />
-            {member.image && (
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                loading={removePhoto.isPending}
-                onClick={() => removePhoto.mutate({ userId: member.id, data: { image: null } })}
-              >
-                Remove
-              </Button>
-            )}
-          </div>
+        <SettingsRow title="Photo" description="Set by the member from their own account.">
+          <Avatar className="size-10">
+            {member.image && <AvatarImage src={member.image} alt="" />}
+            <AvatarFallback>{getInitials(member.name) || "U"}</AvatarFallback>
+          </Avatar>
         </SettingsRow>
         <Form
           id="member-profile-form"
@@ -209,10 +192,10 @@ export function MemberProfileForm({ member, isSelf }: MemberProfileFormProps) {
           </form.Field>
         </Form>
       </Card>
-      {(updateUser.error ?? removePhoto.error) && (
+      {updateUser.error && (
         <div className="px-6 pt-4">
           <Alert variant="error">
-            <AlertDescription>{(updateUser.error ?? removePhoto.error)?.message}</AlertDescription>
+            <AlertDescription>{updateUser.error.message}</AlertDescription>
           </Alert>
         </div>
       )}

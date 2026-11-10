@@ -9,6 +9,6 @@ export const uploadAvatarMutationOptions = mutationOptions({
   mutationFn: async (file: File) => {
     const body = new FormData();
     body.set("file", file);
-    return fetch("/api/account/avatar", { method: "POST", body });
+    return fetch("/api/avatar", { method: "POST", body });
   },
 });

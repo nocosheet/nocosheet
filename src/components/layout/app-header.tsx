@@ -26,9 +26,6 @@ export function AppHeader({ user }: AppHeaderProps) {
               <Button variant="ghost" size="sm" render={<Link to="/auth/sign-in" />}>
                 Sign in
               </Button>
-              <Button size="sm" className="rounded-lg" render={<Link to="/auth/sign-up" />}>
-                Get started
-              </Button>
             </div>
           )}
         </div>
