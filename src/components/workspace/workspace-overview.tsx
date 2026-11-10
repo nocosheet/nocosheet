@@ -24,7 +24,7 @@ import { toastManager } from "@/components/ui/toast";
 import { membersQueryOptions } from "@/data/workspace/members";
 import { getInitials } from "@/lib/initials";
 import { usePlaceholderTables } from "@/lib/placeholder-tables-store";
-import { isAdmin } from "@/lib/roles";
+import { isAdmin } from "@/lib/auth/access";
 
 const START_ACTIONS = [
   {

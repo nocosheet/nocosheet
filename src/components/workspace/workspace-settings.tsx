@@ -11,7 +11,7 @@ import {
   CardFrameTitle,
 } from "@/components/ui/card";
 import { membersQueryOptions } from "@/data/workspace/members";
-import { isAdmin } from "@/lib/roles";
+import { isAdmin } from "@/lib/auth/access";
 import { DEFAULT_WORKSPACE, DEFAULT_WORKSPACE_NAME } from "@/lib/workspace";
 
 export function WorkspaceSettings() {

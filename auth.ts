@@ -5,9 +5,9 @@ import { defineAuth } from "void/auth";
 import { sendEmail } from "void/email";
 import { storage } from "void/storage";
 
-import { kvSecondaryStorage } from "./src/lib/auth-secondary-storage";
+import { kvSecondaryStorage } from "./src/lib/auth/secondary-storage";
 import { avatarKey, isAvatarUrl } from "./src/lib/avatar";
-import { hasRole } from "./src/lib/roles";
+import { ac, ADMIN_ROLES, DEFAULT_ROLE, isAdmin, roles } from "./src/lib/auth/access";
 
 const SIGNUP_DISABLED_MESSAGE = "Sign-up is disabled. Ask an administrator for access.";
 const LAST_ADMIN_MESSAGE = "This is the last admin. Make someone else an admin first.";
@@ -20,7 +20,7 @@ export default defineAuth(({ defaults, env }) => ({
     ...(defaults.plugins ?? []),
     passkey({ rpName: "Nocosheet" }),
     twoFactor({ issuer: "Nocosheet" }),
-    admin(),
+    admin({ ac, roles, defaultRole: DEFAULT_ROLE, adminRoles: ADMIN_ROLES }),
   ],
   emailAndPassword: {
     ...defaults.emailAndPassword,
@@ -51,10 +51,10 @@ export default defineAuth(({ defaults, env }) => ({
       },
       delete: {
         before: async (user, ctx) => {
-          if (!ctx || !hasRole(user, "admin")) return;
+          if (!ctx || !isAdmin(user)) return;
           const admins = await ctx.context.adapter.count({
             model: "user",
-            where: [{ field: "role", operator: "contains", value: "admin" }],
+            where: [{ field: "role", operator: "in", value: ADMIN_ROLES }],
           });
           if (admins <= 1)
             throw APIError.from("BAD_REQUEST", { code: "LAST_ADMIN", message: LAST_ADMIN_MESSAGE });

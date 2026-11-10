@@ -1,8 +1,7 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { Link, useRouteContext } from "@tanstack/react-router";
+import { useRouteContext } from "@tanstack/react-router";
 
 import { SettingsRow } from "@/components/shared/settings-row";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -70,17 +69,7 @@ export function MemberAdminDetail({ userId }: { userId: string }) {
           </SettingsRow>
         </Card>
       </CardFrame>
-      {isSelf ? (
-        <Alert variant="info">
-          <AlertDescription>
-            This is your own account. Manage your password, sessions and two-factor from{" "}
-            <Link to="/account" className="underline underline-offset-4">
-              Account settings
-            </Link>
-            .
-          </AlertDescription>
-        </Alert>
-      ) : (
+      {!isSelf && (
         <>
           <MemberSecurity userId={member.id} />
           <MemberSessions userId={member.id} name={member.name} />

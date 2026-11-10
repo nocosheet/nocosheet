@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import { isAdmin } from "@/lib/roles";
+import { isAdmin } from "@/lib/auth/access";
 
 export function RoleBadge({ user }: { user: { role?: string | null } }) {
   return isAdmin(user) ? (

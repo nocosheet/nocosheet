@@ -5,7 +5,7 @@ import { MemberDetail } from "@/components/workspace/member-detail";
 import { adminUserQueryOptions } from "@/data/admin/user";
 import { adminUserSessionsQueryOptions } from "@/data/admin/user-sessions";
 import { membersQueryOptions } from "@/data/workspace/members";
-import { isAdmin } from "@/lib/roles";
+import { isAdmin } from "@/lib/auth/access";
 
 export const Route = createFileRoute("/w/$workspace/settings/members/$userId")({
   loader: async ({ context, params }) => {

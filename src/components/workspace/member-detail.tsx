@@ -16,7 +16,7 @@ import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/u
 import { membersQueryOptions } from "@/data/workspace/members";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 import { formatRelativeTime } from "@/lib/format-relative-time";
-import { isAdmin } from "@/lib/roles";
+import { isAdmin } from "@/lib/auth/access";
 
 import { MemberAdminDetail } from "./member-admin/member-admin-detail";
 

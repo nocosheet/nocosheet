@@ -2,7 +2,7 @@ import { mutationOptions } from "@tanstack/react-query";
 
 import { fetch } from "void/client";
 
-import { auth } from "@/lib/auth-client";
+import { auth } from "@/lib/auth/client";
 
 import { unwrapAuthResult } from "./auth-error";
 import { authKeys } from "./keys";

@@ -24,7 +24,7 @@ import { adminKeys } from "@/data/admin/keys";
 import { updateUserMutationOptions } from "@/data/admin/update-user";
 import { workspaceKeys } from "@/data/workspace/keys";
 import { getInitials } from "@/lib/initials";
-import { isAdmin } from "@/lib/roles";
+import { DEFAULT_ROLE } from "@/lib/auth/access";
 
 import { RoleSelect, type MemberRole } from "./role-select";
 
@@ -54,7 +54,7 @@ export function MemberProfileForm({ member, isSelf }: MemberProfileFormProps) {
     name: member.name,
     email: member.email,
     emailVerified: member.emailVerified,
-    role: (isAdmin(member) ? "admin" : "user") as MemberRole,
+    role: (member.role ?? DEFAULT_ROLE) as MemberRole,
   };
 
   const refresh = () =>

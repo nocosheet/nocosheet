@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { WorkspaceContent, WorkspaceHeader } from "@/components/layout/workspace-header";
 import { AddMemberDialog } from "@/components/workspace/member-admin/add-member-dialog";
 import { MembersList } from "@/components/workspace/members-list";
-import { isAdmin } from "@/lib/roles";
+import { isAdmin } from "@/lib/auth/access";
 
 export const Route = createFileRoute("/w/$workspace/settings/members/")({
   component: MembersPage,
