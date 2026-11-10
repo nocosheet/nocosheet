@@ -1,7 +1,8 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 
 import { membersQueryOptions } from "@/data/workspace/members";
-import { DEFAULT_WORKSPACE } from "@/lib/workspace";
+import { DEFAULT_ROLE, isAdmin } from "@/lib/auth/access";
+import { DEFAULT_WORKSPACE, DEFAULT_WORKSPACE_NAME } from "@/lib/workspace";
 
 export const Route = createFileRoute("/w/$workspace")({
   beforeLoad: ({ context, params }) => {
@@ -10,7 +11,18 @@ export const Route = createFileRoute("/w/$workspace")({
     if (params.workspace !== DEFAULT_WORKSPACE) {
       throw redirect({ to: "/w/$workspace", params: { workspace: DEFAULT_WORKSPACE } });
     }
+
+    const role = (context.session.user as { role?: string | null }).role ?? DEFAULT_ROLE;
+    return {
+      workspace: {
+        id: DEFAULT_WORKSPACE,
+        name: DEFAULT_WORKSPACE_NAME,
+        role,
+        isAdmin: isAdmin({ role }),
+      },
+    };
   },
-  loader: ({ context }) => context.queryClient.ensureQueryData(membersQueryOptions),
+  loader: ({ context }) =>
+    context.queryClient.query({ ...membersQueryOptions, staleTime: "static" }),
   component: Outlet,
 });

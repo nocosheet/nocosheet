@@ -5,18 +5,23 @@ import { MemberDetail } from "@/components/workspace/member-detail";
 import { adminUserQueryOptions } from "@/data/admin/user";
 import { adminUserSessionsQueryOptions } from "@/data/admin/user-sessions";
 import { membersQueryOptions } from "@/data/workspace/members";
-import { isAdmin } from "@/lib/auth/access";
 
 export const Route = createFileRoute("/w/$workspace/settings/members/$userId")({
   loader: async ({ context, params }) => {
-    const members = await context.queryClient.ensureQueryData(membersQueryOptions);
+    const members = await context.queryClient.query({
+      ...membersQueryOptions,
+      staleTime: "static",
+    });
 
     // Admins see the full account; fetch it up front. Errors (e.g. a stale id) fall back to the
     // directory view's "not found" state instead of breaking navigation.
-    if (isAdmin(context.session?.user)) {
+    if (context.workspace.isAdmin) {
       await Promise.allSettled([
-        context.queryClient.ensureQueryData(adminUserQueryOptions(params.userId)),
-        context.queryClient.ensureQueryData(adminUserSessionsQueryOptions(params.userId)),
+        context.queryClient.query({ ...adminUserQueryOptions(params.userId), staleTime: "static" }),
+        context.queryClient.query({
+          ...adminUserSessionsQueryOptions(params.userId),
+          staleTime: "static",
+        }),
       ]);
     }
 

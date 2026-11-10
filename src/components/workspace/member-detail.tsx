@@ -1,5 +1,4 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { useRouteContext } from "@tanstack/react-router";
 
 import { SettingsRow } from "@/components/shared/settings-row";
 import { RoleBadge } from "@/components/shared/user-badges";
@@ -15,15 +14,15 @@ import {
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
 import { membersQueryOptions } from "@/data/workspace/members";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
+import { useWorkspace } from "@/hooks/use-workspace";
 import { formatRelativeTime } from "@/lib/format-relative-time";
-import { isAdmin } from "@/lib/auth/access";
 
 import { MemberAdminDetail } from "./member-admin/member-admin-detail";
 
 type MemberDetailProps = { userId: string };
 
 export function MemberDetail({ userId }: MemberDetailProps) {
-  const { session } = useRouteContext({ from: "__root__" });
+  const { isAdmin } = useWorkspace();
   const { copyToClipboard, isCopied } = useCopyToClipboard();
   // The member directory is already loaded for the list, so the detail page just picks from it.
   const { data: member } = useSuspenseQuery({
@@ -42,7 +41,7 @@ export function MemberDetail({ userId }: MemberDetailProps) {
     );
   }
 
-  if (isAdmin(session?.user)) return <MemberAdminDetail userId={userId} />;
+  if (isAdmin) return <MemberAdminDetail userId={userId} />;
 
   return (
     <CardFrame>

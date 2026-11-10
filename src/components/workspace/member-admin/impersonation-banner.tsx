@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import { useNavigate, useRouteContext } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 
 import { UserRoundCogIcon } from "lucide-react";
 
@@ -7,11 +7,12 @@ import { Button } from "@/components/ui/button";
 import { toastManager } from "@/components/ui/toast";
 import { stopImpersonatingMutationOptions } from "@/data/admin/stop-impersonating";
 import { useRefreshSession } from "@/data/auth/session-refresh";
+import { useSession } from "@/hooks/use-session";
 import { DEFAULT_WORKSPACE } from "@/lib/workspace";
 
 /** Shown on every page while an admin is signed in as someone else. */
 export function ImpersonationBanner() {
-  const { session } = useRouteContext({ from: "__root__" });
+  const session = useSession();
   const navigate = useNavigate();
   const refreshSession = useRefreshSession();
 

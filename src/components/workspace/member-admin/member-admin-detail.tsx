@@ -1,5 +1,4 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { useRouteContext } from "@tanstack/react-router";
 
 import { SettingsRow } from "@/components/shared/settings-row";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +12,7 @@ import {
 } from "@/components/ui/card";
 import { adminUserQueryOptions } from "@/data/admin/user";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
+import { useSession } from "@/hooks/use-session";
 import { formatRelativeTime } from "@/lib/format-relative-time";
 
 import { MemberAccess } from "./member-access";
@@ -23,7 +23,7 @@ import { MemberSessions } from "./member-sessions";
 
 /** Everything an admin can do to a member; rendered instead of the read-only view. */
 export function MemberAdminDetail({ userId }: { userId: string }) {
-  const { session } = useRouteContext({ from: "__root__" });
+  const session = useSession();
   const { copyToClipboard, isCopied } = useCopyToClipboard();
   const { data: member } = useSuspenseQuery(adminUserQueryOptions(userId));
   const isSelf = session?.user.id === member.id;

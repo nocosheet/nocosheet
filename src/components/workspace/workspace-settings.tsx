@@ -1,5 +1,4 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { useRouteContext } from "@tanstack/react-router";
 
 import { SettingsRow } from "@/components/shared/settings-row";
 import { Badge } from "@/components/ui/badge";
@@ -11,13 +10,12 @@ import {
   CardFrameTitle,
 } from "@/components/ui/card";
 import { membersQueryOptions } from "@/data/workspace/members";
-import { isAdmin } from "@/lib/auth/access";
+import { useWorkspace } from "@/hooks/use-workspace";
 import { DEFAULT_WORKSPACE, DEFAULT_WORKSPACE_NAME } from "@/lib/workspace";
 
 export function WorkspaceSettings() {
   const { data: members } = useSuspenseQuery(membersQueryOptions);
-  const { session } = useRouteContext({ from: "__root__" });
-  const admin = isAdmin(session?.user);
+  const { isAdmin: admin } = useWorkspace();
 
   return (
     <CardFrame>

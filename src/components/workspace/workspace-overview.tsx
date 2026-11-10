@@ -1,5 +1,5 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { Link, useRouteContext } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 
 import { FileSpreadsheetIcon, LayoutTemplateIcon, PlusIcon, UserPlusIcon } from "lucide-react";
 
@@ -22,9 +22,10 @@ import {
 } from "@/components/ui/card";
 import { toastManager } from "@/components/ui/toast";
 import { membersQueryOptions } from "@/data/workspace/members";
+import { useSession } from "@/hooks/use-session";
+import { useWorkspace } from "@/hooks/use-workspace";
 import { getInitials } from "@/lib/initials";
 import { usePlaceholderTables } from "@/lib/placeholder-tables-store";
-import { isAdmin } from "@/lib/auth/access";
 
 const START_ACTIONS = [
   {
@@ -48,7 +49,8 @@ const MAX_AVATARS = 5;
 
 export function WorkspaceOverview({ workspace }: { workspace: string }) {
   const { data: members } = useSuspenseQuery(membersQueryOptions);
-  const { session } = useRouteContext({ from: "__root__" });
+  const session = useSession();
+  const { isAdmin } = useWorkspace();
   const tables = usePlaceholderTables();
 
   const firstName = session?.user.name?.split(" ")[0];
@@ -159,7 +161,7 @@ export function WorkspaceOverview({ workspace }: { workspace: string }) {
               size="sm"
               render={<Link to="/w/$workspace/settings/members" params={{ workspace }} />}
             >
-              {isAdmin(session?.user) ? (
+              {isAdmin ? (
                 <>
                   <UserPlusIcon />
                   Invite people
