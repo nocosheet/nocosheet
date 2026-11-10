@@ -11,8 +11,7 @@ import { formatRelativeTime } from "@/lib/format-relative-time";
 import { NamedIcon } from "./named-icon";
 
 function TableName({ id, name }: { id: number; name: string }) {
-  const { id: workspace, isAdmin } = useWorkspace();
-  if (!isAdmin) return <span className="truncate font-medium">{name}</span>;
+  const { id: workspace } = useWorkspace();
   return (
     <Link
       to="/w/$workspace/tables/$table/definition"

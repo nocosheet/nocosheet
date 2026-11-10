@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 
-import { HomeIcon, SparklesIcon } from "lucide-react";
+import { HomeIcon, SparklesIcon, TableIcon } from "lucide-react";
 
 import {
   SidebarGroup,
@@ -14,7 +14,7 @@ import { useIsActivePath } from "@/hooks/use-is-active-path";
 
 import { SearchDialog } from "./search-dialog";
 
-/** Search, Ask AI and Home: the always-visible entries at the top of the sidebar. */
+/** Search, Ask AI, Home and All tables: the always-visible entries at the top of the sidebar. */
 export function NavMain({ workspace }: { workspace: string }) {
   const isActive = useIsActivePath();
 
@@ -48,6 +48,16 @@ export function NavMain({ workspace }: { workspace: string }) {
             >
               <HomeIcon />
               <span>Home</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              tooltip="All tables"
+              isActive={isActive(`/w/${workspace}/tables`)}
+              render={<Link to="/w/$workspace/tables" params={{ workspace }} />}
+            >
+              <TableIcon />
+              <span>All tables</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

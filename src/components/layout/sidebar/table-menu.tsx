@@ -108,25 +108,23 @@ export function TableMenu({ table, workspace }: { table: SidebarTable; workspace
             <ExternalLinkIcon />
             Open in new tab
           </MenuLinkItem>
+          <MenuSeparator />
+          <MenuLinkItem
+            render={
+              <Link
+                to="/w/$workspace/tables/$table/definition"
+                params={{ workspace, table: String(table.id) }}
+              />
+            }
+          >
+            <SlidersHorizontalIcon />
+            {isAdmin ? "Edit definition" : "View definition"}
+          </MenuLinkItem>
           {isAdmin && (
-            <>
-              <MenuSeparator />
-              <MenuLinkItem
-                render={
-                  <Link
-                    to="/w/$workspace/tables/$table/definition"
-                    params={{ workspace, table: String(table.id) }}
-                  />
-                }
-              >
-                <SlidersHorizontalIcon />
-                Edit definition
-              </MenuLinkItem>
-              <MenuItem variant="destructive" onClick={() => setConfirmOpen(true)}>
-                <Trash2Icon />
-                Delete
-              </MenuItem>
-            </>
+            <MenuItem variant="destructive" onClick={() => setConfirmOpen(true)}>
+              <Trash2Icon />
+              Delete
+            </MenuItem>
           )}
         </MenuPopup>
       </Menu>

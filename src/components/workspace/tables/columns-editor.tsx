@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 
-import { PencilIcon, PlusIcon, TrashIcon } from "lucide-react";
+import { PlusIcon } from "lucide-react";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
@@ -14,7 +14,6 @@ import {
   AlertDialogPopup,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { workspaceKeys } from "@/data/workspace/keys";
 import {
@@ -23,11 +22,10 @@ import {
   tableQueryOptions,
   updateColumnMutationOptions,
 } from "@/data/workspace/tables";
-import { FORMATS, type ColumnFormat } from "@/lib/tables/formats";
 
 import { ColumnDialog } from "./column-dialog";
 import { columnToDraft, type ColumnDraft } from "./column-draft";
-import { NamedIcon } from "./named-icon";
+import { ColumnsList } from "./columns-list";
 
 function useTableData(workspace: string, tableId: number) {
   return useSuspenseQuery(tableQueryOptions(workspace, tableId));
@@ -109,55 +107,13 @@ export function ColumnsEditor({ workspace, tableId }: { workspace: string; table
         </Button>
       </div>
 
-      {columns.length === 0 ? (
-        <div className="rounded-lg border border-dashed p-8 text-center text-muted-foreground text-sm">
-          No columns yet. Add the columns that hold your data.
-        </div>
-      ) : (
-        <div className="divide-y rounded-lg border">
-          {columns.map((column) => {
-            const FormatIcon = FORMATS[column.format as ColumnFormat].icon;
-            return (
-              <div key={column.id} className="flex items-center gap-3 px-4 py-3">
-                {column.icon ? (
-                  <NamedIcon name={column.icon} className="size-4 shrink-0 text-muted-foreground" />
-                ) : (
-                  <FormatIcon className="size-4 shrink-0 text-muted-foreground" />
-                )}
-                <div className="flex min-w-0 flex-1 flex-col">
-                  <span className="truncate font-medium text-sm">{column.name}</span>
-                  <span className="truncate text-muted-foreground text-xs">
-                    {FORMATS[column.format as ColumnFormat].label} · {column.columnName}
-                  </span>
-                </div>
-                <div className="hidden items-center gap-1 sm:flex">
-                  {column.id === table.titleColumnId && <Badge>Title</Badge>}
-                  {column.isRequired && <Badge variant="outline">Required</Badge>}
-                  {column.isUnique && <Badge variant="outline">Unique</Badge>}
-                  {column.isHidden && <Badge variant="outline">Hidden</Badge>}
-                  {column.generatedExpression && <Badge variant="outline">Computed</Badge>}
-                </div>
-                <Button
-                  variant="ghost"
-                  size="icon-sm"
-                  aria-label={`Edit ${column.name}`}
-                  onClick={() => openDialog(column)}
-                >
-                  <PencilIcon />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon-sm"
-                  aria-label={`Delete ${column.name}`}
-                  onClick={() => setRemoving(column)}
-                >
-                  <TrashIcon />
-                </Button>
-              </div>
-            );
-          })}
-        </div>
-      )}
+      <ColumnsList
+        columns={columns}
+        titleColumnId={table.titleColumnId}
+        empty="No columns yet. Add the columns that hold your data."
+        onEdit={openDialog}
+        onDelete={setRemoving}
+      />
 
       <ColumnDialog
         formKey={dialog.key}
