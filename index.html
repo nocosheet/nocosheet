@@ -6,9 +6,14 @@
     <link rel="icon" type="image/svg+xml" href="/icons.svg" />
     <script>
       try {
-        var theme = localStorage.getItem("theme");
+        var stored = JSON.parse(localStorage.getItem("preferences") || "{}")["s:appearance"];
+        var prefs = (stored && stored.data) || {};
+        var theme = prefs.theme;
         if (theme === "dark" || (theme !== "light" && matchMedia("(prefers-color-scheme: dark)").matches)) {
           document.documentElement.classList.add("dark");
+        }
+        if (prefs.accent && /^[a-z]+$/.test(prefs.accent) && prefs.accent !== "default") {
+          document.documentElement.dataset.accent = prefs.accent;
         }
       } catch (e) {}
     </script>

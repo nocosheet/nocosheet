@@ -7,6 +7,7 @@ import { RouterProvider, createRouter } from "@tanstack/react-router";
 import { RouteError } from "@/components/layout/route-error";
 import { RouteNotFound } from "@/components/layout/route-not-found";
 import { RoutePending } from "@/components/layout/route-pending";
+import { initPreferences } from "@/lib/preferences";
 import { routeTree } from "@/routeTree.gen";
 
 import "./index.css";
@@ -35,11 +36,13 @@ declare module "@tanstack/react-router" {
 const rootElement = document.getElementById("app")!;
 
 if (!rootElement.innerHTML) {
-  createRoot(rootElement).render(
-    <StrictMode>
-      <QueryClientProvider client={queryClient}>
-        <RouterProvider router={router} />
-      </QueryClientProvider>
-    </StrictMode>,
+  void initPreferences().then(() =>
+    createRoot(rootElement).render(
+      <StrictMode>
+        <QueryClientProvider client={queryClient}>
+          <RouterProvider router={router} />
+        </QueryClientProvider>
+      </StrictMode>,
+    ),
   );
 }

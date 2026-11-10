@@ -2,10 +2,11 @@ import { MonitorIcon, MoonIcon, SunIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Menu, MenuPopup, MenuRadioGroup, MenuRadioItem, MenuTrigger } from "@/components/ui/menu";
-import { useTheme, type Theme } from "@/hooks/use-theme";
+import { usePreference } from "@/hooks/use-preference";
+import type { Theme } from "@/lib/preferences";
 
 export function ThemeToggle() {
-  const { theme, setTheme } = useTheme();
+  const [theme, setTheme] = usePreference("theme");
 
   return (
     <Menu>
