@@ -9,6 +9,7 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
+      "@db": fileURLToPath(new URL("./db", import.meta.url)),
     },
   },
   plugins: [tailwindcss(), tanstackRouter({ target: "react", autoCodeSplitting: true }), react(), voidPlugin()],

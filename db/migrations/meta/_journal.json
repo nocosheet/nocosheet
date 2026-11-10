@@ -1,0 +1,20 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1794287420456,
+      "tag": "20261110051020_kind_shinobi_shaw",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1794287491257,
+      "tag": "20261110051131_mature_sharon_carter",
+      "breakpoints": true
+    }
+  ]
+}
