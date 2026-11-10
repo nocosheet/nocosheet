@@ -27,7 +27,7 @@ import { Route as WWorkspaceRouteRouteImport } from './routes/w/$workspace/route
 import { Route as WWorkspaceAppRouteRouteImport } from './routes/w/$workspace/_app/route'
 import { Route as WWorkspaceSettingsRouteRouteImport } from './routes/w/$workspace/settings/route'
 import { Route as WWorkspaceAppIndexRouteImport } from './routes/w/$workspace/_app/index'
-import { Route as WWorkspaceAppTablesRouteImport } from './routes/w/$workspace/_app/tables'
+import { Route as WWorkspaceAppTablesRouteRouteImport } from './routes/w/$workspace/_app/tables/route'
 import { Route as WWorkspaceSettingsIndexRouteImport } from './routes/w/$workspace/settings/index'
 import { Route as WWorkspaceSettingsApiRouteImport } from './routes/w/$workspace/settings/api'
 import { Route as WWorkspaceSettingsAppearanceRouteImport } from './routes/w/$workspace/settings/appearance'
@@ -35,6 +35,8 @@ import { Route as WWorkspaceSettingsBillingRouteImport } from './routes/w/$works
 import { Route as WWorkspaceSettingsDataRouteImport } from './routes/w/$workspace/settings/data'
 import { Route as WWorkspaceSettingsIntegrationsRouteImport } from './routes/w/$workspace/settings/integrations'
 import { Route as WWorkspaceSettingsMembersRouteRouteImport } from './routes/w/$workspace/settings/members/route'
+import { Route as WWorkspaceAppTablesIndexRouteImport } from './routes/w/$workspace/_app/tables/index'
+import { Route as WWorkspaceAppTablesNewRouteImport } from './routes/w/$workspace/_app/tables/new'
 import { Route as WWorkspaceSettingsMembersIndexRouteImport } from './routes/w/$workspace/settings/members/index'
 import { Route as WWorkspaceSettingsMembersUserIdRouteImport } from './routes/w/$workspace/settings/members/$userId'
 
@@ -127,11 +129,12 @@ const WWorkspaceAppIndexRoute = WWorkspaceAppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => WWorkspaceAppRouteRoute,
 } as any)
-const WWorkspaceAppTablesRoute = WWorkspaceAppTablesRouteImport.update({
-  id: '/tables',
-  path: '/tables',
-  getParentRoute: () => WWorkspaceAppRouteRoute,
-} as any)
+const WWorkspaceAppTablesRouteRoute =
+  WWorkspaceAppTablesRouteRouteImport.update({
+    id: '/tables',
+    path: '/tables',
+    getParentRoute: () => WWorkspaceAppRouteRoute,
+  } as any)
 const WWorkspaceSettingsIndexRoute = WWorkspaceSettingsIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -171,6 +174,17 @@ const WWorkspaceSettingsMembersRouteRoute =
     path: '/members',
     getParentRoute: () => WWorkspaceSettingsRouteRoute,
   } as any)
+const WWorkspaceAppTablesIndexRoute =
+  WWorkspaceAppTablesIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => WWorkspaceAppTablesRouteRoute,
+  } as any)
+const WWorkspaceAppTablesNewRoute = WWorkspaceAppTablesNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => WWorkspaceAppTablesRouteRoute,
+} as any)
 const WWorkspaceSettingsMembersIndexRoute =
   WWorkspaceSettingsMembersIndexRouteImport.update({
     id: '/',
@@ -201,8 +215,8 @@ export interface FileRoutesByFullPath {
   '/auth/verify-email': typeof AuthVerifyEmailRoute
   '/account/': typeof AccountIndexRoute
   '/w/$workspace/settings': typeof WWorkspaceSettingsRouteRouteWithChildren
+  '/w/$workspace/tables': typeof WWorkspaceAppTablesRouteRouteWithChildren
   '/w/$workspace/settings/members': typeof WWorkspaceSettingsMembersRouteRouteWithChildren
-  '/w/$workspace/tables': typeof WWorkspaceAppTablesRoute
   '/w/$workspace/settings/api': typeof WWorkspaceSettingsApiRoute
   '/w/$workspace/settings/appearance': typeof WWorkspaceSettingsAppearanceRoute
   '/w/$workspace/settings/billing': typeof WWorkspaceSettingsBillingRoute
@@ -210,7 +224,9 @@ export interface FileRoutesByFullPath {
   '/w/$workspace/settings/integrations': typeof WWorkspaceSettingsIntegrationsRoute
   '/w/$workspace/': typeof WWorkspaceAppIndexRoute
   '/w/$workspace/settings/': typeof WWorkspaceSettingsIndexRoute
+  '/w/$workspace/tables/new': typeof WWorkspaceAppTablesNewRoute
   '/w/$workspace/settings/members/$userId': typeof WWorkspaceSettingsMembersUserIdRoute
+  '/w/$workspace/tables/': typeof WWorkspaceAppTablesIndexRoute
   '/w/$workspace/settings/members/': typeof WWorkspaceSettingsMembersIndexRoute
 }
 export interface FileRoutesByTo {
@@ -228,14 +244,15 @@ export interface FileRoutesByTo {
   '/auth/two-factor': typeof AuthTwoFactorRoute
   '/auth/verify-email': typeof AuthVerifyEmailRoute
   '/account': typeof AccountIndexRoute
-  '/w/$workspace/tables': typeof WWorkspaceAppTablesRoute
   '/w/$workspace/settings/api': typeof WWorkspaceSettingsApiRoute
   '/w/$workspace/settings/appearance': typeof WWorkspaceSettingsAppearanceRoute
   '/w/$workspace/settings/billing': typeof WWorkspaceSettingsBillingRoute
   '/w/$workspace/settings/data': typeof WWorkspaceSettingsDataRoute
   '/w/$workspace/settings/integrations': typeof WWorkspaceSettingsIntegrationsRoute
   '/w/$workspace/settings': typeof WWorkspaceSettingsIndexRoute
+  '/w/$workspace/tables/new': typeof WWorkspaceAppTablesNewRoute
   '/w/$workspace/settings/members/$userId': typeof WWorkspaceSettingsMembersUserIdRoute
+  '/w/$workspace/tables': typeof WWorkspaceAppTablesIndexRoute
   '/w/$workspace/settings/members': typeof WWorkspaceSettingsMembersIndexRoute
 }
 export interface FileRoutesById {
@@ -257,8 +274,8 @@ export interface FileRoutesById {
   '/account/': typeof AccountIndexRoute
   '/w/$workspace/_app': typeof WWorkspaceAppRouteRouteWithChildren
   '/w/$workspace/settings': typeof WWorkspaceSettingsRouteRouteWithChildren
+  '/w/$workspace/_app/tables': typeof WWorkspaceAppTablesRouteRouteWithChildren
   '/w/$workspace/settings/members': typeof WWorkspaceSettingsMembersRouteRouteWithChildren
-  '/w/$workspace/_app/tables': typeof WWorkspaceAppTablesRoute
   '/w/$workspace/settings/api': typeof WWorkspaceSettingsApiRoute
   '/w/$workspace/settings/appearance': typeof WWorkspaceSettingsAppearanceRoute
   '/w/$workspace/settings/billing': typeof WWorkspaceSettingsBillingRoute
@@ -266,7 +283,9 @@ export interface FileRoutesById {
   '/w/$workspace/settings/integrations': typeof WWorkspaceSettingsIntegrationsRoute
   '/w/$workspace/_app/': typeof WWorkspaceAppIndexRoute
   '/w/$workspace/settings/': typeof WWorkspaceSettingsIndexRoute
+  '/w/$workspace/_app/tables/new': typeof WWorkspaceAppTablesNewRoute
   '/w/$workspace/settings/members/$userId': typeof WWorkspaceSettingsMembersUserIdRoute
+  '/w/$workspace/_app/tables/': typeof WWorkspaceAppTablesIndexRoute
   '/w/$workspace/settings/members/': typeof WWorkspaceSettingsMembersIndexRoute
 }
 export interface FileRouteTypes {
@@ -288,8 +307,8 @@ export interface FileRouteTypes {
     | '/auth/verify-email'
     | '/account/'
     | '/w/$workspace/settings'
-    | '/w/$workspace/settings/members'
     | '/w/$workspace/tables'
+    | '/w/$workspace/settings/members'
     | '/w/$workspace/settings/api'
     | '/w/$workspace/settings/appearance'
     | '/w/$workspace/settings/billing'
@@ -297,7 +316,9 @@ export interface FileRouteTypes {
     | '/w/$workspace/settings/integrations'
     | '/w/$workspace/'
     | '/w/$workspace/settings/'
+    | '/w/$workspace/tables/new'
     | '/w/$workspace/settings/members/$userId'
+    | '/w/$workspace/tables/'
     | '/w/$workspace/settings/members/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -315,14 +336,15 @@ export interface FileRouteTypes {
     | '/auth/two-factor'
     | '/auth/verify-email'
     | '/account'
-    | '/w/$workspace/tables'
     | '/w/$workspace/settings/api'
     | '/w/$workspace/settings/appearance'
     | '/w/$workspace/settings/billing'
     | '/w/$workspace/settings/data'
     | '/w/$workspace/settings/integrations'
     | '/w/$workspace/settings'
+    | '/w/$workspace/tables/new'
     | '/w/$workspace/settings/members/$userId'
+    | '/w/$workspace/tables'
     | '/w/$workspace/settings/members'
   id:
     | '__root__'
@@ -343,8 +365,8 @@ export interface FileRouteTypes {
     | '/account/'
     | '/w/$workspace/_app'
     | '/w/$workspace/settings'
-    | '/w/$workspace/settings/members'
     | '/w/$workspace/_app/tables'
+    | '/w/$workspace/settings/members'
     | '/w/$workspace/settings/api'
     | '/w/$workspace/settings/appearance'
     | '/w/$workspace/settings/billing'
@@ -352,7 +374,9 @@ export interface FileRouteTypes {
     | '/w/$workspace/settings/integrations'
     | '/w/$workspace/_app/'
     | '/w/$workspace/settings/'
+    | '/w/$workspace/_app/tables/new'
     | '/w/$workspace/settings/members/$userId'
+    | '/w/$workspace/_app/tables/'
     | '/w/$workspace/settings/members/'
   fileRoutesById: FileRoutesById
 }
@@ -495,7 +519,7 @@ declare module '@tanstack/react-router' {
       id: '/w/$workspace/_app/tables'
       path: '/tables'
       fullPath: '/w/$workspace/tables'
-      preLoaderRoute: typeof WWorkspaceAppTablesRouteImport
+      preLoaderRoute: typeof WWorkspaceAppTablesRouteRouteImport
       parentRoute: typeof WWorkspaceAppRouteRoute
     }
     '/w/$workspace/settings/': {
@@ -546,6 +570,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/w/$workspace/settings/members'
       preLoaderRoute: typeof WWorkspaceSettingsMembersRouteRouteImport
       parentRoute: typeof WWorkspaceSettingsRouteRoute
+    }
+    '/w/$workspace/_app/tables/': {
+      id: '/w/$workspace/_app/tables/'
+      path: '/'
+      fullPath: '/w/$workspace/tables/'
+      preLoaderRoute: typeof WWorkspaceAppTablesIndexRouteImport
+      parentRoute: typeof WWorkspaceAppTablesRouteRoute
+    }
+    '/w/$workspace/_app/tables/new': {
+      id: '/w/$workspace/_app/tables/new'
+      path: '/new'
+      fullPath: '/w/$workspace/tables/new'
+      preLoaderRoute: typeof WWorkspaceAppTablesNewRouteImport
+      parentRoute: typeof WWorkspaceAppTablesRouteRoute
     }
     '/w/$workspace/settings/members/': {
       id: '/w/$workspace/settings/members/'
@@ -606,13 +644,29 @@ const AuthRouteRouteWithChildren = AuthRouteRoute._addFileChildren(
   AuthRouteRouteChildren,
 )
 
+interface WWorkspaceAppTablesRouteRouteChildren {
+  WWorkspaceAppTablesNewRoute: typeof WWorkspaceAppTablesNewRoute
+  WWorkspaceAppTablesIndexRoute: typeof WWorkspaceAppTablesIndexRoute
+}
+
+const WWorkspaceAppTablesRouteRouteChildren: WWorkspaceAppTablesRouteRouteChildren =
+  {
+    WWorkspaceAppTablesNewRoute: WWorkspaceAppTablesNewRoute,
+    WWorkspaceAppTablesIndexRoute: WWorkspaceAppTablesIndexRoute,
+  }
+
+const WWorkspaceAppTablesRouteRouteWithChildren =
+  WWorkspaceAppTablesRouteRoute._addFileChildren(
+    WWorkspaceAppTablesRouteRouteChildren,
+  )
+
 interface WWorkspaceAppRouteRouteChildren {
-  WWorkspaceAppTablesRoute: typeof WWorkspaceAppTablesRoute
+  WWorkspaceAppTablesRouteRoute: typeof WWorkspaceAppTablesRouteRouteWithChildren
   WWorkspaceAppIndexRoute: typeof WWorkspaceAppIndexRoute
 }
 
 const WWorkspaceAppRouteRouteChildren: WWorkspaceAppRouteRouteChildren = {
-  WWorkspaceAppTablesRoute: WWorkspaceAppTablesRoute,
+  WWorkspaceAppTablesRouteRoute: WWorkspaceAppTablesRouteRouteWithChildren,
   WWorkspaceAppIndexRoute: WWorkspaceAppIndexRoute,
 }
 

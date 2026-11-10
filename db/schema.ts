@@ -1,17 +1,224 @@
-import { sqliteTable, text } from "void/schema-d1";
+import { sql } from "void/db";
+import {
+  type AnySQLiteColumn,
+  check,
+  index,
+  integer,
+  sqliteTable,
+  text,
+  uniqueIndex,
+} from "void/schema-d1";
 
 import { userTable } from "../.void/better-auth-schema";
 
-export const workspaceSchema = (workspaceId = "default") => ({
-  settings: sqliteTable(`${workspaceId}__settings`, {
+const RESOURCE_KINDS = ["table", "view", "widget"] as const;
+
+const lower = (column: AnySQLiteColumn) => sql`lower(${column})`;
+const live = (column: AnySQLiteColumn) => sql`${column} is null`;
+
+const timestamps = {
+  createdAt: integer("created_at", { mode: "timestamp_ms" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+  updatedAt: integer("updated_at", { mode: "timestamp_ms" })
+    .notNull()
+    .$defaultFn(() => new Date())
+    .$onUpdateFn(() => new Date()),
+};
+
+const deletedAt = () => integer("deleted_at", { mode: "timestamp_ms" });
+
+const createdBy = () => text("created_by").references(() => userTable.id, { onDelete: "set null" });
+
+const json = <T>(name: string, fallback: T) =>
+  text(name, { mode: "json" }).$type<T>().notNull().default(fallback);
+
+export const workspaceSchema = (workspaceId = "default") => {
+  const name = (suffix: string) => `${workspaceId}__${suffix}`;
+
+  const settingTable = sqliteTable(name("setting"), {
     userId: text("user_id")
       .primaryKey()
       .references(() => userTable.id, { onDelete: "cascade" }),
-    metadata: text("metadata", { mode: "json" })
-      .$type<Record<string, unknown>>()
-      .notNull()
-      .default({}),
-  }),
-});
+    metadata: json<Record<string, unknown>>("metadata", {}),
+  });
 
-export const { settings } = workspaceSchema();
+  const resourceTable = sqliteTable(
+    name("resource"),
+    {
+      id: integer("id").primaryKey({ autoIncrement: true }),
+      kind: text("kind", { enum: RESOURCE_KINDS }).notNull(),
+    },
+    (t) => [
+      check(
+        name("resource_kind_check"),
+        sql`${t.kind} in (${sql.raw(RESOURCE_KINDS.map((kind) => `'${kind}'`).join(", "))})`,
+      ),
+    ],
+  );
+
+  const tableTable = sqliteTable(
+    name("table"),
+    {
+      id: integer("id")
+        .primaryKey()
+        .references(() => resourceTable.id, { onDelete: "cascade" }),
+      tableName: text("table_name").notNull(),
+      name: text("name").notNull(),
+      description: text("description"),
+      icon: text("icon"),
+      groupName: text("group_name"),
+      titleColumnId: integer("title_column_id").references((): AnySQLiteColumn => columnTable.id, {
+        onDelete: "set null",
+      }),
+      isSingleton: integer("is_singleton", { mode: "boolean" }).notNull().default(false),
+      idType: text("id_type", { enum: ["increment", "uuid"] })
+        .notNull()
+        .default("increment"),
+      hasCreatedAt: integer("has_created_at", { mode: "boolean" }).notNull().default(true),
+      hasCreatedBy: integer("has_created_by", { mode: "boolean" }).notNull().default(true),
+      hasUpdatedAt: integer("has_updated_at", { mode: "boolean" }).notNull().default(true),
+      hasUpdatedBy: integer("has_updated_by", { mode: "boolean" }).notNull().default(true),
+      position: integer("position").notNull().default(0),
+      metadata: json<Record<string, unknown>>("metadata", {}),
+      createdBy: createdBy(),
+      ...timestamps,
+      deletedAt: deletedAt(),
+    },
+    (t) => [
+      uniqueIndex(name("table_name")).on(lower(t.name)).where(live(t.deletedAt)),
+      uniqueIndex(name("table_table_name")).on(t.tableName),
+      index(name("table_position")).on(t.position).where(live(t.deletedAt)),
+      index(name("table_group")).on(t.groupName, t.position).where(live(t.deletedAt)),
+      index(name("table_deleted"))
+        .on(t.deletedAt)
+        .where(sql`${t.deletedAt} is not null`),
+    ],
+  );
+
+  const columnTable = sqliteTable(
+    name("column"),
+    {
+      id: integer("id").primaryKey({ autoIncrement: true }),
+      tableId: integer("table_id")
+        .notNull()
+        .references(() => tableTable.id, { onDelete: "cascade" }),
+      columnName: text("column_name").notNull(),
+      name: text("name").notNull(),
+      icon: text("icon"),
+      type: text("type").notNull(),
+      format: text("format").notNull(),
+      isRequired: integer("is_required", { mode: "boolean" }).notNull().default(false),
+      isFilterable: integer("is_filterable", { mode: "boolean" }).notNull().default(false),
+      isSortable: integer("is_sortable", { mode: "boolean" }).notNull().default(false),
+      isSearchable: integer("is_searchable", { mode: "boolean" }).notNull().default(false),
+      isUnique: integer("is_unique", { mode: "boolean" }).notNull().default(false),
+      isHidden: integer("is_hidden", { mode: "boolean" }).notNull().default(false),
+      checkExpression: text("check_expression"),
+      generatedExpression: text("generated_expression"),
+      defaultValue: text("default_value"),
+      position: integer("position").notNull().default(0),
+      description: text("description"),
+      options: json<Record<string, unknown>>("options", {}),
+      metadata: json<Record<string, unknown>>("metadata", {}),
+      ...timestamps,
+      deletedAt: deletedAt(),
+    },
+    (t) => [
+      uniqueIndex(name("column_name")).on(t.tableId, lower(t.name)).where(live(t.deletedAt)),
+      uniqueIndex(name("column_column_name")).on(t.tableId, t.columnName),
+      index(name("column_position")).on(t.tableId, t.position).where(live(t.deletedAt)),
+    ],
+  );
+
+  const viewTable = sqliteTable(
+    name("view"),
+    {
+      id: integer("id")
+        .primaryKey()
+        .references(() => resourceTable.id, { onDelete: "cascade" }),
+      tableId: integer("table_id")
+        .notNull()
+        .references(() => tableTable.id, { onDelete: "cascade" }),
+      viewName: text("view_name").notNull(),
+      name: text("name").notNull(),
+      description: text("description"),
+      icon: text("icon"),
+      type: text("type"),
+      position: integer("position").notNull().default(0),
+      selectColumns: json<string[]>("select_columns", []),
+      whereExpression: text("where_expression"),
+      metadata: json<Record<string, unknown>>("metadata", {}),
+      createdBy: createdBy(),
+      ...timestamps,
+      deletedAt: deletedAt(),
+    },
+    (t) => [
+      uniqueIndex(name("view_name")).on(t.tableId, lower(t.name)).where(live(t.deletedAt)),
+      uniqueIndex(name("view_view_name")).on(t.viewName),
+      index(name("view_table_position")).on(t.tableId, t.position).where(live(t.deletedAt)),
+    ],
+  );
+
+  const widgetTable = sqliteTable(
+    name("widget"),
+    {
+      id: integer("id")
+        .primaryKey()
+        .references(() => resourceTable.id, { onDelete: "cascade" }),
+      tableId: integer("table_id")
+        .notNull()
+        .references(() => tableTable.id, { onDelete: "cascade" }),
+      viewName: text("view_name").notNull(),
+      title: text("title").notNull(),
+      kind: text("kind").notNull(),
+      variant: text("variant").notNull(),
+      definition: json<Record<string, unknown>>("definition", {}),
+      layout: json<Record<string, unknown>>("layout", {}),
+      options: json<Record<string, unknown>>("options", {}),
+      position: integer("position").notNull().default(0),
+      createdBy: createdBy(),
+      ...timestamps,
+      deletedAt: deletedAt(),
+    },
+    (t) => [
+      uniqueIndex(name("widget_view_name")).on(t.viewName),
+      index(name("widget_table_position")).on(t.tableId, t.position).where(live(t.deletedAt)),
+    ],
+  );
+
+  const favoriteTable = sqliteTable(
+    name("favorite"),
+    {
+      id: integer("id").primaryKey({ autoIncrement: true }),
+      userId: text("user_id")
+        .notNull()
+        .references(() => userTable.id, { onDelete: "cascade" }),
+      tableId: integer("table_id")
+        .notNull()
+        .references(() => tableTable.id, { onDelete: "cascade" }),
+      createdAt: timestamps.createdAt,
+    },
+    (t) => [uniqueIndex(name("favorite_user_table")).on(t.userId, t.tableId)],
+  );
+
+  return {
+    settingTable,
+    resourceTable,
+    tableTable,
+    columnTable,
+    viewTable,
+    widgetTable,
+    favoriteTable,
+  };
+};
+
+export const {
+  settingTable,
+  resourceTable,
+  tableTable,
+  columnTable,
+  viewTable,
+  widgetTable,
+  favoriteTable,
+} = workspaceSchema();

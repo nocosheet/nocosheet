@@ -24,7 +24,8 @@ export const POST = defineHandler(async (c) => {
   if (await hasUsers()) throw new HTTPException(409, { message: "Setup is already complete." });
 
   const parsed = bodySchema.safeParse(await c.req.json().catch(() => null));
-  if (!parsed.success) throw new HTTPException(400, { message: "Invalid name, email or password." });
+  if (!parsed.success)
+    throw new HTTPException(400, { message: "Invalid name, email or password." });
   const { name, email, password } = parsed.data;
 
   const auth = c.get("__voidAuth" as never) as {

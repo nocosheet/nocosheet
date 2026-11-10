@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 
-import { TableIcon } from "lucide-react";
+import { PlusIcon, TableIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -20,14 +20,18 @@ export function TablesEmpty({ workspace }: { workspace: string }) {
           <EmptyMedia variant="icon">
             <TableIcon />
           </EmptyMedia>
-          <EmptyTitle>Tables are coming soon</EmptyTitle>
+          <EmptyTitle>No tables yet</EmptyTitle>
           <EmptyDescription>
-            Create tables, add records and build views here, so you can model your data without
-            code.
+            Create a table, define its columns and start modeling your data without code.
           </EmptyDescription>
         </EmptyHeader>
-        <Button variant="outline" render={<Link to="/w/$workspace" params={{ workspace }} />}>
-          Back to overview
+        <Button
+          render={
+            <Link to="/w/$workspace/tables/new" params={{ workspace }} search={{ step: 1 }} />
+          }
+        >
+          <PlusIcon />
+          New table
         </Button>
       </Empty>
     </Card>

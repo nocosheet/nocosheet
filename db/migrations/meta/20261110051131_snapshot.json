@@ -4,8 +4,8 @@
   "id": "aaa276b6-a056-4463-b667-cd82ccabf222",
   "prevId": "54acb6bd-1d89-42f9-8132-906b5f043e8c",
   "tables": {
-    "default__settings": {
-      "name": "default__settings",
+    "default__setting": {
+      "name": "default__setting",
       "columns": {
         "user_id": {
           "name": "user_id",
@@ -25,9 +25,9 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "default__settings_user_id_user_id_fk": {
-          "name": "default__settings_user_id_user_id_fk",
-          "tableFrom": "default__settings",
+        "default__setting_user_id_user_id_fk": {
+          "name": "default__setting_user_id_user_id_fk",
+          "tableFrom": "default__setting",
           "tableTo": "user",
           "columnsFrom": [
             "user_id"
