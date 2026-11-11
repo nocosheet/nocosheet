@@ -53,7 +53,9 @@ export function NavMain({ workspace }: { workspace: string }) {
           <SidebarMenuItem>
             <SidebarMenuButton
               tooltip="All tables"
-              isActive={isActive(`/w/${workspace}/tables`)}
+              isActive={
+                isActive(`/w/${workspace}/tables`, true) || isActive(`/w/${workspace}/tables/new`)
+              }
               render={<Link to="/w/$workspace/tables" params={{ workspace }} />}
             >
               <TableIcon />

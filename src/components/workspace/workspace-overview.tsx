@@ -130,8 +130,8 @@ export function WorkspaceOverview({ workspace }: { workspace: string }) {
           {tables.slice(0, 5).map(({ id, name, icon, groupName, updatedAt }) => (
             <Link
               key={id}
-              to="/w/$workspace/tables"
-              params={{ workspace }}
+              to="/w/$workspace/tables/$table"
+              params={{ workspace, table: String(id) }}
               className="flex items-center gap-3 p-4 transition-colors not-last:border-b hover:bg-accent/40 md:px-6"
             >
               <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">

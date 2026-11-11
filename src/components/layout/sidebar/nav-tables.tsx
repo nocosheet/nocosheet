@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/sidebar";
 import { NamedIcon } from "@/components/workspace/tables/named-icon";
 import { sidebarQueryOptions } from "@/data/workspace/sidebar";
+import { useIsActivePath } from "@/hooks/use-is-active-path";
 import { useWorkspace } from "@/hooks/use-workspace";
 
 import { TableMenu } from "./table-menu";
@@ -20,6 +21,7 @@ import { TableMenu } from "./table-menu";
 export function NavTables({ workspace }: { workspace: string }) {
   const { data } = useSuspenseQuery(sidebarQueryOptions(workspace));
   const { isAdmin } = useWorkspace();
+  const isActive = useIsActivePath();
 
   if (data.groups.length === 0) {
     if (!isAdmin) return null;
@@ -55,7 +57,13 @@ export function NavTables({ workspace }: { workspace: string }) {
             <SidebarMenuItem key={table.id}>
               <SidebarMenuButton
                 tooltip={table.name}
-                render={<Link to="/w/$workspace/tables" params={{ workspace }} />}
+                isActive={isActive(`/w/${workspace}/tables/${table.id}`)}
+                render={
+                  <Link
+                    to="/w/$workspace/tables/$table"
+                    params={{ workspace, table: String(table.id) }}
+                  />
+                }
               >
                 <NamedIcon name={table.icon} />
                 <span>{table.name}</span>

@@ -17,7 +17,7 @@ function AppLayout() {
   return (
     <SidebarProvider defaultOpen={readSidebarDefaultOpen()}>
       <WorkspaceSidebar workspace={workspace} user={session!.user} />
-      <SidebarInset>
+      <SidebarInset className="min-w-0">
         <ImpersonationBanner />
         <Outlet />
       </SidebarInset>

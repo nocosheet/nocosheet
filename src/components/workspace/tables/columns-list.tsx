@@ -43,14 +43,13 @@ export function ColumnsList<T extends ListColumn>({
     <div className="divide-y rounded-lg border">
       {columns.map((column) => {
         const format = FORMATS[column.format as ColumnFormat];
-        const FormatIcon = format.icon;
         return (
           <div key={column.id} className="flex items-center gap-3 px-4 py-3">
-            {column.icon ? (
-              <NamedIcon name={column.icon} className="size-4 shrink-0 text-muted-foreground" />
-            ) : (
-              <FormatIcon className="size-4 shrink-0 text-muted-foreground" />
-            )}
+            <NamedIcon
+              name={column.icon}
+              fallback={format.icon}
+              className="size-4 shrink-0 text-muted-foreground"
+            />
             <div className="flex min-w-0 flex-1 flex-col">
               <span className="truncate font-medium text-sm">{column.name}</span>
               <span className="truncate text-muted-foreground text-xs">

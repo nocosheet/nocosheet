@@ -2,6 +2,12 @@ export const workspaceKeys = {
   all: ["workspace"] as const,
   members: () => [...workspaceKeys.all, "members"] as const,
   tables: () => [...workspaceKeys.all, "tables"] as const,
+  records: (id: number, query: object) => [...workspaceKeys.table(id), "records", query] as const,
+  record: (id: number, recordId: string) =>
+    [...workspaceKeys.table(id), "record", recordId] as const,
+  recordsExport: (id: number) => [...workspaceKeys.table(id), "export"] as const,
+  recordOptions: (id: number, term: string) =>
+    [...workspaceKeys.table(id), "options", term] as const,
   sidebar: () => [...workspaceKeys.tables(), "sidebar"] as const,
   tableList: (query: object) => [...workspaceKeys.tables(), "list", query] as const,
   table: (id: number) => [...workspaceKeys.tables(), id] as const,

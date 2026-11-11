@@ -80,7 +80,7 @@ export function SearchDialog({ workspace }: { workspace: string }) {
         value: `table-${table.id}`,
         label: table.name,
         tableIcon: table.icon,
-        path: "/tables",
+        path: `/tables/${table.id}`,
       })),
     },
     { value: "Settings", items: settings },

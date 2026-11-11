@@ -14,7 +14,7 @@ function TableName({ id, name }: { id: number; name: string }) {
   const { id: workspace } = useWorkspace();
   return (
     <Link
-      to="/w/$workspace/tables/$table/definition"
+      to="/w/$workspace/tables/$table"
       params={{ workspace, table: String(id) }}
       className="truncate font-medium hover:underline"
     >

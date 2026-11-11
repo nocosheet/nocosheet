@@ -1,0 +1,69 @@
+.records-grid {
+  --rdg-font-size: 0.875rem;
+  --rdg-color: var(--foreground);
+  --rdg-background-color: var(--background);
+  --rdg-border-color: var(--border);
+  --rdg-header-background-color: color-mix(in srgb, var(--foreground) 3%, var(--background));
+  --rdg-row-hover-background-color: color-mix(in srgb, var(--foreground) 3.5%, var(--background));
+  --rdg-selection-color: var(--ring);
+  --rdg-selection-width: 2px;
+
+  position: absolute;
+  inset: 0;
+  block-size: 100%;
+  inline-size: 100%;
+  border: 0;
+  border-block-start: 1px solid var(--border);
+  font-family: inherit;
+  scrollbar-width: thin;
+}
+
+.records-grid .rdg-header-row {
+  color: var(--muted-foreground);
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.records-grid .rdg-cell {
+  display: flex;
+  align-items: center;
+  padding-inline: 0.75rem;
+}
+
+.records-grid .records-row-number {
+  justify-content: flex-start;
+  gap: 0.5rem;
+  padding-inline: 0.75rem;
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.records-grid .records-row-index {
+  display: inline-flex;
+  inline-size: 1rem;
+  justify-content: center;
+}
+
+.records-grid .records-row-check,
+.records-grid .records-row-open {
+  display: none;
+}
+
+.records-grid .rdg-row:hover .records-row-index,
+.records-grid .records-row-selected .records-row-index {
+  display: none;
+}
+
+.records-grid .rdg-row:hover .records-row-open {
+  display: inline-flex;
+}
+
+.records-grid .rdg-row:hover .records-row-check,
+.records-grid .records-row-selected .records-row-check {
+  display: inline-flex;
+}
+
+.records-grid .records-row-selected {
+  --rdg-background-color: color-mix(in srgb, var(--primary) 6%, var(--background));
+}

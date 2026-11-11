@@ -222,3 +222,15 @@ export const RELATION_ON_DELETE = [
 export type RelationOnDelete = (typeof RELATION_ON_DELETE)[number]["value"];
 
 export type SelectChoice = { label: string; value: string };
+
+export const choiceLabel = (options: Record<string, unknown>, value: string) =>
+  ((options.choices as SelectChoice[] | undefined) ?? []).find((choice) => choice.value === value)
+    ?.label ?? value;
+
+export const choiceIndex = (options: Record<string, unknown>, value: string) =>
+  Math.max(
+    0,
+    ((options.choices as SelectChoice[] | undefined) ?? []).findIndex(
+      (choice) => choice.value === value,
+    ),
+  );

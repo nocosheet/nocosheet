@@ -1,5 +1,5 @@
 import { hashPassword } from "better-auth/crypto";
-import { randomUUID } from "node:crypto";
+import { createHash } from "node:crypto";
 
 import { accountTable, userTable } from "../../.void/better-auth-schema";
 import { at, type SeedDb, type SeedRow } from "./helpers";
@@ -23,10 +23,10 @@ const MEMBERS_WITH_ACCOUNTS = new Set([
   "diego.alvarez@example.com",
 ]);
 
-const newId = () => randomUUID().replaceAll("-", "");
+const stableId = (key: string) => createHash("sha256").update(key).digest("hex").slice(0, 32);
 
 async function createAccount(db: SeedDb, account: Account) {
-  const id = newId();
+  const id = stableId(`user:${account.email}`);
 
   await db.insert(userTable).values({
     id,
@@ -40,7 +40,7 @@ async function createAccount(db: SeedDb, account: Account) {
     updatedAt: account.joined,
   });
   await db.insert(accountTable).values({
-    id: newId(),
+    id: stableId(`account:${account.email}`),
     accountId: id,
     providerId: "credential",
     userId: id,

@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/sidebar";
 import { NamedIcon } from "@/components/workspace/tables/named-icon";
 import { sidebarQueryOptions } from "@/data/workspace/sidebar";
+import { useIsActivePath } from "@/hooks/use-is-active-path";
 
 import { TableMenu } from "./table-menu";
 
@@ -23,6 +24,7 @@ const VISIBLE = 3;
 export function NavFavorites({ workspace }: { workspace: string }) {
   const [expanded, setExpanded] = useState(false);
   const { data } = useSuspenseQuery(sidebarQueryOptions(workspace));
+  const isActive = useIsActivePath();
   const favorites = data.favorites;
   const visible = expanded ? favorites : favorites.slice(0, VISIBLE);
 
@@ -37,7 +39,13 @@ export function NavFavorites({ workspace }: { workspace: string }) {
             <SidebarMenuItem key={table.id}>
               <SidebarMenuButton
                 tooltip={table.name}
-                render={<Link to="/w/$workspace/tables" params={{ workspace }} />}
+                isActive={isActive(`/w/${workspace}/tables/${table.id}`)}
+                render={
+                  <Link
+                    to="/w/$workspace/tables/$table"
+                    params={{ workspace, table: String(table.id) }}
+                  />
+                }
               >
                 <NamedIcon name={table.icon} />
                 <span>{table.name}</span>
