@@ -44,6 +44,7 @@ export const recordsSearchParams = {
   q: parseAsString.withDefault(""),
   filters: filtersParser,
   join: parseAsStringLiteral(["and", "or"] as const).withDefault("and"),
+  group: parseAsString,
 };
 
 export type RecordsQuery = inferParserType<typeof recordsSearchParams>;
@@ -56,6 +57,7 @@ export const resolveRecordsQuery = (search: Partial<RecordsQuery>) => ({
   q: search.q ?? recordsSearchParams.q.defaultValue,
   filters: (search.filters ?? []) as FilterCondition[],
   join: search.join ?? recordsSearchParams.join.defaultValue,
+  group: search.group ?? null,
 });
 
 export type ResolvedRecordsQuery = ReturnType<typeof resolveRecordsQuery>;
@@ -87,6 +89,7 @@ export const recordsApiSchema = z.object({
   order: z.enum(["asc", "desc"]).optional(),
   q: z.string().max(100).optional(),
   join: z.enum(["and", "or"]).optional(),
+  group: z.string().max(64).optional(),
   filters: z
     .string()
     .optional()

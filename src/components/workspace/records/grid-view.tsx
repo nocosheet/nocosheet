@@ -22,6 +22,7 @@ import { buildViewerColumns } from "./columns";
 import { DeleteRecordsDialog } from "./delete-records-dialog";
 import { RecordExport } from "./record-export";
 import { RecordFilters } from "./record-filters";
+import { RecordGroup } from "./record-group";
 import { RecordsGrid, type ViewerRow } from "./records-grid";
 import { useUpdateCell } from "./use-update-cell";
 
@@ -41,8 +42,10 @@ export function GridView({
   const resolved = resolveRecordsQuery(urlQuery);
   const sortable = new Set(viewerColumns.filter((column) => column.sortable).map((c) => c.key));
   const filterable = new Set(viewerColumns.filter((column) => column.filterable).map((c) => c.key));
+  const groupable = new Set(viewerColumns.filter((column) => column.groupable).map((c) => c.key));
   const query = {
     ...resolved,
+    group: resolved.group && groupable.has(resolved.group) ? resolved.group : null,
     sort: resolved.sort && sortable.has(resolved.sort) ? resolved.sort : null,
     filters: resolved.filters.filter((filter) => filterable.has(filter.column)),
   };
@@ -56,6 +59,18 @@ export function GridView({
   });
   const rows = (data?.rows ?? []) as ViewerRow[];
   const total = data?.total ?? 0;
+  const groupColumn = viewerColumns.find((column) => column.key === query.group) ?? null;
+  const groups = data && "groups" in data && data.group === query.group ? data.groups : undefined;
+  const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(new Set());
+  const toggleGroup = useCallback(
+    (key: string) =>
+      setCollapsed((current) => {
+        const next = new Set(current);
+        if (!next.delete(key)) next.add(key);
+        return next;
+      }),
+    [],
+  );
 
   const ownerOf = (row: ViewerRow) => (row.created_by as { id?: string } | null | undefined)?.id;
   const canEditRow = useCallback(
@@ -186,6 +201,14 @@ export function GridView({
               void setUrlQuery({ filters: filters.length ? filters : null, join, page: 1 })
             }
           />
+          <RecordGroup
+            columns={viewerColumns}
+            value={query.group}
+            onChange={(group) => {
+              setCollapsed(new Set());
+              void setUrlQuery({ group, page: 1 });
+            }}
+          />
           <div className="ms-auto flex items-center gap-2">
             <DataTableViewOptions table={grid} />
           </div>
@@ -213,6 +236,10 @@ export function GridView({
           workspace={workspace}
           canEdit={access.can("update", tableId)}
           canEditRow={canEditRow}
+          groupBy={groupColumn}
+          groups={groups}
+          collapsed={collapsed}
+          onToggleGroup={toggleGroup}
           onOpenRecord={onOpenRecord}
           onCellChange={(original, draft, column) => void updateCell(original, draft, column)}
           sort={query.sort}

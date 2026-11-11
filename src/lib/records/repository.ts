@@ -2,10 +2,11 @@ import { columnTable, tableTable } from "@db/schema";
 import { and, db, eq, inArray, isNull, sql } from "void/db";
 import { sqliteTable, text } from "void/schema-d1";
 
-import { SEARCHABLE_FORMATS } from "../tables/formats";
+import { SEARCHABLE_FORMATS, type SelectChoice } from "../tables/formats";
 import { physicalTableName, quoteIdent } from "../tables/naming";
 import type { Column, Table } from "../tables/repository";
 import { type FilterCondition, type FilterKind, filterKind } from "./filters";
+import { groupKeyOf, isGroupableSystemKey } from "./grouping";
 import type { ResolvedRecordsQuery } from "./query";
 import { shapeRecord } from "./shape";
 import type { ParsedValue } from "./values";
@@ -118,6 +119,7 @@ async function recordSource(workspace: string, table: Table, columns: Column[]) 
       });
   }
 
+  const labelled = new Set<string>();
   const selects = ['t."id" as "id"'];
   selects.push('t."created_at" as "created_at"', 't."updated_at" as "updated_at"');
   for (const name of ["created_by", "updated_by"])
@@ -129,14 +131,17 @@ async function recordSource(workspace: string, table: Table, columns: Column[]) 
     selects.push(`t.${quoteIdent(column.columnName)} as ${quoteIdent(column.columnName)}`);
     if (column.format === "relation") {
       const target = targets.get(Number((column.options as { tableId?: number }).tableId));
-      if (target)
+      if (target) {
+        labelled.add(column.columnName);
         selects.push(
           `(select cast(r.${quoteIdent(target.label)} as text) from ${quoteIdent(target.physicalName)} r where r."id" = t.${quoteIdent(column.columnName)}) as ${quoteIdent(`${column.columnName}__label`)}`,
         );
+      }
     }
   }
 
   return {
+    labelled,
     select: raw(selects.join(", ")),
     from: sql`${raw(quoteIdent(physicalTableName(workspace, table.tableName)))} t`,
   };
@@ -186,6 +191,55 @@ function recordsOrder(columns: Column[], query: ResolvedRecordsQuery) {
   return sql`${col(column.columnName)} is null, ${col(column.columnName)}${collate} ${direction}, t."id" asc`;
 }
 
+type GroupSpec = { column: string; format: string; key: Fragment; order: Fragment };
+
+function groupSpec(columns: Column[], name: string, labelled: Set<string>): GroupSpec | undefined {
+  const target = col(name);
+
+  if (isGroupableSystemKey(name)) {
+    const label = raw(quoteIdent(`${name}__label`));
+    return {
+      column: name,
+      format: "user",
+      key: target,
+      order: sql`${label} is null, ${label} collate nocase, ${target}`,
+    };
+  }
+
+  const column = columns.find((item) => item.columnName === name);
+  if (!column) return undefined;
+
+  switch (column.format) {
+    case "single_select": {
+      const choices = (column.options as { choices?: SelectChoice[] }).choices ?? [];
+      const rank = choices.length
+        ? sql`case ${target} ${sql.join(
+            choices.map((choice, index) => sql`when ${choice.value} then ${index}`),
+            sql` `,
+          )} else ${choices.length} end`
+        : sql`0`;
+      return { column: name, format: column.format, key: target, order: sql`${rank}, ${target}` };
+    }
+    case "checkbox": {
+      const key = sql`coalesce(${target}, 0)`;
+      return { column: name, format: column.format, key, order: key };
+    }
+    case "relation": {
+      const label = raw(quoteIdent(`${name}__label`));
+      return {
+        column: name,
+        format: column.format,
+        key: target,
+        order: labelled.has(name)
+          ? sql`${target} is null, ${label} is null, ${label} collate nocase, ${target}`
+          : sql`${target} is null, ${target}`,
+      };
+    }
+    default:
+      return undefined;
+  }
+}
+
 export async function findRecords(
   workspace: string,
   table: Table,
@@ -193,17 +247,30 @@ export async function findRecords(
   query: ResolvedRecordsQuery,
   ownerId?: string,
 ) {
-  const { select, from } = await recordSource(workspace, table, columns);
+  const { select, from, labelled } = await recordSource(workspace, table, columns);
   const condition = filterWhere(columns, query, ownerId);
-  const orderBy = recordsOrder(columns, query);
+  const grouping = query.group ? groupSpec(columns, query.group, labelled) : undefined;
+  const order = recordsOrder(columns, query);
+  const orderBy = grouping ? sql`${grouping.order}, ${order}` : order;
+  const columnsSql = grouping
+    ? sql`${select}, count(*) over (partition by ${grouping.key}) as "__group_count"`
+    : select;
 
   const [rows, [{ n: total }]] = await Promise.all([
     db.all<Record<string, unknown>>(
-      sql`select ${select} from ${from} where ${condition} order by ${orderBy} limit ${query.pageSize} offset ${(query.page - 1) * query.pageSize}`,
+      sql`select ${columnsSql} from ${from} where ${condition} order by ${orderBy} limit ${query.pageSize} offset ${(query.page - 1) * query.pageSize}`,
     ),
     db.all<{ n: number }>(sql`select count(*) as n from ${from} where ${condition}`),
   ]);
-  return { total: Number(total), rows: rows.map((row) => shapeRecord(row, columns)) };
+
+  const shaped = rows.map((row) => shapeRecord(row, columns));
+  if (!grouping) return { total: Number(total), rows: shaped };
+
+  const groups: Record<string, number> = {};
+  rows.forEach((row, index) => {
+    groups[groupKeyOf(grouping.format, shaped[index][grouping.column])] = Number(row.__group_count);
+  });
+  return { total: Number(total), rows: shaped, group: grouping.column, groups };
 }
 
 export async function findRecord(

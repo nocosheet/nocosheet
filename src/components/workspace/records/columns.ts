@@ -1,6 +1,7 @@
 import { CalendarClockIcon, CalendarIcon, HashIcon, UserIcon, type LucideIcon } from "lucide-react";
 
 import { filterKind, isSortableFormat } from "@/lib/records/filters";
+import { isGroupableColumn, isGroupableFormat, isGroupableSystemKey } from "@/lib/records/grouping";
 import { isEditableColumn } from "@/lib/records/values";
 import { FORMATS, SEARCHABLE_FORMATS, type ColumnFormat } from "@/lib/tables/formats";
 
@@ -16,6 +17,8 @@ export type ViewerColumn = {
   width: number;
   sortable: boolean;
   filterable: boolean;
+  groupable: boolean;
+  groupFormat: boolean;
   searchable: boolean;
   title: boolean;
   hiddenByDefault: boolean;
@@ -86,6 +89,8 @@ export function buildViewerColumns(table: TableDetail): ViewerColumn[] {
       width: title ? Math.max(WIDTHS[format] ?? 200, 240) : (WIDTHS[format] ?? 180),
       sortable: column.isSortable && isSortableFormat(format),
       filterable: column.isFilterable && filterKind(format) !== null,
+      groupable: isGroupableColumn(column),
+      groupFormat: isGroupableFormat(format),
       searchable: column.isSearchable && SEARCHABLE_FORMATS.includes(format),
       title,
       hiddenByDefault: column.isHidden,
@@ -113,6 +118,8 @@ export function buildViewerColumns(table: TableDetail): ViewerColumn[] {
     width,
     sortable,
     filterable: false,
+    groupable: isGroupableSystemKey(key),
+    groupFormat: isGroupableSystemKey(key),
     searchable: false,
     title: false,
     hiddenByDefault: true,

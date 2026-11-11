@@ -67,3 +67,35 @@
 .records-grid .records-row-selected {
   --rdg-background-color: color-mix(in srgb, var(--primary) 6%, var(--background));
 }
+
+.records-grid .records-group-row {
+  --rdg-background-color: color-mix(in srgb, var(--foreground) 4%, var(--background));
+  --rdg-row-hover-background-color: color-mix(in srgb, var(--foreground) 7%, var(--background));
+}
+
+.records-grid .records-group-row .rdg-cell {
+  padding-inline: 0;
+}
+
+.records-grid .records-group-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  inline-size: 100%;
+  block-size: 100%;
+  padding-inline: 0.75rem;
+  color: var(--foreground);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-align: start;
+  cursor: pointer;
+}
+
+.records-grid .records-group-row .rdg-cell[aria-selected="true"] {
+  outline: none;
+}
+
+.records-grid .records-group-toggle:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+}
