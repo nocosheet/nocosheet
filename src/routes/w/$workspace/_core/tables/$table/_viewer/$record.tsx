@@ -7,6 +7,7 @@ import { recordQueryOptions } from "@/data/workspace/records";
 import { useAccess } from "@/hooks/use-access";
 
 export const Route = createFileRoute("/w/$workspace/_core/tables/$table/_viewer/$record")({
+  pendingComponent: () => null,
   loader: ({ context, params }) => {
     void context.queryClient
       .query(recordQueryOptions(params.workspace, Number(params.table), params.record))

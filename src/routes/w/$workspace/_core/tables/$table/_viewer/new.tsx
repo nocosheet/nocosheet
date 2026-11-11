@@ -4,6 +4,7 @@ import { CreateRecordSheet } from "@/components/workspace/records/record-sheet/c
 import { useAccess } from "@/hooks/use-access";
 
 export const Route = createFileRoute("/w/$workspace/_core/tables/$table/_viewer/new")({
+  pendingComponent: () => null,
   component: NewRecordPage,
 });
 

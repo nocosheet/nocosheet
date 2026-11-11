@@ -4,6 +4,7 @@ import { RestoreRecordSheet } from "@/components/workspace/records/record-sheet/
 import { trashEntryQueryOptions } from "@/data/workspace/trash";
 
 export const Route = createFileRoute("/w/$workspace/_core/tables/$table/trash/$entry")({
+  pendingComponent: () => null,
   loader: ({ context, params }) => {
     void context.queryClient
       .query(trashEntryQueryOptions(params.workspace, Number(params.table), Number(params.entry)))
