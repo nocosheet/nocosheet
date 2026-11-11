@@ -62,6 +62,7 @@ const textOf = (value: unknown) =>
 function RecordFields({
   form,
   workspace,
+  tableId,
   columns,
   record,
   disabled,
@@ -71,6 +72,7 @@ function RecordFields({
 }: {
   form: RecordFormApi;
   workspace: string;
+  tableId: number;
   columns: ViewerColumn[];
   record?: RecordData;
   disabled: boolean;
@@ -127,6 +129,7 @@ function RecordFields({
                     <RecordInput
                       id={`record-${field.name}`}
                       workspace={workspace}
+                      tableId={tableId}
                       column={column}
                       value={field.state.value as FormValue}
                       current={record?.[column.key]}
@@ -156,6 +159,7 @@ function RecordFields({
 export function RecordForm({
   form,
   workspace,
+  tableId,
   tableName,
   columns,
   record,
@@ -169,6 +173,7 @@ export function RecordForm({
 }: {
   form: RecordFormApi;
   workspace: string;
+  tableId: number;
   tableName: string;
   columns: ViewerColumn[];
   record?: Record<string, unknown>;
@@ -208,6 +213,7 @@ export function RecordForm({
       <RecordFields
         form={form}
         workspace={workspace}
+        tableId={tableId}
         columns={columns}
         record={record}
         disabled={disabled}

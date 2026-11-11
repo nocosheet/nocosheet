@@ -49,6 +49,7 @@ function CreateForm({
     <RecordForm
       form={form}
       workspace={workspace}
+      tableId={tableId}
       tableName={tableName}
       columns={columns}
       error={create.error}

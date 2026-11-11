@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { FILE_MAX_COUNT, fileValueSchema, isImageType } from "../files";
 import type { ColumnFormat, SelectChoice } from "../tables/formats";
 
 type ColumnLike = {
@@ -9,7 +10,7 @@ type ColumnLike = {
   generatedExpression: string | null;
 };
 
-const NOT_EDITABLE: ColumnFormat[] = ["file", "image", "binary"];
+const NOT_EDITABLE: ColumnFormat[] = ["binary"];
 
 export const isEditableColumn = (column: Pick<ColumnLike, "format" | "generatedExpression">) =>
   !column.generatedExpression && !NOT_EDITABLE.includes(column.format as ColumnFormat);
@@ -62,6 +63,17 @@ function baseSchema(column: ColumnLike): z.ZodType {
       return z.union([z.number().int(), z.string().min(1).max(64)]);
     case "json":
       return z.unknown();
+    case "file":
+    case "image": {
+      const max = options.multiple === true ? FILE_MAX_COUNT : 1;
+      const item =
+        format === "image"
+          ? fileValueSchema.refine((file) => isImageType(file.type), "Only images are allowed")
+          : fileValueSchema;
+      return z
+        .array(item)
+        .max(max, max === 1 ? "Only one file is allowed" : `At most ${max} files`);
+    }
     default:
       return z.string().max(10_000, "Too long");
   }
@@ -88,7 +100,8 @@ export const recordPatchSchema = z.object({
 export function toDbValue(format: string, value: unknown) {
   if (value === null || value === undefined) return null;
   if (format === "checkbox") return value ? 1 : 0;
-  if (format === "multi_select" || format === "json") return JSON.stringify(value);
+  if (format === "multi_select" || format === "json" || format === "file" || format === "image")
+    return JSON.stringify(value);
   return value as string | number;
 }
 

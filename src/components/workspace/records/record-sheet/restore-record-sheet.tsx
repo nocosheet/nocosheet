@@ -76,6 +76,7 @@ function RestoreForm({
     <RecordForm
       form={form}
       workspace={workspace}
+      tableId={tableId}
       tableName={tableName}
       columns={columns}
       record={record}

@@ -23,3 +23,10 @@ export async function authorizeExport(user: User, tableId: number) {
   await authorize(user, "export", tableId);
   return authorize(user, "read", tableId);
 }
+
+export async function authorizeAny(user: User, actions: Action[], tableId: number) {
+  const access: Access = await loadAccess(user);
+  const action = actions.find((item) => access.scope(item, tableId) !== "none");
+  if (!action) throw httpError(403, DENIED[actions[0]]);
+  return { action };
+}

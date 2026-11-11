@@ -23,11 +23,13 @@ import type { FormValue } from "@/lib/records/form";
 import type { SelectChoice } from "@/lib/tables/formats";
 
 import type { ViewerColumn } from "./columns";
+import { FileInput } from "./file-input";
 import { RelationCombobox } from "./relation-combobox";
 
 type InputProps = {
   id: string;
   workspace: string;
+  tableId: number;
   column: ViewerColumn;
   value: FormValue;
   current: unknown;
@@ -169,7 +171,7 @@ export function RecordInput(props: InputProps) {
       );
     case "multi_select": {
       const items = choices.map((choice) => ({ value: choice.value, label: choice.label }));
-      const selected = Array.isArray(value) ? value : [];
+      const selected = Array.isArray(value) ? (value as string[]) : [];
       return (
         <Combobox
           multiple
@@ -211,6 +213,9 @@ export function RecordInput(props: InputProps) {
     }
     case "relation":
       return <RelationInput {...props} />;
+    case "file":
+    case "image":
+      return <FileInput {...props} />;
     default:
       return input("text");
   }

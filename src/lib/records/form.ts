@@ -1,3 +1,5 @@
+import { asFiles, type FileValue } from "../files";
+
 type FormColumn = {
   key: string;
   format: string;
@@ -6,7 +8,7 @@ type FormColumn = {
   defaultValue: string | null;
 };
 
-export type FormValue = string | boolean | string[];
+export type FormValue = string | boolean | string[] | FileValue[];
 export type FormValues = Record<string, FormValue>;
 
 const NUMBER_FORMATS = ["integer", "decimal", "percent", "currency", "rating", "duration"];
@@ -18,13 +20,20 @@ const toLocalInput = (date: Date) =>
 
 function toFormValue(column: FormColumn, value: unknown): FormValue {
   if (value === null || value === undefined)
-    return column.format === "checkbox" ? false : column.format === "multi_select" ? [] : "";
+    return column.format === "checkbox"
+      ? false
+      : ["multi_select", "file", "image"].includes(column.format)
+        ? []
+        : "";
 
   switch (column.format) {
     case "checkbox":
       return Boolean(value);
     case "multi_select":
       return Array.isArray(value) ? value.map(String) : [];
+    case "file":
+    case "image":
+      return asFiles(value);
     case "datetime":
     case "datetime_tz": {
       const date = new Date(value as number | string);
@@ -48,7 +57,7 @@ export const toDefaultFormValues = (columns: FormColumn[]) =>
       column.key,
       column.format === "checkbox"
         ? column.defaultValue === "true"
-        : column.format === "multi_select"
+        : ["multi_select", "file", "image"].includes(column.format)
           ? []
           : (column.defaultValue ?? ""),
     ]),
@@ -62,6 +71,8 @@ export const toFormValues = (columns: FormColumn[], record: Record<string, unkno
 function toPayloadValue(column: FormColumn, value: FormValue): unknown {
   if (column.format === "checkbox") return value;
   if (column.format === "multi_select") return value;
+  if (column.format === "file" || column.format === "image")
+    return Array.isArray(value) && value.length > 0 ? value : null;
   const text = typeof value === "string" ? value.trim() : "";
   if (text === "") return null;
 

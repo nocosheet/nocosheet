@@ -136,3 +136,28 @@ export const createRecordMutationOptions = mutationOptions({
       }),
     ),
 });
+
+export const uploadFileMutationOptions = mutationOptions({
+  mutationFn: ({
+    workspace,
+    tableId,
+    column,
+    file,
+  }: {
+    workspace: string;
+    tableId: number;
+    column: string;
+    file: File;
+  }) => {
+    const body = new FormData();
+    body.set("file", file);
+    body.set("column", column);
+    return unwrapFetch(
+      fetch("/api/w/:workspace/tables/:id/files", {
+        method: "POST",
+        params: { workspace, id: String(tableId) },
+        body,
+      }),
+    );
+  },
+});

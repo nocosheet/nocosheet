@@ -915,6 +915,62 @@ const posts: SeedRow[] = postSeeds.map(
   }),
 );
 
+const photo = (seed: string, width = 640, height = 480) => ({
+  url: `https://picsum.photos/seed/${seed}/${width}/${height}`,
+  name: `${seed}.jpg`,
+  size: 48_000 + seed.length * 1_700,
+  type: "image/jpeg",
+});
+
+const pdf = (name: string, size: number) => ({
+  url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+  name,
+  size,
+  type: "application/pdf",
+});
+
+const assets: SeedRow[] = [
+  {
+    Name: "Primary logo",
+    Category: "Logo",
+    Preview: [photo("logo-primary")],
+    Files: [pdf("logo-guidelines.pdf", 482_000)],
+    Notes: "Use on light backgrounds only.",
+  },
+  {
+    Name: "Dark logo",
+    Category: "Logo",
+    Preview: [photo("logo-dark")],
+    Files: [],
+    Notes: "Use on dark backgrounds.",
+  },
+  {
+    Name: "Homepage hero",
+    Category: "Photography",
+    Preview: [photo("hero-home", 960, 540)],
+    Files: [pdf("hero-usage-rights.pdf", 126_000)],
+    Notes: "Licensed for web and print.",
+  },
+  {
+    Name: "Team offsite",
+    Category: "Photography",
+    Preview: [photo("offsite")],
+    Files: [],
+  },
+  {
+    Name: "Brand guidelines",
+    Category: "Document",
+    Files: [pdf("brand-guidelines.pdf", 2_480_000), pdf("typography.pdf", 640_000)],
+    Notes: "Version 3, updated this quarter.",
+  },
+  {
+    Name: "Product screenshots",
+    Category: "Screenshot",
+    Preview: [photo("screens-dashboard", 960, 600)],
+    Files: [pdf("release-notes.pdf", 310_000)],
+  },
+];
+
 const col = {
   text: (name: string, extra: Partial<SeedColumn> = {}): SeedColumn => ({
     name,
@@ -991,6 +1047,18 @@ const col = {
     name,
     format: "multi_select",
     options: choices(...labels),
+    ...extra,
+  }),
+  file: (name: string, extra: Partial<SeedColumn> = {}): SeedColumn => ({
+    name,
+    format: "file",
+    options: { multiple: true },
+    ...extra,
+  }),
+  image: (name: string, extra: Partial<SeedColumn> = {}): SeedColumn => ({
+    name,
+    format: "image",
+    options: { multiple: false },
     ...extra,
   }),
   link: (name: string, relation: string, extra: Partial<SeedColumn> = {}): SeedColumn => ({
@@ -1178,5 +1246,20 @@ export const tables: SeedTable[] = [
       col.rating("Quality"),
     ],
     rows: posts,
+  },
+  {
+    name: "Brand Assets",
+    icon: "image",
+    group: "Marketing",
+    description: "Logos, photography and documents with their files.",
+    title: "Name",
+    columns: [
+      col.text("Name", { required: true }),
+      col.select("Category", ["Logo", "Photography", "Document", "Screenshot"]),
+      col.image("Preview"),
+      col.file("Files"),
+      col.long("Notes"),
+    ],
+    rows: assets,
   },
 ];

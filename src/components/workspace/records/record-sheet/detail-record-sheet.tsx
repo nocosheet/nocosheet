@@ -14,12 +14,14 @@ import { useRecordForm } from "./use-record-form";
 
 function DetailForm({
   workspace,
+  tableId,
   tableName,
   recordId,
   record,
   columns,
 }: {
   workspace: string;
+  tableId: number;
   tableName: string;
   recordId: string;
   record: Record<string, unknown>;
@@ -31,6 +33,7 @@ function DetailForm({
     <RecordForm
       form={form}
       workspace={workspace}
+      tableId={tableId}
       tableName={tableName}
       columns={columns}
       record={record}
@@ -69,6 +72,7 @@ export function DetailRecordSheet({
           <DetailForm
             key={recordId}
             workspace={workspace}
+            tableId={tableId}
             tableName={table.name}
             recordId={recordId}
             record={record}
