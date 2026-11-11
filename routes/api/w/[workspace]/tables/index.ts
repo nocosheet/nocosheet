@@ -1,7 +1,8 @@
 import { columnTable, resourceTable, tableTable } from "@db/schema";
+import { HTTPException } from "hono/http-exception";
 import { defineHandler } from "void";
 import { requireAuth } from "void/auth";
-import { and, asc, count, db, desc, isNull, or, sql } from "void/db";
+import { and, asc, count, db, desc, eq, isNotNull, isNull, or, sql } from "void/db";
 
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { buildCreateTable } from "@/lib/tables/ddl";
@@ -72,6 +73,16 @@ export const POST = defineHandler(
     const physicalName = physicalTableName(workspace, tableName);
     const createTable = buildCreateTable({ ...body, physicalName });
 
+    const [trashed] = await db
+      .select({ name: tableTable.name })
+      .from(tableTable)
+      .where(and(eq(tableTable.tableName, tableName), isNotNull(tableTable.deletedAt)))
+      .limit(1);
+    if (trashed)
+      throw new HTTPException(409, {
+        message: `A deleted table named "${trashed.name}" is still in the trash. Restore it or delete it forever from the trash first.`,
+      });
+
     try {
       const [, , inserted] = await db.batch([
         db.run(sql.raw(createTable)),
@@ -86,10 +97,6 @@ export const POST = defineHandler(
             icon: body.icon,
             groupName: body.groupName,
             idType: body.idType,
-            hasCreatedAt: body.hasCreatedAt,
-            hasCreatedBy: body.hasCreatedBy,
-            hasUpdatedAt: body.hasUpdatedAt,
-            hasUpdatedBy: body.hasUpdatedBy,
             position: sql`(select coalesce(max(position), -1) + 1 from ${tableTable})`,
             createdBy: user.id,
           })
@@ -105,7 +112,10 @@ export const POST = defineHandler(
 export const DELETE = defineHandler(
   requireAdmin,
   defineHandler.withValidator({ body: tablesDeleteSchema })(async (c, { body }) => {
-    await deleteTables(c.get("workspaceId"), body.ids);
+    await deleteTables(c.get("workspaceId"), body.ids, {
+      userId: requireAuth(c).id,
+      permanent: body.permanent,
+    });
     return { ok: true };
   }),
 );

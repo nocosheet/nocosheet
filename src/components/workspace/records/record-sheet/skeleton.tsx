@@ -3,18 +3,18 @@ import { SheetDescription, SheetHeader, SheetPanel, SheetTitle } from "@/compone
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function RecordSheetSkeleton({
+  title,
   tableName,
-  recordId,
   error,
 }: {
+  title: string;
   tableName: string;
-  recordId: string;
   error?: Error | null;
 }) {
   return (
     <>
       <SheetHeader>
-        <SheetTitle>Record {recordId}</SheetTitle>
+        <SheetTitle>{title}</SheetTitle>
         <SheetDescription>{tableName}</SheetDescription>
       </SheetHeader>
       <SheetPanel>

@@ -66,6 +66,8 @@ function RecordFields({
   record,
   disabled,
   error,
+  fieldErrors,
+  onFieldEdit,
 }: {
   form: RecordFormApi;
   workspace: string;
@@ -73,6 +75,8 @@ function RecordFields({
   record?: RecordData;
   disabled: boolean;
   error?: Error | null;
+  fieldErrors?: Record<string, string>;
+  onFieldEdit?: (key: string) => void;
 }) {
   const fields = columns.filter((column) => !SYSTEM_FORMATS.includes(column.format));
 
@@ -112,7 +116,11 @@ function RecordFields({
           return (
             <form.Field key={column.key} name={column.key}>
               {(field) => {
-                const invalid = field.state.meta.errors.length > 0;
+                const messages = [
+                  ...(fieldErrors?.[column.key] ? [fieldErrors[column.key]] : []),
+                  ...field.state.meta.errors.map((item) => String(item)),
+                ];
+                const invalid = messages.length > 0;
                 return (
                   <Field name={field.name} invalid={invalid}>
                     {label}
@@ -123,15 +131,16 @@ function RecordFields({
                       value={field.state.value as FormValue}
                       current={record?.[column.key]}
                       disabled={disabled}
-                      onChange={field.handleChange}
+                      onChange={(value) => {
+                        field.handleChange(value);
+                        onFieldEdit?.(column.key);
+                      }}
                       onBlur={field.handleBlur}
                     />
                     {column.description && (
                       <FieldDescription>{column.description}</FieldDescription>
                     )}
-                    <FieldError match={invalid}>
-                      {field.state.meta.errors.map((item) => String(item)).join(", ")}
-                    </FieldError>
+                    <FieldError match={invalid}>{messages.join(", ")}</FieldError>
                   </Field>
                 );
               }}
@@ -152,7 +161,10 @@ export function RecordForm({
   record,
   recordId,
   disabled = false,
+  status,
   error,
+  fieldErrors,
+  onFieldEdit,
   children,
 }: {
   form: RecordFormApi;
@@ -162,7 +174,10 @@ export function RecordForm({
   record?: Record<string, unknown>;
   recordId?: string;
   disabled?: boolean;
+  status?: string;
   error?: Error | null;
+  fieldErrors?: Record<string, string>;
+  onFieldEdit?: (key: string) => void;
   children?: React.ReactNode;
 }) {
   const title = columns.find((column) => column.title);
@@ -187,7 +202,7 @@ export function RecordForm({
               <span className="font-mono">#{recordId}</span>
             </>
           )}
-          {disabled && " · View only"}
+          {status && ` · ${status}`}
         </SheetDescription>
       </SheetHeader>
       <RecordFields
@@ -197,6 +212,8 @@ export function RecordForm({
         record={record}
         disabled={disabled}
         error={error}
+        fieldErrors={fieldErrors}
+        onFieldEdit={onFieldEdit}
       />
       {children}
     </Form>

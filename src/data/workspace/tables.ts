@@ -9,6 +9,7 @@ import type {
   TableInput,
   TableUpdateInput,
 } from "@/lib/tables/validation";
+import type { TrashQuery } from "@/lib/trash/query";
 
 import { unwrapFetch } from "./api-error";
 import { workspaceKeys } from "./keys";
@@ -50,12 +51,74 @@ export const createTableMutationOptions = mutationOptions({
 
 export const deleteTablesMutationOptions = mutationOptions({
   mutationKey: workspaceKeys.mutation("delete-tables"),
-  mutationFn: ({ workspace, ids }: { workspace: string; ids: number[] }) =>
+  mutationFn: ({
+    workspace,
+    ids,
+    permanent,
+  }: {
+    workspace: string;
+    ids: number[];
+    permanent?: boolean;
+  }) =>
     unwrapFetch(
       fetch("/api/w/:workspace/tables", {
         method: "DELETE",
         params: { workspace },
-        body: { ids },
+        body: permanent ? { ids, permanent } : { ids },
+      }),
+    ),
+});
+
+export const discardTableMutationOptions = mutationOptions({
+  mutationKey: workspaceKeys.mutation("discard-table"),
+  mutationFn: ({ workspace, id }: { workspace: string; id: number }) =>
+    unwrapFetch(
+      fetch("/api/w/:workspace/tables", {
+        method: "DELETE",
+        params: { workspace },
+        body: { ids: [id], permanent: true },
+      }),
+    ),
+});
+
+export const deletedTablesQueryOptions = (workspace: string, query: TrashQuery) =>
+  queryOptions({
+    queryKey: workspaceKeys.tablesTrash(query),
+    queryFn: () =>
+      unwrapFetch(
+        fetch("/api/w/:workspace/tables/trash", {
+          params: { workspace },
+          query: {
+            page: query.page,
+            pageSize: query.pageSize,
+            sort: query.sort,
+            order: query.order,
+            ...(query.q ? { q: query.q } : {}),
+          },
+        }),
+      ),
+    staleTime: 15_000,
+    retry: false,
+  });
+
+export const restoreTableMutationOptions = mutationOptions({
+  mutationKey: workspaceKeys.mutation("restore-table"),
+  mutationFn: ({ workspace, id }: { workspace: string; id: number }) =>
+    unwrapFetch(
+      fetch("/api/w/:workspace/tables/trash/:id/restore", {
+        method: "POST",
+        params: { workspace, id: String(id) },
+      }),
+    ),
+});
+
+export const purgeTableMutationOptions = mutationOptions({
+  mutationKey: workspaceKeys.mutation("purge-table"),
+  mutationFn: ({ workspace, id }: { workspace: string; id: number }) =>
+    unwrapFetch(
+      fetch("/api/w/:workspace/tables/trash/:id", {
+        method: "DELETE",
+        params: { workspace, id: String(id) },
       }),
     ),
 });

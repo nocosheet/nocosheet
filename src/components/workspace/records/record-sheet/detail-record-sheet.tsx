@@ -36,6 +36,7 @@ function DetailForm({
       record={record}
       recordId={recordId}
       disabled
+      status="View only"
     />
   );
 }
@@ -74,7 +75,7 @@ export function DetailRecordSheet({
             columns={buildViewerColumns(table)}
           />
         ) : (
-          <RecordSheetSkeleton tableName={table.name} recordId={recordId} error={error} />
+          <RecordSheetSkeleton title={`Record ${recordId}`} tableName={table.name} error={error} />
         )}
       </SheetPopup>
     </Sheet>

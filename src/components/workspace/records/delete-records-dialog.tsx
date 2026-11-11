@@ -20,6 +20,8 @@ import { toastManager } from "@/components/ui/toast";
 import { workspaceKeys } from "@/data/workspace/keys";
 import { deleteRecordsMutationOptions } from "@/data/workspace/records";
 
+import { useRestoreRecord } from "./use-restore-record";
+
 export function DeleteRecordsDialog({
   workspace,
   tableId,
@@ -35,12 +37,13 @@ export function DeleteRecordsDialog({
 }) {
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
+  const restore = useRestoreRecord(workspace, tableId);
   const count = ids.length;
   const noun = count === 1 ? "record" : "records";
 
   const deleteRecords = useMutation({
     ...deleteRecordsMutationOptions,
-    onSuccess: async () => {
+    onSuccess: async (result) => {
       setOpen(false);
       onDeleted(count);
       await queryClient.invalidateQueries({
@@ -49,7 +52,11 @@ export function DeleteRecordsDialog({
       });
       for (const id of ids)
         queryClient.removeQueries({ queryKey: workspaceKeys.record(tableId, String(id)) });
-      toastManager.add({ type: "success", title: `${count} ${noun} deleted` });
+      toastManager.add({
+        type: "success",
+        title: `${count} ${noun} moved to trash`,
+        actionProps: { children: "Undo", onClick: () => void restore(result.trash) },
+      });
     },
   });
 
@@ -71,7 +78,8 @@ export function DeleteRecordsDialog({
             Delete {count} {noun}?
           </AlertDialogTitle>
           <AlertDialogDescription>
-            This permanently deletes the selected {noun}. This can't be undone.
+            The selected {noun} will move to the trash, where you can restore{" "}
+            {count === 1 ? "it" : "them"}.
           </AlertDialogDescription>
         </AlertDialogHeader>
         {deleteRecords.error && (

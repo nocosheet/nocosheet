@@ -27,10 +27,6 @@ export type ViewerColumn = {
 
 type TableDetail = {
   titleColumnId: number | null;
-  hasCreatedAt: boolean;
-  hasUpdatedAt: boolean;
-  hasCreatedBy: boolean;
-  hasUpdatedBy: boolean;
   columns: {
     id: number;
     columnName: string;
@@ -131,17 +127,9 @@ export function buildViewerColumns(table: TableDetail): ViewerColumn[] {
   return [
     ...columns,
     system("id", "Id", "id", HashIcon, 120, true),
-    ...(table.hasCreatedAt
-      ? [system("created_at", "Created at", "created_at", CalendarClockIcon, 190, true)]
-      : []),
-    ...(table.hasUpdatedAt
-      ? [system("updated_at", "Updated at", "updated_at", CalendarIcon, 190, true)]
-      : []),
-    ...(table.hasCreatedBy
-      ? [system("created_by", "Created by", "user", UserIcon, 160, false)]
-      : []),
-    ...(table.hasUpdatedBy
-      ? [system("updated_by", "Updated by", "user", UserIcon, 160, false)]
-      : []),
+    system("created_at", "Created at", "created_at", CalendarClockIcon, 190, true),
+    system("updated_at", "Updated at", "updated_at", CalendarIcon, 190, true),
+    system("created_by", "Created by", "user", UserIcon, 160, false),
+    system("updated_by", "Updated by", "user", UserIcon, 160, false),
   ];
 }

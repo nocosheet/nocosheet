@@ -4,7 +4,8 @@ import { z } from "zod";
 
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { recordsApiSchema, recordsDeleteSchema, resolveRecordsQuery } from "@/lib/records/query";
-import { createRecord, deleteRecords, loadRecords } from "@/lib/records/server";
+import { createRecord, loadRecords } from "@/lib/records/server";
+import { deleteRecords } from "@/lib/records/trash";
 import { recordPatchSchema } from "@/lib/records/values";
 import { findTable } from "@/lib/tables/server";
 
@@ -23,8 +24,7 @@ export const DELETE = defineHandler(
   defineHandler.withValidator({ params, body: recordsDeleteSchema })(
     async (c, { params, body }) => {
       const table = await findTable(params.id);
-      await deleteRecords(c.get("workspaceId"), table, body.ids);
-      return { ok: true };
+      return deleteRecords(c.get("workspaceId"), table, body.ids, requireAuth(c).id);
     },
   ),
 );

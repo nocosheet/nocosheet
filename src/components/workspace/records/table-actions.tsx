@@ -7,6 +7,7 @@ import {
   PlusIcon,
   RefreshCwIcon,
   SlidersHorizontalIcon,
+  Trash2Icon,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -43,6 +44,14 @@ export function TableActions({ workspace, table }: { workspace: string; table: s
           <DownloadIcon />
           Export
         </MenuItem>
+        {isAdmin && (
+          <MenuLinkItem
+            render={<Link to="/w/$workspace/tables/$table/trash" params={{ workspace, table }} />}
+          >
+            <Trash2Icon />
+            Trash
+          </MenuLinkItem>
+        )}
         <MenuItem
           onClick={() =>
             void queryClient.invalidateQueries({ queryKey: workspaceKeys.table(Number(table)) })

@@ -1124,7 +1124,6 @@ export const tables: SeedTable[] = [
     icon: "package",
     group: "Sales",
     description: "Hardware, software and services we sell, with live stock value.",
-    tracking: { createdBy: false, updatedBy: false },
     title: "SKU",
     columns: [
       col.text("SKU", { required: true, unique: true }),

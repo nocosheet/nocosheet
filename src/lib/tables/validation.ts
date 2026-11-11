@@ -42,14 +42,11 @@ export const tableInputSchema = z.object({
   groupName: optionalText(64),
   description: optionalText(500),
   idType: z.enum(ID_TYPES),
-  hasCreatedAt: z.boolean(),
-  hasCreatedBy: z.boolean(),
-  hasUpdatedAt: z.boolean(),
-  hasUpdatedBy: z.boolean(),
 });
 
 export const tablesDeleteSchema = z.object({
   ids: z.array(z.number().int().positive()).min(1).max(100),
+  permanent: z.boolean().optional(),
 });
 
 export type TableInput = z.input<typeof tableInputSchema>;

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { toastManager } from "@/components/ui/toast";
 import { workspaceKeys } from "@/data/workspace/keys";
 import {
-  deleteTablesMutationOptions,
+  discardTableMutationOptions,
   tableQueryOptions,
   updateTableMutationOptions,
 } from "@/data/workspace/tables";
@@ -44,7 +44,7 @@ export function ColumnsStep({
   });
 
   const discardTable = useMutation({
-    ...deleteTablesMutationOptions,
+    ...discardTableMutationOptions,
     onSuccess: async () => {
       await refresh();
       onDiscarded();
@@ -89,7 +89,7 @@ export function ColumnsStep({
       <WizardFooter hint="Finish saves the title column.">
         <Button
           variant="outline"
-          onClick={() => discardTable.mutate({ workspace, ids: [tableId] })}
+          onClick={() => discardTable.mutate({ workspace, id: tableId })}
           loading={discardTable.isPending}
           disabled={updateTable.isPending}
         >

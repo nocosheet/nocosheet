@@ -1,12 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 
-import { PlusIcon } from "lucide-react";
+import { PlusIcon, Trash2Icon } from "lucide-react";
 
 import { WorkspaceContent, WorkspaceHeader } from "@/components/layout/workspace-header";
 import { Button } from "@/components/ui/button";
 import { TablesEmpty } from "@/components/workspace/tables-empty";
 import { TablesTable } from "@/components/workspace/tables/tables-table";
 import { tablesQueryOptions } from "@/data/workspace/tables";
+import { useWorkspace } from "@/hooks/use-workspace";
 import { resolveTablesQuery, validateTablesSearch } from "@/lib/tables/query";
 
 export const Route = createFileRoute("/w/$workspace/_core/tables/")({
@@ -19,10 +20,21 @@ export const Route = createFileRoute("/w/$workspace/_core/tables/")({
 
 function TablesPage() {
   const { workspace } = Route.useParams();
+  const { isAdmin } = useWorkspace();
 
   return (
     <>
       <WorkspaceHeader workspace={workspace}>
+        {isAdmin && (
+          <Button
+            size="sm"
+            variant="outline"
+            render={<Link to="/w/$workspace/tables/trash" params={{ workspace }} />}
+          >
+            <Trash2Icon />
+            Trash
+          </Button>
+        )}
         <Button
           size="sm"
           render={

@@ -126,7 +126,7 @@ export function UpdateRecordSheet({
             onDeleted={() => setOpen(false)}
           />
         ) : (
-          <RecordSheetSkeleton tableName={table.name} recordId={recordId} error={error} />
+          <RecordSheetSkeleton title={`Record ${recordId}`} tableName={table.name} error={error} />
         )}
       </SheetPopup>
     </Sheet>

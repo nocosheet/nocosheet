@@ -4,16 +4,9 @@ import type { ColumnValues } from "./validation";
 
 export class DdlError extends Error {}
 
-export type TrackingColumns = {
-  hasCreatedAt: boolean;
-  hasCreatedBy: boolean;
-  hasUpdatedAt: boolean;
-  hasUpdatedBy: boolean;
-};
-
 export type RelationTarget = { physicalName: string; idType: "increment" | "uuid" };
 
-export type CreateTableSpec = TrackingColumns & {
+export type CreateTableSpec = {
   physicalName: string;
   idType: "increment" | "uuid";
 };
@@ -95,14 +88,12 @@ function columnDefinition(column: ColumnValues, targets: Map<number, RelationTar
   return parts.join(" ");
 }
 
-function trackingDefinitions(spec: CreateTableSpec) {
-  const defs: string[] = [];
-  if (spec.hasCreatedAt) defs.push(`"created_at" INTEGER NOT NULL DEFAULT ${NOW_MS}`);
-  if (spec.hasUpdatedAt) defs.push(`"updated_at" INTEGER NOT NULL DEFAULT ${NOW_MS}`);
-  if (spec.hasCreatedBy) defs.push(`"created_by" TEXT REFERENCES "user" ("id") ON DELETE SET NULL`);
-  if (spec.hasUpdatedBy) defs.push(`"updated_by" TEXT REFERENCES "user" ("id") ON DELETE SET NULL`);
-  return defs;
-}
+const trackingDefinitions = () => [
+  `"created_at" INTEGER NOT NULL DEFAULT ${NOW_MS}`,
+  `"updated_at" INTEGER NOT NULL DEFAULT ${NOW_MS}`,
+  `"created_by" TEXT REFERENCES "user" ("id") ON DELETE SET NULL`,
+  `"updated_by" TEXT REFERENCES "user" ("id") ON DELETE SET NULL`,
+];
 
 export function buildCreateTable(spec: CreateTableSpec) {
   const id =
@@ -110,7 +101,7 @@ export function buildCreateTable(spec: CreateTableSpec) {
       ? `"id" TEXT PRIMARY KEY NOT NULL DEFAULT ${UUID_DEFAULT}`
       : `"id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL`;
 
-  return `CREATE TABLE ${quoteIdent(spec.physicalName)} (\n  ${[id, ...trackingDefinitions(spec)].join(",\n  ")}\n)`;
+  return `CREATE TABLE ${quoteIdent(spec.physicalName)} (\n  ${[id, ...trackingDefinitions()].join(",\n  ")}\n)`;
 }
 
 export type IndexKind = "uq" | "idx";

@@ -28,6 +28,8 @@ const timestamps = {
 
 const deletedAt = () => integer("deleted_at", { mode: "timestamp_ms" });
 
+const deletedBy = () => text("deleted_by").references(() => userTable.id, { onDelete: "set null" });
+
 const createdBy = () => text("created_by").references(() => userTable.id, { onDelete: "set null" });
 
 const json = <T>(name: string, fallback: T) =>
@@ -75,15 +77,12 @@ export const workspaceSchema = (workspaceId = "default") => {
       idType: text("id_type", { enum: ["increment", "uuid"] })
         .notNull()
         .default("increment"),
-      hasCreatedAt: integer("has_created_at", { mode: "boolean" }).notNull().default(true),
-      hasCreatedBy: integer("has_created_by", { mode: "boolean" }).notNull().default(true),
-      hasUpdatedAt: integer("has_updated_at", { mode: "boolean" }).notNull().default(true),
-      hasUpdatedBy: integer("has_updated_by", { mode: "boolean" }).notNull().default(true),
       position: integer("position").notNull().default(0),
       metadata: json<Record<string, unknown>>("metadata", {}),
       createdBy: createdBy(),
       ...timestamps,
       deletedAt: deletedAt(),
+      deletedBy: deletedBy(),
     },
     (t) => [
       uniqueIndex(name("table_name")).on(lower(t.name)).where(live(t.deletedAt)),
@@ -123,6 +122,7 @@ export const workspaceSchema = (workspaceId = "default") => {
       metadata: json<Record<string, unknown>>("metadata", {}),
       ...timestamps,
       deletedAt: deletedAt(),
+      deletedBy: deletedBy(),
     },
     (t) => [
       uniqueIndex(name("column_name")).on(t.tableId, lower(t.name)).where(live(t.deletedAt)),
@@ -152,6 +152,7 @@ export const workspaceSchema = (workspaceId = "default") => {
       createdBy: createdBy(),
       ...timestamps,
       deletedAt: deletedAt(),
+      deletedBy: deletedBy(),
     },
     (t) => [
       uniqueIndex(name("view_name")).on(t.tableId, lower(t.name)).where(live(t.deletedAt)),
@@ -180,6 +181,7 @@ export const workspaceSchema = (workspaceId = "default") => {
       createdBy: createdBy(),
       ...timestamps,
       deletedAt: deletedAt(),
+      deletedBy: deletedBy(),
     },
     (t) => [
       uniqueIndex(name("widget_view_name")).on(t.viewName),
@@ -202,6 +204,23 @@ export const workspaceSchema = (workspaceId = "default") => {
     (t) => [uniqueIndex(name("favorite_user_table")).on(t.userId, t.tableId)],
   );
 
+  const trashTable = sqliteTable(
+    name("trash"),
+    {
+      id: integer("id").primaryKey({ autoIncrement: true }),
+      tableId: integer("table_id")
+        .notNull()
+        .references(() => tableTable.id, { onDelete: "cascade" }),
+      recordId: text("record_id").notNull(),
+      data: json<Record<string, unknown>>("data", {}),
+      deletedBy: text("deleted_by").references(() => userTable.id, { onDelete: "set null" }),
+      deletedAt: integer("deleted_at", { mode: "timestamp_ms" })
+        .notNull()
+        .$defaultFn(() => new Date()),
+    },
+    (t) => [index(name("trash_table_deleted")).on(t.tableId, t.deletedAt)],
+  );
+
   return {
     settingTable,
     resourceTable,
@@ -210,6 +229,7 @@ export const workspaceSchema = (workspaceId = "default") => {
     viewTable,
     widgetTable,
     favoriteTable,
+    trashTable,
   };
 };
 
@@ -221,4 +241,5 @@ export const {
   viewTable,
   widgetTable,
   favoriteTable,
+  trashTable,
 } = workspaceSchema();

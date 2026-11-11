@@ -25,12 +25,6 @@ export function TableDefinitionView({
 }) {
   const { data: table } = useSuspenseQuery(tableQueryOptions(workspace, tableId));
 
-  const tracking = [
-    table.hasCreatedAt && "Created at",
-    table.hasUpdatedAt && "Updated at",
-    table.hasCreatedBy && "Created by",
-    table.hasUpdatedBy && "Updated by",
-  ].filter(Boolean);
   const titleColumn = table.columns.find((column) => column.id === table.titleColumnId);
 
   return (
@@ -63,9 +57,6 @@ export function TableDefinitionView({
           </SettingsRow>
           <SettingsRow title="Record id" description="How records are identified.">
             <span className="text-sm">{ID_TYPE_LABELS[table.idType]}</span>
-          </SettingsRow>
-          <SettingsRow title="Tracking columns" description="Added to every record automatically.">
-            <span className="text-sm">{tracking.length ? tracking.join(", ") : "None"}</span>
           </SettingsRow>
         </Card>
       </CardFrame>

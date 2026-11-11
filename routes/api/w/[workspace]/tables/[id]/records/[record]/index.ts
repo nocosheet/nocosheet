@@ -3,7 +3,8 @@ import { requireAuth } from "void/auth";
 import { z } from "zod";
 
 import { requireAdmin } from "@/lib/auth/require-admin";
-import { deleteRecords, loadRecord, updateRecord } from "@/lib/records/server";
+import { loadRecord, updateRecord } from "@/lib/records/server";
+import { deleteRecords } from "@/lib/records/trash";
 import { recordPatchSchema } from "@/lib/records/values";
 import { findTable } from "@/lib/tables/server";
 
@@ -30,7 +31,6 @@ export const DELETE = defineHandler(
   requireAdmin,
   defineHandler.withValidator({ params })(async (c, { params }) => {
     const table = await findTable(params.id);
-    await deleteRecords(c.get("workspaceId"), table, [params.record]);
-    return { ok: true };
+    return deleteRecords(c.get("workspaceId"), table, [params.record], requireAuth(c).id);
   }),
 );

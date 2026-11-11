@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { toastManager } from "@/components/ui/toast";
 import { workspaceKeys } from "@/data/workspace/keys";
 import { deleteTablesMutationOptions } from "@/data/workspace/tables";
+import { TRASH_RETENTION_DAYS } from "@/lib/records/retention";
 
 export function DeleteTablesDialog({
   workspace,
@@ -44,7 +45,7 @@ export function DeleteTablesDialog({
       setOpen(false);
       await onDeleted(count);
       await queryClient.invalidateQueries({ queryKey: workspaceKeys.tables() });
-      toastManager.add({ type: "success", title: `${count} ${noun} deleted` });
+      toastManager.add({ type: "success", title: `${count} ${noun} moved to trash` });
     },
   });
 
@@ -67,8 +68,8 @@ export function DeleteTablesDialog({
           </AlertDialogTitle>
           <AlertDialogDescription>
             {count === 1
-              ? "This permanently deletes the selected table along with its columns, views, widgets and every record. This can't be undone."
-              : "This permanently deletes the selected tables along with their columns, views, widgets and every record. This can't be undone."}
+              ? `The selected table moves to the trash for ${TRASH_RETENTION_DAYS} days, then it's deleted forever with its columns, views, widgets and every record.`
+              : `The selected tables move to the trash for ${TRASH_RETENTION_DAYS} days, then they're deleted forever with their columns, views, widgets and every record.`}
           </AlertDialogDescription>
         </AlertDialogHeader>
         {deleteTables.error && (

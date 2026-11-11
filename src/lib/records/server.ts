@@ -1,6 +1,7 @@
 import { columnTable, tableTable } from "@db/schema";
 import { HTTPException } from "hono/http-exception";
 import { and, asc, db, eq, inArray, isNull, sql } from "void/db";
+import { sqliteTable, text } from "void/schema-d1";
 
 import { SEARCHABLE_FORMATS } from "../tables/formats";
 import { physicalTableName, quoteIdent } from "../tables/naming";
@@ -138,18 +139,12 @@ async function recordSource(workspace: string, table: Table) {
   }
 
   const selects = ['t."id" as "id"'];
-  if (table.hasCreatedAt) selects.push('t."created_at" as "created_at"');
-  if (table.hasUpdatedAt) selects.push('t."updated_at" as "updated_at"');
-  for (const [flag, name] of [
-    [table.hasCreatedBy, "created_by"],
-    [table.hasUpdatedBy, "updated_by"],
-  ] as const) {
-    if (flag)
-      selects.push(
-        `t."${name}" as "${name}"`,
-        `(select u."name" from "user" u where u."id" = t."${name}") as "${name}__label"`,
-      );
-  }
+  selects.push('t."created_at" as "created_at"', 't."updated_at" as "updated_at"');
+  for (const name of ["created_by", "updated_by"])
+    selects.push(
+      `t."${name}" as "${name}"`,
+      `(select u."name" from "user" u where u."id" = t."${name}") as "${name}__label"`,
+    );
   for (const column of columns) {
     selects.push(`t.${quoteIdent(column.columnName)} as ${quoteIdent(column.columnName)}`);
     if (column.format === "relation") {
@@ -168,7 +163,7 @@ async function recordSource(workspace: string, table: Table) {
   };
 }
 
-function shapeRecord(row: Record<string, unknown>, columns: Column[]) {
+export function shapeRecord(row: Record<string, unknown>, columns: Column[]) {
   const record: Record<string, unknown> = { id: row.id };
   for (const key of ["created_at", "updated_at"]) if (key in row) record[key] = row[key];
   for (const key of ["created_by", "updated_by"])
@@ -226,15 +221,11 @@ export async function loadRecords(workspace: string, table: Table, query: Resolv
 
   let orderBy = sql`t."id" asc`;
   if (query.sort) {
-    const system = {
-      id: true,
-      created_at: table.hasCreatedAt,
-      updated_at: table.hasUpdatedAt,
-    } as Record<string, boolean>;
+    const system = ["id", "created_at", "updated_at"];
     const column = byName.get(query.sort);
     const direction = raw(query.order === "desc" ? "desc" : "asc");
 
-    if (system[query.sort]) {
+    if (system.includes(query.sort)) {
       orderBy = sql`${raw(`t.${quoteIdent(query.sort)}`)} ${direction}, t."id" asc`;
     } else if (!column || !column.isSortable || !isSortableFormat(column.format)) {
       throw new HTTPException(400, { message: `"${query.sort}" can't be sorted.` });
@@ -274,10 +265,10 @@ export async function loadExportRecords(workspace: string, table: Table) {
   const columns = (await activeColumns(table)).filter((column) => column.format !== "binary");
   const names = [
     "id",
-    ...(table.hasCreatedAt ? ["created_at"] : []),
-    ...(table.hasUpdatedAt ? ["updated_at"] : []),
-    ...(table.hasCreatedBy ? ["created_by"] : []),
-    ...(table.hasUpdatedBy ? ["updated_by"] : []),
+    "created_at",
+    "updated_at",
+    "created_by",
+    "updated_by",
     ...columns.map((column) => column.columnName),
   ];
 
@@ -309,53 +300,39 @@ export async function loadRecordOptions(workspace: string, table: Table, term: s
   );
 }
 
-export async function deleteRecords(workspace: string, table: Table, ids: (string | number)[]) {
-  const unique = [...new Set(ids)];
-  let deleted: unknown[] = [];
-  try {
-    deleted = await db.all(
-      sql`delete from ${raw(quoteIdent(physicalTableName(workspace, table.tableName)))} where "id" in (${sql.join(
-        unique.map((id) => sql`${id}`),
-        sql`, `,
-      )}) returning "id"`,
-    );
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    throw new HTTPException(/FOREIGN KEY/i.test(message) ? 409 : 400, {
-      message: /FOREIGN KEY/i.test(message)
-        ? "Some of these records are still linked from other records."
-        : message,
-    });
-  }
-  if (deleted.length === 0) throw new HTTPException(404, { message: "Record not found." });
+export function apiError(status: 400 | 404 | 409, message: string, field?: string) {
+  return new HTTPException(
+    status,
+    field ? { res: Response.json({ message, field }, { status }) } : { message },
+  );
 }
 
-async function activeColumns(table: Table) {
+export async function activeColumns(table: Table) {
   return db
     .select()
     .from(columnTable)
     .where(and(eq(columnTable.tableId, table.id), isNull(columnTable.deletedAt)));
 }
 
-function parseValues(columns: Column[], values: Record<string, unknown>) {
+export type ParsedValue = { column: Column; value: string | number | null };
+
+export function parseValues(columns: Column[], values: Record<string, unknown>) {
   const byName = new Map(columns.map((column) => [column.columnName, column]));
   return Object.entries(values).map(([key, input]) => {
     const column = byName.get(key);
-    if (!column || !isEditableColumn(column))
-      throw new HTTPException(400, { message: `"${key}" can't be edited.` });
+    if (!column || !isEditableColumn(column)) throw apiError(400, `"${key}" can't be edited.`);
     const parsed = valueSchema(column).safeParse(input);
     if (!parsed.success)
-      throw new HTTPException(400, {
-        message: `${column.name}: ${parsed.error.issues[0]?.message ?? "Invalid value"}`,
-      });
+      throw apiError(
+        400,
+        `${column.name}: ${parsed.error.issues[0]?.message ?? "Invalid value"}`,
+        column.columnName,
+      );
     return { column, value: toDbValue(column.format, parsed.data) };
   });
 }
 
-async function assertLinksExist(
-  workspace: string,
-  parsed: { column: Column; value: string | number | null }[],
-) {
+export async function assertLinksExist(workspace: string, parsed: ParsedValue[]) {
   for (const { column, value } of parsed) {
     if (column.format !== "relation" || value === null) continue;
     const [target] = await db
@@ -369,32 +346,71 @@ async function assertLinksExist(
       )
       .limit(1);
     if (!target)
-      throw new HTTPException(400, {
-        message: `${column.name}: the linked table no longer exists.`,
-      });
+      throw apiError(400, `${column.name}: the linked table no longer exists.`, column.columnName);
     const [found] = await db.all<{ found: number }>(
       sql`select 1 as found from ${raw(quoteIdent(physicalTableName(workspace, target.tableName)))} where "id" = ${value} limit 1`,
     );
     if (!found)
-      throw new HTTPException(400, {
-        message: `${column.name}: the linked record no longer exists. Refresh and pick again.`,
-      });
+      throw apiError(
+        400,
+        `${column.name}: the linked record no longer exists. Refresh and pick again.`,
+        column.columnName,
+      );
   }
 }
 
-function writeError(error: unknown): never {
+export function assertRequired(columns: Column[], parsed: ParsedValue[]) {
+  const missing = columns.find(
+    (column) =>
+      column.isRequired &&
+      isEditableColumn(column) &&
+      column.defaultValue === null &&
+      !parsed.some((item) => item.column.id === column.id && item.value !== null),
+  );
+  if (missing) throw apiError(400, `${missing.name}: This field is required`, missing.columnName);
+}
+
+export function writeError(error: unknown, columns: Column[] = []): never {
   const message = [error, (error as { cause?: unknown })?.cause]
     .map((item) => (item instanceof Error ? item.message : ""))
     .join(" ");
-  if (/UNIQUE constraint/i.test(message))
-    throw new HTTPException(409, { message: "Another record already uses this value." });
-  if (/FOREIGN KEY/i.test(message))
-    throw new HTTPException(400, { message: "A linked record or user doesn't exist." });
+  if (/UNIQUE constraint/i.test(message)) {
+    const failed = /UNIQUE constraint failed: ([\w.]+)/i.exec(message)?.[1]?.split(".").pop();
+    const column = columns.find((item) => item.columnName === failed);
+    throw apiError(
+      409,
+      column
+        ? `${column.name}: another record already uses this value.`
+        : "Another record already uses this value.",
+      column?.columnName,
+    );
+  }
+  if (/FOREIGN KEY/i.test(message)) throw apiError(400, "A linked record or user doesn't exist.");
   if (/CHECK constraint/i.test(message))
-    throw new HTTPException(400, { message: "A value doesn't meet its column's rules." });
-  if (/NOT NULL constraint/i.test(message))
-    throw new HTTPException(400, { message: "A required value is missing." });
-  throw new HTTPException(400, { message });
+    throw apiError(400, "A value doesn't meet its column's rules.");
+  if (/NOT NULL constraint/i.test(message)) throw apiError(400, "A required value is missing.");
+  throw apiError(400, message);
+}
+
+export function recordsTable(workspace: string, table: Table, names: string[] = []) {
+  return sqliteTable(
+    physicalTableName(workspace, table.tableName),
+    Object.fromEntries(["id", ...names].map((name) => [name, text(name)])),
+  );
+}
+
+export function insertRecord(
+  workspace: string,
+  table: Table,
+  parsed: ParsedValue[],
+  system: Record<string, unknown>,
+) {
+  const row = {
+    ...Object.fromEntries(parsed.map(({ column, value }) => [column.columnName, value])),
+    ...system,
+  } as Record<string, string>;
+  const target = recordsTable(workspace, table, Object.keys(row));
+  return db.insert(target).values(row).returning({ id: target.id });
 }
 
 export async function updateRecord(
@@ -404,16 +420,18 @@ export async function updateRecord(
   values: Record<string, unknown>,
   userId: string,
 ) {
-  const parsed = parseValues(await activeColumns(table), values);
-  if (parsed.length === 0) throw new HTTPException(400, { message: "Nothing to update." });
+  const columns = await activeColumns(table);
+  const parsed = parseValues(columns, values);
+  if (parsed.length === 0) throw apiError(400, "Nothing to update.");
   await assertLinksExist(workspace, parsed);
 
   const assignments = parsed.map(
     ({ column, value }) => sql`${raw(quoteIdent(column.columnName))} = ${value}`,
   );
-  if (table.hasUpdatedAt)
-    assignments.push(sql`"updated_at" = cast(unixepoch('subsec') * 1000 as integer)`);
-  if (table.hasUpdatedBy) assignments.push(sql`"updated_by" = ${userId}`);
+  assignments.push(
+    sql`"updated_at" = cast(unixepoch('subsec') * 1000 as integer)`,
+    sql`"updated_by" = ${userId}`,
+  );
 
   let updated: unknown[] = [];
   try {
@@ -421,9 +439,9 @@ export async function updateRecord(
       sql`update ${raw(quoteIdent(physicalTableName(workspace, table.tableName)))} set ${sql.join(assignments, sql`, `)} where "id" = ${recordId} returning "id"`,
     );
   } catch (error) {
-    writeError(error);
+    writeError(error, columns);
   }
-  if (updated.length === 0) throw new HTTPException(404, { message: "Record not found." });
+  if (updated.length === 0) throw apiError(404, "Record not found.");
 
   return { ok: true };
 }
@@ -437,39 +455,18 @@ export async function createRecord(
   const columns = await activeColumns(table);
   const parsed = parseValues(columns, values);
   await assertLinksExist(workspace, parsed);
+  assertRequired(columns, parsed);
 
-  const missing = columns.find(
-    (column) =>
-      column.isRequired &&
-      isEditableColumn(column) &&
-      column.defaultValue === null &&
-      !parsed.some((item) => item.column.id === column.id && item.value !== null),
-  );
-  if (missing) throw new HTTPException(400, { message: `${missing.name}: This field is required` });
-
-  const names = parsed.map(({ column }) => raw(quoteIdent(column.columnName)));
-  const bound = parsed.map(({ value }) => sql`${value}`);
-  if (table.hasCreatedBy) {
-    names.push(raw('"created_by"'));
-    bound.push(sql`${userId}`);
-  }
-  if (table.hasUpdatedBy) {
-    names.push(raw('"updated_by"'));
-    bound.push(sql`${userId}`);
-  }
-
-  const target = raw(quoteIdent(physicalTableName(workspace, table.tableName)));
   let created: { id: string | number } | undefined;
   try {
-    [created] = await db.all<{ id: string | number }>(
-      names.length
-        ? sql`insert into ${target} (${sql.join(names, sql`, `)}) values (${sql.join(bound, sql`, `)}) returning "id"`
-        : sql`insert into ${target} default values returning "id"`,
-    );
+    [created] = (await insertRecord(workspace, table, parsed, {
+      created_by: userId,
+      updated_by: userId,
+    })) as { id: string | number }[];
   } catch (error) {
-    writeError(error);
+    writeError(error, columns);
   }
-  if (!created) throw new HTTPException(400, { message: "The record could not be created." });
+  if (!created) throw apiError(400, "The record could not be created.");
 
   return { id: created.id };
 }

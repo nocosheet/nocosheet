@@ -21,7 +21,6 @@ import { toTableName } from "@/lib/tables/naming";
 import { tableInputSchema } from "@/lib/tables/validation";
 
 import { IconPicker } from "./icon-picker";
-import { ToggleRow } from "./toggle-row";
 import { WizardFooter, WizardPanel } from "./wizard-panel";
 
 type TableFormValues = {
@@ -30,10 +29,6 @@ type TableFormValues = {
   groupName: string;
   description: string;
   idType: "increment" | "uuid";
-  hasCreatedAt: boolean;
-  hasCreatedBy: boolean;
-  hasUpdatedAt: boolean;
-  hasUpdatedBy: boolean;
 };
 
 const ID_TYPES = [
@@ -43,13 +38,6 @@ const ID_TYPES = [
     hint: "1, 2, 3… Compact and easy to read.",
   },
   { value: "uuid", title: "UUID", hint: "Random, unguessable ids that are safe to share." },
-] as const;
-
-const TRACKING = [
-  { name: "hasCreatedAt", title: "Created at", description: "When each record was created." },
-  { name: "hasCreatedBy", title: "Created by", description: "Who created each record." },
-  { name: "hasUpdatedAt", title: "Updated at", description: "When each record last changed." },
-  { name: "hasUpdatedBy", title: "Updated by", description: "Who last changed each record." },
 ] as const;
 
 export function TableStep({ onDone }: { onDone: (tableId: number) => void }) {
@@ -71,10 +59,6 @@ export function TableStep({ onDone }: { onDone: (tableId: number) => void }) {
       groupName: "",
       description: "",
       idType: "increment",
-      hasCreatedAt: true,
-      hasCreatedBy: true,
-      hasUpdatedAt: true,
-      hasUpdatedBy: true,
     } as TableFormValues,
     validators: { onSubmit: formSchema<TableFormValues>(tableInputSchema) },
     onSubmit: ({ value }) => createTable.mutate({ workspace, ...value }),
@@ -199,22 +183,6 @@ export function TableStep({ onDone }: { onDone: (tableId: number) => void }) {
                     </Field>
                   )}
                 </form.Field>
-
-                <div className="flex flex-col gap-4">
-                  <p className="font-medium text-sm">Tracking columns</p>
-                  {TRACKING.map((item) => (
-                    <form.Field key={item.name} name={item.name}>
-                      {(field) => (
-                        <ToggleRow
-                          title={item.title}
-                          description={item.description}
-                          checked={field.state.value}
-                          onCheckedChange={field.handleChange}
-                        />
-                      )}
-                    </form.Field>
-                  ))}
-                </div>
               </div>
             </CollapsiblePanel>
           </Collapsible>

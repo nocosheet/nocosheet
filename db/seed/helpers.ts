@@ -63,7 +63,6 @@ export type SeedTable = {
   group?: string;
   description: string;
   idType?: "increment" | "uuid";
-  tracking?: { createdAt?: boolean; createdBy?: boolean; updatedAt?: boolean; updatedBy?: boolean };
   title: string;
   columns: SeedColumn[];
   rows: SeedRow[];
@@ -101,12 +100,6 @@ export async function seedTable(
   users: SeedUsers,
 ) {
   const idType = def.idType ?? "increment";
-  const tracking = {
-    hasCreatedAt: def.tracking?.createdAt ?? true,
-    hasCreatedBy: def.tracking?.createdBy ?? true,
-    hasUpdatedAt: def.tracking?.updatedAt ?? true,
-    hasUpdatedBy: def.tracking?.updatedBy ?? true,
-  };
   const tableName = toTableName(def.name);
   const physicalName = physicalTableName(WORKSPACE, tableName);
 
@@ -123,14 +116,13 @@ export async function seedTable(
     icon: def.icon,
     groupName: def.group ?? null,
     idType,
-    ...tracking,
     position,
     createdBy: users.admin,
     createdAt: new Date(at(-90 + position)),
     updatedAt: new Date(at(-3 - position)),
   });
 
-  db.run(buildCreateTable({ ...tracking, idType, physicalName }));
+  db.run(buildCreateTable({ idType, physicalName }));
 
   const targets = new Map<number, RelationTarget>();
   for (const seeded of state.values())
@@ -204,28 +196,15 @@ export async function seedTable(
       -Math.round(((def.rows.length - index) * 60) / def.rows.length),
       9 + (index % 8),
     );
-    const names: string[] = ["id"];
-    const values: unknown[] = [id];
-
-    if (tracking.hasCreatedAt) {
-      names.push("created_at");
-      values.push(created);
-    }
-    if (tracking.hasUpdatedAt) {
-      names.push("updated_at");
-      values.push(created + (index % 5) * 6 * 3_600_000);
-    }
-
     const authors = [users.admin, users.member, ...users.others];
-    const author = authors[index % authors.length];
-    if (tracking.hasCreatedBy) {
-      names.push("created_by");
-      values.push(author);
-    }
-    if (tracking.hasUpdatedBy) {
-      names.push("updated_by");
-      values.push(authors[(index + 3) % authors.length]);
-    }
+    const names: string[] = ["id", "created_at", "updated_at", "created_by", "updated_by"];
+    const values: unknown[] = [
+      id,
+      created,
+      created + (index % 5) * 6 * 3_600_000,
+      authors[index % authors.length],
+      authors[(index + 3) % authors.length],
+    ];
 
     for (const { spec, column, relation } of writable) {
       const value = row[column.name];
