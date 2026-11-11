@@ -6,7 +6,7 @@ import { TableDefinition } from "@/components/workspace/tables/table-definition"
 import { TableDefinitionView } from "@/components/workspace/tables/table-definition-view";
 import { useWorkspace } from "@/hooks/use-workspace";
 
-export const Route = createFileRoute("/w/$workspace/_app/tables/$table/definition")({
+export const Route = createFileRoute("/w/$workspace/_core/tables/$table/definition")({
   staticData: { crumb: "Definition" },
   component: DefinitionPage,
 });

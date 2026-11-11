@@ -13,7 +13,7 @@ const searchSchema = z.object({
   table: z.coerce.number().int().positive().optional().catch(undefined),
 });
 
-export const Route = createFileRoute("/w/$workspace/_app/tables/new")({
+export const Route = createFileRoute("/w/$workspace/_core/tables/new")({
   staticData: { crumb: "New table" },
   validateSearch: searchSchema,
   beforeLoad: ({ search, params }) => {

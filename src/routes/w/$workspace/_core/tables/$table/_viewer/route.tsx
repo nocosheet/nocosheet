@@ -6,7 +6,7 @@ import { TableActions } from "@/components/workspace/records/table-actions";
 import { recordsQueryOptions } from "@/data/workspace/records";
 import { resolveRecordsQuery, validateRecordsSearch } from "@/lib/records/query";
 
-export const Route = createFileRoute("/w/$workspace/_app/tables/$table/_viewer")({
+export const Route = createFileRoute("/w/$workspace/_core/tables/$table/_viewer")({
   validateSearch: (search: Record<string, unknown>) => search,
   loaderDeps: ({ search }) => resolveRecordsQuery(validateRecordsSearch(search)),
   loader: async ({ context, deps, params }) => {

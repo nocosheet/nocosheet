@@ -5,7 +5,7 @@ import { UpdateRecordSheet } from "@/components/workspace/records/record-sheet/u
 import { recordQueryOptions } from "@/data/workspace/records";
 import { useWorkspace } from "@/hooks/use-workspace";
 
-export const Route = createFileRoute("/w/$workspace/_app/tables/$table/_viewer/$record")({
+export const Route = createFileRoute("/w/$workspace/_core/tables/$table/_viewer/$record")({
   loader: ({ context, params }) => {
     void context.queryClient
       .query(recordQueryOptions(params.workspace, Number(params.table), params.record))

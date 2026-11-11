@@ -2,7 +2,7 @@ import { createFileRoute, notFound, Outlet } from "@tanstack/react-router";
 
 import { tableQueryOptions } from "@/data/workspace/tables";
 
-export const Route = createFileRoute("/w/$workspace/_app/tables/$table")({
+export const Route = createFileRoute("/w/$workspace/_core/tables/$table")({
   staticData: { crumb: (loaderData) => (loaderData as { name?: string } | undefined)?.name },
   loader: ({ context, params }) => {
     const id = Number(params.table);

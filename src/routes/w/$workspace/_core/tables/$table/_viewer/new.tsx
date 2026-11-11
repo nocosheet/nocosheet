@@ -3,7 +3,7 @@ import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { CreateRecordSheet } from "@/components/workspace/records/record-sheet/create-record-sheet";
 import { useWorkspace } from "@/hooks/use-workspace";
 
-export const Route = createFileRoute("/w/$workspace/_app/tables/$table/_viewer/new")({
+export const Route = createFileRoute("/w/$workspace/_core/tables/$table/_viewer/new")({
   component: NewRecordPage,
 });
 

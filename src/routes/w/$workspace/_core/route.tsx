@@ -6,7 +6,7 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { useSession } from "@/hooks/use-session";
 import { readSidebarDefaultOpen } from "@/hooks/use-sidebar-default";
 
-export const Route = createFileRoute("/w/$workspace/_app")({
+export const Route = createFileRoute("/w/$workspace/_core")({
   component: AppLayout,
 });
 

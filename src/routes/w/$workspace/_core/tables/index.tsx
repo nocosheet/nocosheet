@@ -9,7 +9,7 @@ import { TablesTable } from "@/components/workspace/tables/tables-table";
 import { tablesQueryOptions } from "@/data/workspace/tables";
 import { resolveTablesQuery, validateTablesSearch } from "@/lib/tables/query";
 
-export const Route = createFileRoute("/w/$workspace/_app/tables/")({
+export const Route = createFileRoute("/w/$workspace/_core/tables/")({
   validateSearch: validateTablesSearch,
   loaderDeps: ({ search }) => resolveTablesQuery(search),
   loader: ({ context, deps, params }) =>
