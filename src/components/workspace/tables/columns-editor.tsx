@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useOptimistic, useState, useTransition } from "react";
 
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 
@@ -15,10 +15,12 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { toastManager } from "@/components/ui/toast";
 import { workspaceKeys } from "@/data/workspace/keys";
 import {
   createColumnMutationOptions,
   deleteColumnMutationOptions,
+  reorderColumnsMutationOptions,
   tableQueryOptions,
   updateColumnMutationOptions,
 } from "@/data/workspace/tables";
@@ -36,7 +38,11 @@ type EditorColumn = ReturnType<typeof useTableData>["data"]["columns"][number];
 export function ColumnsEditor({ workspace, tableId }: { workspace: string; tableId: number }) {
   const queryClient = useQueryClient();
   const { data: table } = useTableData(workspace, tableId);
-  const columns = table.columns;
+  const [columns, setColumns] = useOptimistic(
+    table.columns,
+    (_current, next: EditorColumn[]) => next,
+  );
+  const [, startTransition] = useTransition();
 
   const [dialog, setDialog] = useState<{ open: boolean; column: EditorColumn | null; key: number }>(
     { open: false, column: null, key: 0 },
@@ -54,6 +60,25 @@ export function ColumnsEditor({ workspace, tableId }: { workspace: string; table
       setRemoving(null);
     },
   });
+
+  const reorderColumns = useMutation({
+    ...reorderColumnsMutationOptions,
+    onError: (error) =>
+      toastManager.add({
+        type: "error",
+        title: "Couldn't reorder the columns",
+        description: error.message,
+      }),
+    onSettled: refresh,
+  });
+
+  const reorder = (next: EditorColumn[]) =>
+    startTransition(async () => {
+      setColumns(next);
+      await reorderColumns
+        .mutateAsync({ workspace, id: tableId, ids: next.map((column) => column.id) })
+        .catch(() => undefined);
+    });
 
   const openDialog = (column: EditorColumn | null) =>
     setDialog((current) => ({ open: true, column, key: current.key + 1 }));
@@ -113,6 +138,7 @@ export function ColumnsEditor({ workspace, tableId }: { workspace: string; table
         empty="No columns yet. Add the columns that hold your data."
         onEdit={openDialog}
         onDelete={setRemoving}
+        onReorder={reorder}
       />
 
       <ColumnDialog

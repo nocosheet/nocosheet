@@ -310,6 +310,18 @@ export async function updateColumn(
   return findColumn(table.id, column.id);
 }
 
+export async function reorderColumns(tableId: number, ids: number[]) {
+  await db.batch([
+    ...ids.map((id, index) =>
+      db
+        .update(columnTable)
+        .set({ position: index })
+        .where(and(eq(columnTable.id, id), eq(columnTable.tableId, tableId))),
+    ),
+    db.update(tableTable).set({ updatedAt: new Date() }).where(eq(tableTable.id, tableId)),
+  ] as never);
+}
+
 export async function dropColumn(workspace: string, table: Table, column: Column) {
   const physicalName = physicalTableName(workspace, table.tableName);
   const kind = indexKind(column);

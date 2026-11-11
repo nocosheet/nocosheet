@@ -177,6 +177,18 @@ export const updateColumnMutationOptions = mutationOptions({
     ),
 });
 
+export const reorderColumnsMutationOptions = mutationOptions({
+  mutationKey: workspaceKeys.mutation("reorder-columns"),
+  mutationFn: ({ workspace, id, ids }: { workspace: string; id: number; ids: number[] }) =>
+    unwrapFetch(
+      fetch("/api/w/:workspace/tables/:id/columns/order", {
+        method: "PUT",
+        params: { workspace, id: String(id) },
+        body: { ids },
+      }),
+    ),
+});
+
 export const deleteColumnMutationOptions = mutationOptions({
   mutationKey: workspaceKeys.mutation("delete-column"),
   mutationFn: ({ workspace, id, columnId }: { workspace: string; id: number; columnId: number }) =>

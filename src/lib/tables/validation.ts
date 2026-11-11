@@ -49,6 +49,10 @@ export const tablesDeleteSchema = z.object({
   permanent: z.boolean().optional(),
 });
 
+export const columnOrderSchema = z.object({
+  ids: z.array(z.number().int().positive()).min(1).max(500),
+});
+
 export type TableInput = z.input<typeof tableInputSchema>;
 export type TableValues = z.output<typeof tableInputSchema>;
 
