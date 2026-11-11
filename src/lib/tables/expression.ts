@@ -23,3 +23,19 @@ export function isSafeExpression(expression: string) {
 
   return quote === null && depth === 0 && expression.trim().length > 0;
 }
+
+export function findDependentColumn<
+  T extends {
+    id: number;
+    name: string;
+    generatedExpression: string | null;
+    checkExpression: string | null;
+  },
+>(siblings: T[], column: { id: number; columnName: string }) {
+  const usage = new RegExp(`\\b${column.columnName}\\b`, "i");
+  return siblings.find(
+    (other) =>
+      other.id !== column.id &&
+      [other.generatedExpression, other.checkExpression].some((expr) => expr && usage.test(expr)),
+  );
+}

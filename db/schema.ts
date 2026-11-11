@@ -35,8 +35,8 @@ const createdBy = () => text("created_by").references(() => userTable.id, { onDe
 const json = <T>(name: string, fallback: T) =>
   text(name, { mode: "json" }).$type<T>().notNull().default(fallback);
 
-export const workspaceSchema = (workspaceId = "default") => {
-  const name = (suffix: string) => `${workspaceId}__${suffix}`;
+export const workspaceSchema = <W extends string = "default">(workspaceId: W = "default" as W) => {
+  const name = <S extends string>(suffix: S) => `${workspaceId}__${suffix}` as `${W}__${S}`;
 
   const settingTable = sqliteTable(name("setting"), {
     userId: text("user_id")

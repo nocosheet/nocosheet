@@ -1,7 +1,7 @@
 import { defineHandler } from "void";
 
 import { requireAdmin } from "@/lib/auth/require-admin";
-import { listDeletedTables } from "@/lib/tables/server";
+import { listDeletedTables } from "@/lib/tables/repository";
 import { resolveTrashQuery, trashSearchSchema } from "@/lib/trash/query";
 
 export const GET = defineHandler(

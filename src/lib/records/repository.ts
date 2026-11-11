@@ -1,25 +1,20 @@
 import { columnTable, tableTable } from "@db/schema";
-import { HTTPException } from "hono/http-exception";
-import { and, asc, db, eq, inArray, isNull, sql } from "void/db";
+import { and, db, eq, inArray, isNull, sql } from "void/db";
 import { sqliteTable, text } from "void/schema-d1";
 
 import { SEARCHABLE_FORMATS } from "../tables/formats";
 import { physicalTableName, quoteIdent } from "../tables/naming";
-import {
-  conditionError,
-  type FilterCondition,
-  type FilterKind,
-  filterKind,
-  isSortableFormat,
-} from "./filters";
+import type { Column, Table } from "../tables/repository";
+import { type FilterCondition, type FilterKind, filterKind } from "./filters";
 import type { ResolvedRecordsQuery } from "./query";
-import { isEditableColumn, toDbValue, valueSchema } from "./values";
+import { shapeRecord } from "./shape";
+import type { ParsedValue } from "./values";
 
 type Fragment = ReturnType<typeof sql>;
-type Column = typeof columnTable.$inferSelect;
-type Table = typeof tableTable.$inferSelect;
 
 const TEXT_SORT_FORMATS = ["text", "long_text", "email", "url", "phone", "color", "single_select"];
+
+const SYSTEM_SORTS = ["id", "created_at", "updated_at"];
 
 const RECORD_OPTIONS_LIMIT = 10;
 const EXPORT_LIMIT = 10_000;
@@ -105,22 +100,7 @@ function conditionSql(column: Column, kind: FilterKind, condition: FilterConditi
   }
 }
 
-const parse = (value: unknown) => {
-  if (typeof value !== "string") return value;
-  try {
-    return JSON.parse(value) as unknown;
-  } catch {
-    return value;
-  }
-};
-
-async function recordSource(workspace: string, table: Table) {
-  const columns = await db
-    .select()
-    .from(columnTable)
-    .where(and(eq(columnTable.tableId, table.id), isNull(columnTable.deletedAt)))
-    .orderBy(asc(columnTable.position));
-
+async function recordSource(workspace: string, table: Table, columns: Column[]) {
   const targetIds = columns
     .filter((column) => column.format === "relation")
     .map((column) => Number((column.options as { tableId?: number }).tableId));
@@ -157,49 +137,20 @@ async function recordSource(workspace: string, table: Table) {
   }
 
   return {
-    columns,
     select: raw(selects.join(", ")),
     from: sql`${raw(quoteIdent(physicalTableName(workspace, table.tableName)))} t`,
   };
 }
 
-export function shapeRecord(row: Record<string, unknown>, columns: Column[]) {
-  const record: Record<string, unknown> = { id: row.id };
-  for (const key of ["created_at", "updated_at"]) if (key in row) record[key] = row[key];
-  for (const key of ["created_by", "updated_by"])
-    if (key in row)
-      record[key] = row[key] ? { id: row[key], label: row[`${key}__label`] ?? null } : null;
-  for (const column of columns) {
-    const value = row[column.columnName];
-    if (column.format === "checkbox")
-      record[column.columnName] = value === null ? null : value === 1;
-    else if (["multi_select", "json", "file", "image"].includes(column.format))
-      record[column.columnName] = parse(value);
-    else if (column.format === "relation")
-      record[column.columnName] =
-        value === null || value === undefined
-          ? null
-          : { id: value, label: row[`${column.columnName}__label`] ?? null };
-    else record[column.columnName] = value ?? null;
-  }
-  return record;
-}
-
-export async function loadRecords(workspace: string, table: Table, query: ResolvedRecordsQuery) {
-  const { columns, select, from } = await recordSource(workspace, table);
+function filterWhere(columns: Column[], query: ResolvedRecordsQuery) {
   const byName = new Map(columns.map((column) => [column.columnName, column]));
-
   const where: Fragment[] = [];
 
   const conditions: Fragment[] = [];
   for (const condition of query.filters) {
     const column = byName.get(condition.column);
     const kind = column ? filterKind(column.format) : null;
-    if (!column || !kind || !column.isFilterable)
-      throw new HTTPException(400, { message: `"${condition.column}" can't be filtered.` });
-    const error = conditionError(kind, condition);
-    if (error) throw new HTTPException(400, { message: `${column.name}: ${error}` });
-    conditions.push(conditionSql(column, kind, condition));
+    if (column && kind) conditions.push(conditionSql(column, kind, condition));
   }
   if (conditions.length)
     where.push(sql`(${sql.join(conditions, query.join === "or" ? sql` or ` : sql` and `)})`);
@@ -219,57 +170,63 @@ export async function loadRecords(workspace: string, table: Table, query: Resolv
       );
   }
 
-  let orderBy = sql`t."id" asc`;
-  if (query.sort) {
-    const system = ["id", "created_at", "updated_at"];
-    const column = byName.get(query.sort);
-    const direction = raw(query.order === "desc" ? "desc" : "asc");
-
-    if (system.includes(query.sort)) {
-      orderBy = sql`${raw(`t.${quoteIdent(query.sort)}`)} ${direction}, t."id" asc`;
-    } else if (!column || !column.isSortable || !isSortableFormat(column.format)) {
-      throw new HTTPException(400, { message: `"${query.sort}" can't be sorted.` });
-    } else {
-      const collate = raw(TEXT_SORT_FORMATS.includes(column.format) ? " collate nocase" : "");
-      orderBy = sql`${col(column.columnName)} is null, ${col(column.columnName)}${collate} ${direction}, t."id" asc`;
-    }
-  }
-
-  const condition = where.length ? sql`${sql.join(where, sql` and `)}` : sql`1 = 1`;
-
-  try {
-    const [rows, [{ n: total }]] = await Promise.all([
-      db.all<Record<string, unknown>>(
-        sql`select ${select} from ${from} where ${condition} order by ${orderBy} limit ${query.pageSize} offset ${(query.page - 1) * query.pageSize}`,
-      ),
-      db.all<{ n: number }>(sql`select count(*) as n from ${from} where ${condition}`),
-    ]);
-    return { total: Number(total), rows: rows.map((row) => shapeRecord(row, columns)) };
-  } catch (error) {
-    throw new HTTPException(400, {
-      message: error instanceof Error ? error.message : "The records could not be loaded.",
-    });
-  }
+  return where.length ? sql`${sql.join(where, sql` and `)}` : sql`1 = 1`;
 }
 
-export async function loadRecord(workspace: string, table: Table, recordId: string) {
-  const { columns, select, from } = await recordSource(workspace, table);
+function recordsOrder(columns: Column[], query: ResolvedRecordsQuery) {
+  if (!query.sort) return sql`t."id" asc`;
+  const direction = raw(query.order === "desc" ? "desc" : "asc");
+
+  if (SYSTEM_SORTS.includes(query.sort))
+    return sql`${raw(`t.${quoteIdent(query.sort)}`)} ${direction}, t."id" asc`;
+
+  const column = columns.find((item) => item.columnName === query.sort);
+  if (!column) return sql`t."id" asc`;
+  const collate = raw(TEXT_SORT_FORMATS.includes(column.format) ? " collate nocase" : "");
+  return sql`${col(column.columnName)} is null, ${col(column.columnName)}${collate} ${direction}, t."id" asc`;
+}
+
+export async function findRecords(
+  workspace: string,
+  table: Table,
+  columns: Column[],
+  query: ResolvedRecordsQuery,
+) {
+  const { select, from } = await recordSource(workspace, table, columns);
+  const condition = filterWhere(columns, query);
+  const orderBy = recordsOrder(columns, query);
+
+  const [rows, [{ n: total }]] = await Promise.all([
+    db.all<Record<string, unknown>>(
+      sql`select ${select} from ${from} where ${condition} order by ${orderBy} limit ${query.pageSize} offset ${(query.page - 1) * query.pageSize}`,
+    ),
+    db.all<{ n: number }>(sql`select count(*) as n from ${from} where ${condition}`),
+  ]);
+  return { total: Number(total), rows: rows.map((row) => shapeRecord(row, columns)) };
+}
+
+export async function findRecord(
+  workspace: string,
+  table: Table,
+  columns: Column[],
+  recordId: string,
+) {
+  const { select, from } = await recordSource(workspace, table, columns);
   const [row] = await db.all<Record<string, unknown>>(
     sql`select ${select} from ${from} where t."id" = ${recordId} limit 1`,
   );
-  if (!row) throw new HTTPException(404, { message: "Record not found." });
-  return shapeRecord(row, columns);
+  return row ? shapeRecord(row, columns) : undefined;
 }
 
-export async function loadExportRecords(workspace: string, table: Table) {
-  const columns = (await activeColumns(table)).filter((column) => column.format !== "binary");
+export async function findExportRecords(workspace: string, table: Table, columns: Column[]) {
+  const exported = columns.filter((column) => column.format !== "binary");
   const names = [
     "id",
     "created_at",
     "updated_at",
     "created_by",
     "updated_by",
-    ...columns.map((column) => column.columnName),
+    ...exported.map((column) => column.columnName),
   ];
 
   const rows = await db.all<Record<string, unknown>>(
@@ -277,12 +234,12 @@ export async function loadExportRecords(workspace: string, table: Table) {
   );
 
   return {
-    rows: rows.slice(0, EXPORT_LIMIT).map((row) => shapeRecord(row, columns)),
+    rows: rows.slice(0, EXPORT_LIMIT).map((row) => shapeRecord(row, exported)),
     truncated: rows.length > EXPORT_LIMIT,
   };
 }
 
-export async function loadRecordOptions(workspace: string, table: Table, term: string) {
+export async function findRecordOptions(workspace: string, table: Table, term: string) {
   const [title] = table.titleColumnId
     ? await db
         .select({ columnName: columnTable.columnName })
@@ -300,39 +257,12 @@ export async function loadRecordOptions(workspace: string, table: Table, term: s
   );
 }
 
-export function apiError(status: 400 | 404 | 409, message: string, field?: string) {
-  return new HTTPException(
-    status,
-    field ? { res: Response.json({ message, field }, { status }) } : { message },
-  );
-}
+export type BrokenLink = { column: Column; reason: "table" | "record" };
 
-export async function activeColumns(table: Table) {
-  return db
-    .select()
-    .from(columnTable)
-    .where(and(eq(columnTable.tableId, table.id), isNull(columnTable.deletedAt)));
-}
-
-export type ParsedValue = { column: Column; value: string | number | null };
-
-export function parseValues(columns: Column[], values: Record<string, unknown>) {
-  const byName = new Map(columns.map((column) => [column.columnName, column]));
-  return Object.entries(values).map(([key, input]) => {
-    const column = byName.get(key);
-    if (!column || !isEditableColumn(column)) throw apiError(400, `"${key}" can't be edited.`);
-    const parsed = valueSchema(column).safeParse(input);
-    if (!parsed.success)
-      throw apiError(
-        400,
-        `${column.name}: ${parsed.error.issues[0]?.message ?? "Invalid value"}`,
-        column.columnName,
-      );
-    return { column, value: toDbValue(column.format, parsed.data) };
-  });
-}
-
-export async function assertLinksExist(workspace: string, parsed: ParsedValue[]) {
+export async function findBrokenLink(
+  workspace: string,
+  parsed: ParsedValue<Column>[],
+): Promise<BrokenLink | undefined> {
   for (const { column, value } of parsed) {
     if (column.format !== "relation" || value === null) continue;
     const [target] = await db
@@ -345,51 +275,13 @@ export async function assertLinksExist(workspace: string, parsed: ParsedValue[])
         ),
       )
       .limit(1);
-    if (!target)
-      throw apiError(400, `${column.name}: the linked table no longer exists.`, column.columnName);
+    if (!target) return { column, reason: "table" };
     const [found] = await db.all<{ found: number }>(
       sql`select 1 as found from ${raw(quoteIdent(physicalTableName(workspace, target.tableName)))} where "id" = ${value} limit 1`,
     );
-    if (!found)
-      throw apiError(
-        400,
-        `${column.name}: the linked record no longer exists. Refresh and pick again.`,
-        column.columnName,
-      );
+    if (!found) return { column, reason: "record" };
   }
-}
-
-export function assertRequired(columns: Column[], parsed: ParsedValue[]) {
-  const missing = columns.find(
-    (column) =>
-      column.isRequired &&
-      isEditableColumn(column) &&
-      column.defaultValue === null &&
-      !parsed.some((item) => item.column.id === column.id && item.value !== null),
-  );
-  if (missing) throw apiError(400, `${missing.name}: This field is required`, missing.columnName);
-}
-
-export function writeError(error: unknown, columns: Column[] = []): never {
-  const message = [error, (error as { cause?: unknown })?.cause]
-    .map((item) => (item instanceof Error ? item.message : ""))
-    .join(" ");
-  if (/UNIQUE constraint/i.test(message)) {
-    const failed = /UNIQUE constraint failed: ([\w.]+)/i.exec(message)?.[1]?.split(".").pop();
-    const column = columns.find((item) => item.columnName === failed);
-    throw apiError(
-      409,
-      column
-        ? `${column.name}: another record already uses this value.`
-        : "Another record already uses this value.",
-      column?.columnName,
-    );
-  }
-  if (/FOREIGN KEY/i.test(message)) throw apiError(400, "A linked record or user doesn't exist.");
-  if (/CHECK constraint/i.test(message))
-    throw apiError(400, "A value doesn't meet its column's rules.");
-  if (/NOT NULL constraint/i.test(message)) throw apiError(400, "A required value is missing.");
-  throw apiError(400, message);
+  return undefined;
 }
 
 export function recordsTable(workspace: string, table: Table, names: string[] = []) {
@@ -402,7 +294,7 @@ export function recordsTable(workspace: string, table: Table, names: string[] = 
 export function insertRecord(
   workspace: string,
   table: Table,
-  parsed: ParsedValue[],
+  parsed: ParsedValue<Column>[],
   system: Record<string, unknown>,
 ) {
   const row = {
@@ -413,18 +305,26 @@ export function insertRecord(
   return db.insert(target).values(row).returning({ id: target.id });
 }
 
-export async function updateRecord(
+export async function createRecordRow(
+  workspace: string,
+  table: Table,
+  parsed: ParsedValue<Column>[],
+  userId: string,
+) {
+  const [created] = (await insertRecord(workspace, table, parsed, {
+    created_by: userId,
+    updated_by: userId,
+  })) as { id: string | number }[];
+  return created;
+}
+
+export async function updateRecordRow(
   workspace: string,
   table: Table,
   recordId: string,
-  values: Record<string, unknown>,
+  parsed: ParsedValue<Column>[],
   userId: string,
 ) {
-  const columns = await activeColumns(table);
-  const parsed = parseValues(columns, values);
-  if (parsed.length === 0) throw apiError(400, "Nothing to update.");
-  await assertLinksExist(workspace, parsed);
-
   const assignments = parsed.map(
     ({ column, value }) => sql`${raw(quoteIdent(column.columnName))} = ${value}`,
   );
@@ -433,40 +333,8 @@ export async function updateRecord(
     sql`"updated_by" = ${userId}`,
   );
 
-  let updated: unknown[] = [];
-  try {
-    updated = await db.all(
-      sql`update ${raw(quoteIdent(physicalTableName(workspace, table.tableName)))} set ${sql.join(assignments, sql`, `)} where "id" = ${recordId} returning "id"`,
-    );
-  } catch (error) {
-    writeError(error, columns);
-  }
-  if (updated.length === 0) throw apiError(404, "Record not found.");
-
-  return { ok: true };
-}
-
-export async function createRecord(
-  workspace: string,
-  table: Table,
-  values: Record<string, unknown>,
-  userId: string,
-) {
-  const columns = await activeColumns(table);
-  const parsed = parseValues(columns, values);
-  await assertLinksExist(workspace, parsed);
-  assertRequired(columns, parsed);
-
-  let created: { id: string | number } | undefined;
-  try {
-    [created] = (await insertRecord(workspace, table, parsed, {
-      created_by: userId,
-      updated_by: userId,
-    })) as { id: string | number }[];
-  } catch (error) {
-    writeError(error, columns);
-  }
-  if (!created) throw apiError(400, "The record could not be created.");
-
-  return { id: created.id };
+  const updated = await db.all(
+    sql`update ${raw(quoteIdent(physicalTableName(workspace, table.tableName)))} set ${sql.join(assignments, sql`, `)} where "id" = ${recordId} returning "id"`,
+  );
+  return updated.length > 0;
 }

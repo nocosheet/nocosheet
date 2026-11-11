@@ -1,108 +1,39 @@
-import { columnTable, resourceTable, tableTable } from "@db/schema";
-import { HTTPException } from "hono/http-exception";
 import { defineHandler } from "void";
 import { requireAuth } from "void/auth";
-import { and, asc, count, db, desc, eq, isNotNull, isNull, or, sql } from "void/db";
 
 import { requireAdmin } from "@/lib/auth/require-admin";
-import { buildCreateTable } from "@/lib/tables/ddl";
-import { physicalTableName, toTableName } from "@/lib/tables/naming";
+import { conflictOrBadRequest, httpError } from "@/lib/http";
+import { toTableName } from "@/lib/tables/naming";
 import { resolveTablesQuery, tablesSearchSchema } from "@/lib/tables/query";
-import { conflictOrBadRequest, deleteTables } from "@/lib/tables/server";
+import {
+  createTable,
+  dropTables,
+  findLinkingColumns,
+  findTables,
+  findTrashedTableByName,
+  listTables,
+  softDeleteTables,
+} from "@/lib/tables/repository";
 import { tableInputSchema, tablesDeleteSchema } from "@/lib/tables/validation";
 
-export const GET = defineHandler.withValidator({ query: tablesSearchSchema })(async (
-  _c,
-  { query },
-) => {
-  const { page, pageSize, sort, order, q } = resolveTablesQuery(query);
-
-  const columnCount = sql<number>`(select count(*) from ${columnTable} where ${columnTable.tableId} = ${tableTable}.id and ${columnTable.deletedAt} is null)`;
-  const pattern = q ? `%${q.replaceAll(/[\\%_]/g, "\\$&")}%` : null;
-
-  const where = and(
-    isNull(tableTable.deletedAt),
-    pattern
-      ? or(
-          sql`${tableTable.name} like ${pattern} escape '\\'`,
-          sql`${tableTable.tableName} like ${pattern} escape '\\'`,
-          sql`${tableTable.description} like ${pattern} escape '\\'`,
-        )
-      : undefined,
-  );
-
-  const sortExpression = {
-    name: sql`lower(${tableTable.name})`,
-    groupName: sql`lower(${tableTable.groupName})`,
-    columnCount,
-    updatedAt: tableTable.updatedAt,
-  }[sort];
-  const direction = order === "desc" ? desc : asc;
-
-  const [rows, [{ total }]] = await db.batch([
-    db
-      .select({
-        id: tableTable.id,
-        name: tableTable.name,
-        tableName: tableTable.tableName,
-        icon: tableTable.icon,
-        groupName: tableTable.groupName,
-        description: tableTable.description,
-        idType: tableTable.idType,
-        titleColumnId: tableTable.titleColumnId,
-        columnCount,
-        updatedAt: tableTable.updatedAt,
-      })
-      .from(tableTable)
-      .where(where)
-      .orderBy(direction(sortExpression), asc(tableTable.id))
-      .limit(pageSize)
-      .offset((page - 1) * pageSize),
-    db.select({ total: count() }).from(tableTable).where(where),
-  ]);
-
-  return { rows, total };
-});
+export const GET = defineHandler.withValidator({ query: tablesSearchSchema })(
+  async (_c, { query }) => listTables(resolveTablesQuery(query)),
+);
 
 export const POST = defineHandler(
   requireAdmin,
   defineHandler.withValidator({ body: tableInputSchema })(async (c, { body }) => {
     const user = requireAuth(c);
-    const workspace = c.get("workspaceId");
-    const tableName = toTableName(body.name);
-    const physicalName = physicalTableName(workspace, tableName);
-    const createTable = buildCreateTable({ ...body, physicalName });
 
-    const [trashed] = await db
-      .select({ name: tableTable.name })
-      .from(tableTable)
-      .where(and(eq(tableTable.tableName, tableName), isNotNull(tableTable.deletedAt)))
-      .limit(1);
+    const trashed = await findTrashedTableByName(toTableName(body.name));
     if (trashed)
-      throw new HTTPException(409, {
-        message: `A deleted table named "${trashed.name}" is still in the trash. Restore it or delete it forever from the trash first.`,
-      });
+      throw httpError(
+        409,
+        `A deleted table named "${trashed.name}" is still in the trash. Restore it or delete it forever from the trash first.`,
+      );
 
     try {
-      const [, , inserted] = await db.batch([
-        db.run(sql.raw(createTable)),
-        db.insert(resourceTable).values({ kind: "table" }),
-        db
-          .insert(tableTable)
-          .values({
-            id: sql`last_insert_rowid()`,
-            tableName,
-            name: body.name,
-            description: body.description,
-            icon: body.icon,
-            groupName: body.groupName,
-            idType: body.idType,
-            position: sql`(select coalesce(max(position), -1) + 1 from ${tableTable})`,
-            createdBy: user.id,
-          })
-          .returning(),
-      ]);
-      return inserted[0];
+      return await createTable(c.get("workspaceId"), body, user.id);
     } catch (error) {
       conflictOrBadRequest(error, "A table with this name already exists.");
     }
@@ -112,10 +43,27 @@ export const POST = defineHandler(
 export const DELETE = defineHandler(
   requireAdmin,
   defineHandler.withValidator({ body: tablesDeleteSchema })(async (c, { body }) => {
-    await deleteTables(c.get("workspaceId"), body.ids, {
-      userId: requireAuth(c).id,
-      permanent: body.permanent,
-    });
+    const ids = [...new Set(body.ids)];
+
+    const tables = await findTables(ids);
+    if (tables.length !== ids.length) throw httpError(404, "Table not found.");
+
+    const [link] = await findLinkingColumns(ids, { liveOnly: true });
+    if (link)
+      throw httpError(
+        409,
+        `"${link.table}" has a column "${link.column}" that links to a table you are deleting. Delete "${link.table}" first.`,
+      );
+
+    try {
+      if (body.permanent) await dropTables(c.get("workspaceId"), tables);
+      else await softDeleteTables(ids, requireAuth(c).id);
+    } catch (error) {
+      throw httpError(
+        409,
+        error instanceof Error ? error.message : "The tables could not be deleted.",
+      );
+    }
     return { ok: true };
   }),
 );

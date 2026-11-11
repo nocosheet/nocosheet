@@ -2,25 +2,13 @@ import { columnTable, tableTable, trashTable } from "@db/schema";
 import { and, asc, count, db, desc, eq, inArray, isNull, lt, or, sql } from "void/db";
 
 import { physicalTableName, quoteIdent } from "../tables/naming";
+import type { Column, Table } from "../tables/repository";
 import type { TrashQuery } from "../trash/query";
-import { TRASH_RETENTION_DAYS } from "./retention";
-import {
-  activeColumns,
-  apiError,
-  assertLinksExist,
-  assertRequired,
-  insertRecord,
-  recordsTable,
-  parseValues,
-  shapeRecord,
-  writeError,
-  type ParsedValue,
-} from "./server";
+import { insertRecord, recordsTable } from "./repository";
+import type { ParsedValue } from "./values";
 
-type Table = typeof tableTable.$inferSelect;
-type Column = typeof columnTable.$inferSelect;
-type Row = Record<string, unknown>;
-type Snapshot = { table: Table; rows: Row[] };
+export type Row = Record<string, unknown>;
+export type Snapshot = { table: Table; rows: Row[] };
 
 const CHUNK = 50;
 const INSERT_CHUNK = 15;
@@ -37,9 +25,11 @@ const chunks = <T>(items: T[], size: number) =>
   Array.from({ length: Math.ceil(items.length / size) }, (_, index) =>
     items.slice(index * size, (index + 1) * size),
   );
-const storable = (column: Column) => !column.generatedExpression && column.format !== "binary";
 
-async function selectRows(workspace: string, table: Table, columns: Column[], ids: unknown[]) {
+export const isStorableColumn = (column: Column) =>
+  !column.generatedExpression && column.format !== "binary";
+
+export async function findRows(workspace: string, table: Table, columns: Column[], ids: unknown[]) {
   const names = raw(
     [
       "id",
@@ -47,7 +37,7 @@ async function selectRows(workspace: string, table: Table, columns: Column[], id
       "updated_at",
       "created_by",
       "updated_by",
-      ...columns.filter(storable).map((column) => column.columnName),
+      ...columns.filter(isStorableColumn).map((column) => column.columnName),
     ]
       .map(quoteIdent)
       .join(", "),
@@ -62,7 +52,7 @@ async function selectRows(workspace: string, table: Table, columns: Column[], id
   return rows;
 }
 
-async function referencingColumns(tableId: number) {
+export async function listReferencingColumns(tableId: number) {
   const rows = await db
     .select({ column: columnTable, table: tableTable })
     .from(columnTable)
@@ -73,50 +63,31 @@ async function referencingColumns(tableId: number) {
   );
 }
 
-async function collect(
+export async function findLinkedIds(
   workspace: string,
-  table: Table,
+  source: Table,
+  column: Column,
   ids: unknown[],
-  out: Snapshot[],
-  seen: Set<string>,
 ) {
-  const fresh = ids.filter((id) => !seen.has(`${table.id}:${String(id)}`));
-  fresh.forEach((id) => seen.add(`${table.id}:${String(id)}`));
-  if (fresh.length === 0) return;
-
-  const rows = await selectRows(workspace, table, await activeColumns(table), fresh);
-  if (rows.length === 0) return;
-  out.push({ table, rows });
-
-  for (const { column, table: source } of await referencingColumns(table.id)) {
-    if ((column.options as { onDelete?: string }).onDelete !== "cascade") continue;
-    const linked: unknown[] = [];
-    for (const part of chunks(
-      rows.map((row) => row.id),
-      CHUNK,
-    ))
-      linked.push(
-        ...(
-          await db.all<{ id: unknown }>(
-            sql`select "id" from ${physical(workspace, source)} where ${raw(quoteIdent(column.columnName))} in (${idList(part)})`,
-          )
-        ).map((row) => row.id),
-      );
-    await collect(workspace, source, linked, out, seen);
-  }
+  const linked: unknown[] = [];
+  for (const part of chunks(ids, CHUNK))
+    linked.push(
+      ...(
+        await db.all<{ id: unknown }>(
+          sql`select "id" from ${physical(workspace, source)} where ${raw(quoteIdent(column.columnName))} in (${idList(part)})`,
+        )
+      ).map((row) => row.id),
+    );
+  return linked;
 }
 
-export async function deleteRecords(
+export async function trashAndDeleteRows(
   workspace: string,
   table: Table,
-  ids: (string | number)[],
+  snapshots: Snapshot[],
+  topIds: unknown[],
   userId: string,
 ) {
-  const snapshots: Snapshot[] = [];
-  await collect(workspace, table, [...new Set(ids)], snapshots, new Set());
-  const top = snapshots[0];
-  if (!top) throw apiError(404, "Record not found.");
-
   const entries = snapshots.flatMap(({ table: owner, rows }) =>
     rows.map((row) => ({
       tableId: owner.id,
@@ -132,28 +103,15 @@ export async function deleteRecords(
       .returning({ id: trashTable.id, tableId: trashTable.tableId }),
   );
   const source = recordsTable(workspace, table);
-  const removals = chunks(
-    top.rows.map((row) => row.id),
-    CHUNK,
-  ).map((part) => db.delete(source).where(inArray(source.id, part as string[])));
+  const removals = chunks(topIds, CHUNK).map((part) =>
+    db.delete(source).where(inArray(source.id, part as string[])),
+  );
 
-  let results: unknown[];
-  try {
-    results = await db.batch([...inserts, ...removals] as never);
-  } catch (error) {
-    const message = [error, (error as { cause?: unknown })?.cause]
-      .map((item) => (item instanceof Error ? item.message : ""))
-      .join(" ");
-    if (/FOREIGN KEY/i.test(message))
-      throw apiError(409, "Some of these records are still linked from other records.");
-    throw apiError(400, message);
-  }
-
-  const trash = (results.slice(0, inserts.length) as { id: number; tableId: number }[][])
+  const results = (await db.batch([...inserts, ...removals] as never)) as unknown[];
+  return (results.slice(0, inserts.length) as { id: number; tableId: number }[][])
     .flat()
     .filter((entry) => entry.tableId === table.id)
     .map((entry) => entry.id);
-  return { trash };
 }
 
 export async function listTrash(table: Table, query: TrashQuery) {
@@ -215,17 +173,18 @@ export async function listTrash(table: Table, query: TrashQuery) {
   };
 }
 
-async function findEntry(table: Table, entryId: number) {
+export async function findTrashEntry(table: Table, entryId: number) {
   const [entry] = await db
     .select()
     .from(trashTable)
     .where(and(eq(trashTable.id, entryId), eq(trashTable.tableId, table.id)))
     .limit(1);
-  if (!entry) throw apiError(404, "This record is no longer in the trash.");
   return entry;
 }
 
-async function snapshotLabels(workspace: string, columns: Column[], row: Row) {
+export async function findSnapshotLabels(workspace: string, columns: Column[], row: Row) {
+  const labels: Row = {};
+
   for (const column of columns) {
     const value = row[column.columnName];
     if (column.format !== "relation" || value === null || value === undefined) continue;
@@ -244,7 +203,7 @@ async function snapshotLabels(workspace: string, columns: Column[], row: Row) {
     const [found] = await db.all<{ label: string | null }>(
       sql`select cast(${raw(quoteIdent(target.title ?? "id"))} as text) as label from ${raw(quoteIdent(physicalTableName(workspace, target.tableName)))} where "id" = ${value} limit 1`,
     );
-    if (found) row[`${column.columnName}__label`] = found.label;
+    if (found) labels[`${column.columnName}__label`] = found.label;
   }
 
   for (const key of ["created_by", "updated_by"]) {
@@ -252,68 +211,31 @@ async function snapshotLabels(workspace: string, columns: Column[], row: Row) {
     const [user] = await db.all<{ name: string }>(
       sql`select "name" from "user" where "id" = ${row[key]} limit 1`,
     );
-    if (user) row[`${key}__label`] = user.name;
+    if (user) labels[`${key}__label`] = user.name;
   }
+
+  return labels;
 }
 
-export async function loadTrashEntry(workspace: string, table: Table, entryId: number) {
-  const entry = await findEntry(table, entryId);
-  const columns = await activeColumns(table);
-  const row: Row = { ...entry.data };
-  await snapshotLabels(workspace, columns, row);
-  return { id: entry.id, deletedAt: entry.deletedAt.getTime(), record: shapeRecord(row, columns) };
+export async function findExistingUserIds(ids: string[]) {
+  if (ids.length === 0) return new Set<string>();
+  const rows = await db.all<{ id: string }>(
+    sql`select "id" from "user" where "id" in (${idList(ids)})`,
+  );
+  return new Set(rows.map((row) => row.id));
 }
 
-export async function restoreRecord(
+export async function restoreRow(
   workspace: string,
   table: Table,
   entryId: number,
-  overrides: Record<string, unknown>,
+  parsed: ParsedValue<Column>[],
+  system: Record<string, unknown>,
 ) {
-  const entry = await findEntry(table, entryId);
-  const snapshot = entry.data;
-  const columns = await activeColumns(table);
-
-  const edits = parseValues(columns, overrides);
-  const edited = new Set(edits.map((edit) => edit.column.id));
-  const kept: ParsedValue[] = columns
-    .filter((column) => storable(column) && column.columnName in snapshot && !edited.has(column.id))
-    .map((column) => ({ column, value: snapshot[column.columnName] as string | number | null }));
-  const parsed = [...kept, ...edits];
-
-  await assertLinksExist(workspace, parsed);
-  assertRequired(columns, parsed);
-
-  const authors = [snapshot.created_by, snapshot.updated_by].filter(
-    (value): value is string => typeof value === "string",
-  );
-  const known = new Set(
-    authors.length
-      ? (
-          await db.all<{ id: string }>(
-            sql`select "id" from "user" where "id" in (${idList(authors)})`,
-          )
-        ).map((user) => user.id)
-      : [],
-  );
-  const author = (value: unknown) => (typeof value === "string" && known.has(value) ? value : null);
-
-  try {
-    await db.batch([
-      insertRecord(workspace, table, parsed, {
-        id: snapshot.id,
-        created_at: snapshot.created_at,
-        updated_at: snapshot.updated_at,
-        created_by: author(snapshot.created_by),
-        updated_by: author(snapshot.updated_by),
-      }),
-      db.delete(trashTable).where(eq(trashTable.id, entry.id)),
-    ]);
-  } catch (error) {
-    writeError(error, columns);
-  }
-
-  return { id: snapshot.id };
+  await db.batch([
+    insertRecord(workspace, table, parsed, system),
+    db.delete(trashTable).where(eq(trashTable.id, entryId)),
+  ]);
 }
 
 export async function purgeTrashEntry(table: Table, entryId: number) {
@@ -321,11 +243,10 @@ export async function purgeTrashEntry(table: Table, entryId: number) {
     .delete(trashTable)
     .where(and(eq(trashTable.id, entryId), eq(trashTable.tableId, table.id)))
     .returning({ id: trashTable.id });
-  if (removed.length === 0) throw apiError(404, "This record is no longer in the trash.");
+  return removed.length > 0;
 }
 
-export async function purgeExpiredTrash() {
-  const cutoff = new Date(Date.now() - TRASH_RETENTION_DAYS * 24 * 60 * 60 * 1000);
+export async function purgeExpiredTrashEntries(cutoff: Date) {
   const removed = await db
     .delete(trashTable)
     .where(lt(trashTable.deletedAt, cutoff))

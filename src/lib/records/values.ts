@@ -91,3 +91,53 @@ export function toDbValue(format: string, value: unknown) {
   if (format === "multi_select" || format === "json") return JSON.stringify(value);
   return value as string | number;
 }
+
+export type WriteColumn = ColumnLike & {
+  id: number;
+  columnName: string;
+  name: string;
+  defaultValue: string | null;
+};
+
+export type ParsedValue<C extends WriteColumn = WriteColumn> = {
+  column: C;
+  value: string | number | null;
+};
+
+export type ParseResult<C extends WriteColumn> =
+  | { ok: true; values: ParsedValue<C>[] }
+  | { ok: false; message: string; field?: string };
+
+export function parseRecordValues<C extends WriteColumn>(
+  columns: C[],
+  values: Record<string, unknown>,
+): ParseResult<C> {
+  const byName = new Map(columns.map((column) => [column.columnName, column]));
+  const parsed: ParsedValue<C>[] = [];
+
+  for (const [key, input] of Object.entries(values)) {
+    const column = byName.get(key);
+    if (!column || !isEditableColumn(column))
+      return { ok: false, message: `"${key}" can't be edited.` };
+    const result = valueSchema(column).safeParse(input);
+    if (!result.success)
+      return {
+        ok: false,
+        message: `${column.name}: ${result.error.issues[0]?.message ?? "Invalid value"}`,
+        field: column.columnName,
+      };
+    parsed.push({ column, value: toDbValue(column.format, result.data) as string | number | null });
+  }
+
+  return { ok: true, values: parsed };
+}
+
+export function findMissingRequired<C extends WriteColumn>(columns: C[], parsed: ParsedValue<C>[]) {
+  return columns.find(
+    (column) =>
+      column.isRequired &&
+      isEditableColumn(column) &&
+      column.defaultValue === null &&
+      !parsed.some((item) => item.column.id === column.id && item.value !== null),
+  );
+}

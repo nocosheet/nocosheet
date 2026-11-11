@@ -22,8 +22,8 @@ import { SidebarMenuAction, useSidebar } from "@/components/ui/sidebar";
 import { toastManager } from "@/components/ui/toast";
 import { setFavoriteMutationOptions } from "@/data/workspace/favorite";
 import { workspaceKeys } from "@/data/workspace/keys";
+import type { SidebarTable } from "@/data/workspace/sidebar";
 import { useWorkspace } from "@/hooks/use-workspace";
-import type { SidebarTable } from "@/lib/tables/sidebar";
 
 /** The "…" menu on a sidebar table row: favorite, copy link, open in a new tab, definition. */
 export function TableMenu({ table, workspace }: { table: SidebarTable; workspace: string }) {
