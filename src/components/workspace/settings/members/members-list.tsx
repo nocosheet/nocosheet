@@ -102,7 +102,10 @@ export function MembersList({ workspace }: { workspace: string }) {
               )}
               <div className="flex shrink-0 items-center gap-3">
                 <RoleBadge user={member} />
-                <span className="hidden text-muted-foreground text-sm sm:inline">
+                <span
+                  className="hidden w-36 text-end text-muted-foreground text-sm sm:inline-block"
+                  title={`Joined ${new Date(member.createdAt).toLocaleString()}`}
+                >
                   Joined {formatRelativeTime(member.createdAt)}
                 </span>
                 <CopyIdButton id={member.id} />
