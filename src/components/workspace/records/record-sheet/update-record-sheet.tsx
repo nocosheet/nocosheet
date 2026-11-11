@@ -23,6 +23,7 @@ function UpdateForm({
   recordId,
   record,
   columns,
+  canDelete,
   onDeleted,
 }: {
   workspace: string;
@@ -31,6 +32,7 @@ function UpdateForm({
   recordId: string;
   record: Record<string, unknown>;
   columns: ViewerColumn[];
+  canDelete: boolean;
   onDeleted: () => void;
 }) {
   const queryClient = useQueryClient();
@@ -68,15 +70,17 @@ function UpdateForm({
       error={update.error}
     >
       <SheetFooter>
-        <div className="me-auto">
-          <DeleteRecordsDialog
-            workspace={workspace}
-            tableId={tableId}
-            ids={[recordId]}
-            label="Delete"
-            onDeleted={onDeleted}
-          />
-        </div>
+        {canDelete && (
+          <div className="me-auto">
+            <DeleteRecordsDialog
+              workspace={workspace}
+              tableId={tableId}
+              ids={[recordId]}
+              label="Delete"
+              onDeleted={onDeleted}
+            />
+          </div>
+        )}
         <SheetClose render={<Button type="button" variant="ghost" />}>Cancel</SheetClose>
         <form.Subscribe selector={(state) => state.isDirty}>
           {(dirty) => (
@@ -94,11 +98,13 @@ export function UpdateRecordSheet({
   workspace,
   tableId,
   recordId,
+  canDelete = true,
   onClose,
 }: {
   workspace: string;
   tableId: number;
   recordId: string;
+  canDelete?: boolean;
   onClose: () => void;
 }) {
   const [open, setOpen] = useState(true);
@@ -123,6 +129,7 @@ export function UpdateRecordSheet({
             recordId={recordId}
             record={record}
             columns={buildViewerColumns(table)}
+            canDelete={canDelete}
             onDeleted={() => setOpen(false)}
           />
         ) : (

@@ -18,6 +18,7 @@ import { formatRelativeTime } from "@/lib/format-relative-time";
 import { MemberAccess } from "./member-access";
 import { MemberDangerZone } from "./member-danger-zone";
 import { MemberProfileForm } from "./member-profile-form";
+import { MemberRole } from "./member-role";
 import { MemberSecurity } from "./member-security";
 import { MemberSessions } from "./member-sessions";
 
@@ -31,6 +32,7 @@ export function MemberDetail({ userId }: { userId: string }) {
   return (
     <div className="flex flex-col gap-6">
       <MemberProfileForm key={member.updatedAt.toString()} member={member} isSelf={isSelf} />
+      <MemberRole userId={member.id} name={member.name} role={member.role} />
       <CardFrame>
         <CardFrameHeader>
           <CardFrameTitle>Account</CardFrameTitle>

@@ -6,6 +6,7 @@ import {
   KeyRoundIcon,
   PaletteIcon,
   PlugIcon,
+  ShieldCheckIcon,
   SlidersHorizontalIcon,
   UsersIcon,
 } from "lucide-react";
@@ -32,6 +33,12 @@ const groups = [
         exact: true,
       },
       { to: "/w/$workspace/settings/members", label: "Members", icon: UsersIcon, path: "/members" },
+      {
+        to: "/w/$workspace/settings/role",
+        label: "Role & Permissions",
+        icon: ShieldCheckIcon,
+        path: "/role",
+      },
       {
         to: "/w/$workspace/settings/billing",
         label: "Billing",

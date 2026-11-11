@@ -31,6 +31,7 @@ export function RecordsGrid<TSelected extends { rowSelection: Record<string, boo
   empty,
   workspace,
   canEdit,
+  canEditRow,
   onOpenRecord,
   onCellChange,
 }: {
@@ -44,6 +45,7 @@ export function RecordsGrid<TSelected extends { rowSelection: Record<string, boo
   empty: string;
   workspace: string;
   canEdit: boolean;
+  canEditRow: (row: ViewerRow) => boolean;
   onOpenRecord: (id: string | number) => void;
   onCellChange: (original: ViewerRow, draft: ViewerRow, column: ViewerColumn) => void;
 }) {
@@ -122,7 +124,7 @@ export function RecordsGrid<TSelected extends { rowSelection: Record<string, boo
                 )}
               </span>
             ),
-            editable: inline,
+            editable: inline ? canEditRow : false,
             editorOptions: { commitOnOutsideClick: mode === "input" },
             renderEditCell: inline
               ? (props) => <CellEditor {...props} column={meta} workspace={workspace} />
@@ -132,6 +134,7 @@ export function RecordsGrid<TSelected extends { rowSelection: Record<string, boo
                 <Checkbox
                   aria-label={meta.name}
                   checked={row[meta.key] === true}
+                  disabled={!canEditRow(row)}
                   onCheckedChange={(value) =>
                     onCellChange(row, { ...row, [meta.key]: !!value }, meta)
                   }
@@ -143,7 +146,7 @@ export function RecordsGrid<TSelected extends { rowSelection: Record<string, boo
         ];
       }),
     ],
-    [visibleKey, byKey, page, pageSize, selection, canEdit, workspace, onCellChange],
+    [visibleKey, byKey, page, pageSize, selection, canEdit, canEditRow, workspace, onCellChange],
   );
 
   const sortColumns: SortColumn[] = sort

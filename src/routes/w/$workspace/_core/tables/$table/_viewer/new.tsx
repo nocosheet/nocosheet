@@ -1,7 +1,7 @@
 import { createFileRoute, Navigate } from "@tanstack/react-router";
 
 import { CreateRecordSheet } from "@/components/workspace/records/record-sheet/create-record-sheet";
-import { useWorkspace } from "@/hooks/use-workspace";
+import { useAccess } from "@/hooks/use-access";
 
 export const Route = createFileRoute("/w/$workspace/_core/tables/$table/_viewer/new")({
   component: NewRecordPage,
@@ -10,9 +10,9 @@ export const Route = createFileRoute("/w/$workspace/_core/tables/$table/_viewer/
 function NewRecordPage() {
   const { workspace, table } = Route.useParams();
   const navigate = Route.useNavigate();
-  const { isAdmin } = useWorkspace();
+  const access = useAccess();
 
-  if (!isAdmin)
+  if (!access.can("create", Number(table)))
     return (
       <Navigate
         to="/w/$workspace/tables/$table"

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { keepPreviousData, useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { type ColumnDef, functionalUpdate, useTable } from "@tanstack/react-table";
@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { recordsQueryOptions } from "@/data/workspace/records";
 import { tableQueryOptions } from "@/data/workspace/tables";
-import { useWorkspace } from "@/hooks/use-workspace";
+import { useAccess } from "@/hooks/use-access";
 import { recordsSearchParams, resolveRecordsQuery } from "@/lib/records/query";
 import { cn } from "@/lib/utils";
 
@@ -34,7 +34,7 @@ export function GridView({
   tableId: number;
   onOpenRecord: (id: string | number) => void;
 }) {
-  const { isAdmin } = useWorkspace();
+  const access = useAccess();
   const { data: table } = useSuspenseQuery(tableQueryOptions(workspace, tableId));
   const [urlQuery, setUrlQuery] = useQueryStates(recordsSearchParams, { history: "replace" });
   const viewerColumns = useMemo(() => buildViewerColumns(table), [table]);
@@ -56,6 +56,12 @@ export function GridView({
   });
   const rows = (data?.rows ?? []) as ViewerRow[];
   const total = data?.total ?? 0;
+
+  const ownerOf = (row: ViewerRow) => (row.created_by as { id?: string } | null | undefined)?.id;
+  const canEditRow = useCallback(
+    (row: ViewerRow) => access.canOn("update", tableId, ownerOf(row)),
+    [access, tableId],
+  );
 
   const columnDefs = useMemo<ColumnDef<typeof dataTableFeatures, ViewerRow>[]>(
     () =>
@@ -140,8 +146,10 @@ export function GridView({
             {selectedRows.length} selected
           </Button>
           <div className="ms-auto flex items-center gap-2">
-            <RecordExport workspace={workspace} tableId={tableId} selected={selectedRows} />
-            {isAdmin && (
+            {access.can("export", tableId) && (
+              <RecordExport workspace={workspace} tableId={tableId} selected={selectedRows} />
+            )}
+            {selectedRows.every((row) => access.canOn("delete", tableId, ownerOf(row))) && (
               <DeleteRecordsDialog
                 workspace={workspace}
                 tableId={tableId}
@@ -203,7 +211,8 @@ export function GridView({
           page={query.page}
           pageSize={query.pageSize}
           workspace={workspace}
-          canEdit={isAdmin}
+          canEdit={access.can("update", tableId)}
+          canEditRow={canEditRow}
           onOpenRecord={onOpenRecord}
           onCellChange={(original, draft, column) => void updateCell(original, draft, column)}
           sort={query.sort}

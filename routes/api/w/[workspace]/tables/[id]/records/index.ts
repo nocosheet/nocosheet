@@ -2,14 +2,14 @@ import { defineHandler } from "void";
 import { requireAuth } from "void/auth";
 import { z } from "zod";
 
-import { requireAdmin } from "@/lib/auth/require-admin";
 import { httpError, writeFailure } from "@/lib/http";
 import { deleteRecords } from "@/lib/records/deletion";
 import { checkLinks } from "@/lib/records/links";
 import { recordsApiSchema, recordsDeleteSchema, resolveRecordsQuery } from "@/lib/records/query";
-import { createRecordRow, findRecords } from "@/lib/records/repository";
+import { countOwnedRecords, createRecordRow, findRecords } from "@/lib/records/repository";
 import { checkRecordsQuery } from "@/lib/records/validation";
 import { findMissingRequired, parseRecordValues, recordPatchSchema } from "@/lib/records/values";
+import { authorize } from "@/lib/roles/guard";
 import { findTable, listColumns } from "@/lib/tables/repository";
 
 const params = z.object({ workspace: z.string(), id: z.coerce.number().int().positive() });
@@ -18,6 +18,7 @@ export const GET = defineHandler.withValidator({ params, query: recordsApiSchema
   c,
   { params, query },
 ) => {
+  const { ownerId } = await authorize(requireAuth(c), "read", params.id);
   const table = await findTable(params.id);
   if (!table) throw httpError(404, "Table not found.");
   const columns = await listColumns(table.id);
@@ -27,7 +28,7 @@ export const GET = defineHandler.withValidator({ params, query: recordsApiSchema
   if (problem) throw httpError(400, problem);
 
   try {
-    return await findRecords(c.get("workspaceId"), table, columns, resolved);
+    return await findRecords(c.get("workspaceId"), table, columns, resolved, ownerId);
   } catch (error) {
     throw httpError(
       400,
@@ -36,48 +37,55 @@ export const GET = defineHandler.withValidator({ params, query: recordsApiSchema
   }
 });
 
-export const POST = defineHandler(
-  requireAdmin,
-  defineHandler.withValidator({ params, body: recordPatchSchema })(async (c, { params, body }) => {
-    const workspace = c.get("workspaceId");
-    const table = await findTable(params.id);
-    if (!table) throw httpError(404, "Table not found.");
-    const columns = await listColumns(table.id);
+export const POST = defineHandler.withValidator({ params, body: recordPatchSchema })(async (
+  c,
+  { params, body },
+) => {
+  const workspace = c.get("workspaceId");
+  await authorize(requireAuth(c), "create", params.id);
+  const table = await findTable(params.id);
+  if (!table) throw httpError(404, "Table not found.");
+  const columns = await listColumns(table.id);
 
-    const parsed = parseRecordValues(columns, body.values);
-    if (!parsed.ok) throw httpError(400, parsed.message, parsed.field);
+  const parsed = parseRecordValues(columns, body.values);
+  if (!parsed.ok) throw httpError(400, parsed.message, parsed.field);
 
-    const broken = await checkLinks(workspace, parsed.values);
-    if (broken) throw httpError(400, broken.message, broken.field);
+  const broken = await checkLinks(workspace, parsed.values);
+  if (broken) throw httpError(400, broken.message, broken.field);
 
-    const missing = findMissingRequired(columns, parsed.values);
-    if (missing)
-      throw httpError(400, `${missing.name}: This field is required`, missing.columnName);
+  const missing = findMissingRequired(columns, parsed.values);
+  if (missing) throw httpError(400, `${missing.name}: This field is required`, missing.columnName);
 
-    try {
-      const created = await createRecordRow(workspace, table, parsed.values, requireAuth(c).id);
-      if (!created) throw httpError(400, "The record could not be created.");
-      return { id: created.id };
-    } catch (error) {
-      writeFailure(error, columns);
-    }
-  }),
-);
+  try {
+    const created = await createRecordRow(workspace, table, parsed.values, requireAuth(c).id);
+    if (!created) throw httpError(400, "The record could not be created.");
+    return { id: created.id };
+  } catch (error) {
+    writeFailure(error, columns);
+  }
+});
 
-export const DELETE = defineHandler(
-  requireAdmin,
-  defineHandler.withValidator({ params, body: recordsDeleteSchema })(
-    async (c, { params, body }) => {
-      const table = await findTable(params.id);
-      if (!table) throw httpError(404, "Table not found.");
+export const DELETE = defineHandler.withValidator({ params, body: recordsDeleteSchema })(async (
+  c,
+  { params, body },
+) => {
+  const workspace = c.get("workspaceId");
+  const user = requireAuth(c);
+  const { ownerId } = await authorize(user, "delete", params.id);
+  const table = await findTable(params.id);
+  if (!table) throw httpError(404, "Table not found.");
 
-      const result = await deleteRecords(c.get("workspaceId"), table, body.ids, requireAuth(c).id);
-      if (!result.ok)
-        throw httpError(
-          result.reason === "not_found" ? 404 : result.reason === "linked" ? 409 : 400,
-          result.message,
-        );
-      return { trash: result.trash };
-    },
-  ),
-);
+  if (ownerId) {
+    const ids = [...new Set(body.ids)];
+    if ((await countOwnedRecords(workspace, table, ids, ownerId)) !== ids.length)
+      throw httpError(403, "You can only delete records you created.");
+  }
+
+  const result = await deleteRecords(workspace, table, body.ids, user.id);
+  if (!result.ok)
+    throw httpError(
+      result.reason === "not_found" ? 404 : result.reason === "linked" ? 409 : 400,
+      result.message,
+    );
+  return { trash: result.trash };
+});

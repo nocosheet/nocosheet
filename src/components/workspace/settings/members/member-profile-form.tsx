@@ -175,7 +175,7 @@ export function MemberProfileForm({ member, isSelf }: MemberProfileFormProps) {
           <form.Field name="role">
             {(field) => (
               <SettingsRow
-                title="Role"
+                title="Access level"
                 description={
                   isSelf
                     ? "You can't change your own role."

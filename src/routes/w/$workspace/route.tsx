@@ -1,5 +1,6 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 
+import { accessQueryOptions } from "@/data/workspace/access";
 import { membersQueryOptions } from "@/data/workspace/members";
 import { sidebarQueryOptions } from "@/data/workspace/sidebar";
 import { DEFAULT_ROLE, isAdmin } from "@/lib/auth/access";
@@ -27,6 +28,7 @@ export const Route = createFileRoute("/w/$workspace")({
     await Promise.all([
       context.queryClient.query({ ...membersQueryOptions, staleTime: "static" }),
       context.queryClient.query(sidebarQueryOptions(params.workspace)),
+      context.queryClient.query(accessQueryOptions(params.workspace)),
     ]);
   },
   component: Outlet,

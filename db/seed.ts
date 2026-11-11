@@ -2,7 +2,7 @@ import { defineSeed } from "void/seed";
 
 import { tables } from "./seed/data";
 import { seedTable, type SeedState } from "./seed/helpers";
-import { SEED_PASSWORD, seedUsers } from "./seed/users";
+import { SEED_PASSWORD, seedUsers, stableId } from "./seed/users";
 
 export default defineSeed<typeof import("./schema")>(async (context) => {
   if (context.dialect !== "sqlite")
@@ -33,6 +33,25 @@ export default defineSeed<typeof import("./schema")>(async (context) => {
     { userId: users.admin, tableId: tableId("Invoices") },
     { userId: users.member, tableId: tableId("Tasks") },
     { userId: users.member, tableId: tableId("Bug Reports") },
+  ]);
+
+  const roles = await db.select().from(schema.roleTable);
+  const roleId = (name: string) => {
+    const role = roles.find((item) => item.name === name);
+    if (!role) throw new Error(`Unknown role ${name}`);
+    return role.id;
+  };
+  await db.insert(schema.roleMemberTable).values([
+    {
+      userId: stableId("user:maya.chen@example.com"),
+      roleId: roleId("Editor"),
+      assignedBy: users.admin,
+    },
+    {
+      userId: stableId("user:kai.morgan@example.com"),
+      roleId: roleId("Contributor"),
+      assignedBy: users.admin,
+    },
   ]);
 
   console.log(

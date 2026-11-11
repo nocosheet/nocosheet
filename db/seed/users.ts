@@ -23,7 +23,8 @@ const MEMBERS_WITH_ACCOUNTS = new Set([
   "diego.alvarez@example.com",
 ]);
 
-const stableId = (key: string) => createHash("sha256").update(key).digest("hex").slice(0, 32);
+export const stableId = (key: string) =>
+  createHash("sha256").update(key).digest("hex").slice(0, 32);
 
 async function createAccount(db: SeedDb, account: Account) {
   const id = stableId(`user:${account.email}`);

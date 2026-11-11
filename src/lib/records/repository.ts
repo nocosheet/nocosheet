@@ -142,9 +142,9 @@ async function recordSource(workspace: string, table: Table, columns: Column[]) 
   };
 }
 
-function filterWhere(columns: Column[], query: ResolvedRecordsQuery) {
+function filterWhere(columns: Column[], query: ResolvedRecordsQuery, ownerId?: string) {
   const byName = new Map(columns.map((column) => [column.columnName, column]));
-  const where: Fragment[] = [];
+  const where: Fragment[] = ownerId ? [sql`t."created_by" = ${ownerId}`] : [];
 
   const conditions: Fragment[] = [];
   for (const condition of query.filters) {
@@ -191,9 +191,10 @@ export async function findRecords(
   table: Table,
   columns: Column[],
   query: ResolvedRecordsQuery,
+  ownerId?: string,
 ) {
   const { select, from } = await recordSource(workspace, table, columns);
-  const condition = filterWhere(columns, query);
+  const condition = filterWhere(columns, query, ownerId);
   const orderBy = recordsOrder(columns, query);
 
   const [rows, [{ n: total }]] = await Promise.all([
@@ -210,15 +211,21 @@ export async function findRecord(
   table: Table,
   columns: Column[],
   recordId: string,
+  ownerId?: string,
 ) {
   const { select, from } = await recordSource(workspace, table, columns);
   const [row] = await db.all<Record<string, unknown>>(
-    sql`select ${select} from ${from} where t."id" = ${recordId} limit 1`,
+    sql`select ${select} from ${from} where t."id" = ${recordId} ${ownerId ? sql`and t."created_by" = ${ownerId}` : sql``} limit 1`,
   );
   return row ? shapeRecord(row, columns) : undefined;
 }
 
-export async function findExportRecords(workspace: string, table: Table, columns: Column[]) {
+export async function findExportRecords(
+  workspace: string,
+  table: Table,
+  columns: Column[],
+  ownerId?: string,
+) {
   const exported = columns.filter((column) => column.format !== "binary");
   const names = [
     "id",
@@ -230,7 +237,7 @@ export async function findExportRecords(workspace: string, table: Table, columns
   ];
 
   const rows = await db.all<Record<string, unknown>>(
-    sql`select ${raw(names.map((name) => `t.${quoteIdent(name)} as ${quoteIdent(name)}`).join(", "))} from ${raw(quoteIdent(physicalTableName(workspace, table.tableName)))} t order by t."id" limit ${EXPORT_LIMIT + 1}`,
+    sql`select ${raw(names.map((name) => `t.${quoteIdent(name)} as ${quoteIdent(name)}`).join(", "))} from ${raw(quoteIdent(physicalTableName(workspace, table.tableName)))} t ${ownerId ? sql`where t."created_by" = ${ownerId}` : sql``} order by t."id" limit ${EXPORT_LIMIT + 1}`,
   );
 
   return {
@@ -239,7 +246,12 @@ export async function findExportRecords(workspace: string, table: Table, columns
   };
 }
 
-export async function findRecordOptions(workspace: string, table: Table, term: string) {
+export async function findRecordOptions(
+  workspace: string,
+  table: Table,
+  term: string,
+  ownerId?: string,
+) {
   const [title] = table.titleColumnId
     ? await db
         .select({ columnName: columnTable.columnName })
@@ -250,10 +262,13 @@ export async function findRecordOptions(workspace: string, table: Table, term: s
   const label = col(title?.columnName ?? "id");
   const source = raw(`${quoteIdent(physicalTableName(workspace, table.tableName))} t`);
 
+  const conditions: Fragment[] = [];
+  if (ownerId) conditions.push(sql`t."created_by" = ${ownerId}`);
+  if (term) conditions.push(sql`cast(${label} as text) like ${like(term)} escape '\\'`);
+  const where = conditions.length ? sql`where ${sql.join(conditions, sql` and `)}` : sql``;
+
   return db.all<{ id: string | number; label: string | null }>(
-    sql`select t."id" as "id", ${title ? sql`cast(${label} as text)` : sql`null`} as "label" from ${source} ${
-      term ? sql`where cast(${label} as text) like ${like(term)} escape '\\'` : sql``
-    } order by t."id" limit ${RECORD_OPTIONS_LIMIT}`,
+    sql`select t."id" as "id", ${title ? sql`cast(${label} as text)` : sql`null`} as "label" from ${source} ${where} order by t."id" limit ${RECORD_OPTIONS_LIMIT}`,
   );
 }
 
@@ -324,6 +339,7 @@ export async function updateRecordRow(
   recordId: string,
   parsed: ParsedValue<Column>[],
   userId: string,
+  ownerId?: string,
 ) {
   const assignments = parsed.map(
     ({ column, value }) => sql`${raw(quoteIdent(column.columnName))} = ${value}`,
@@ -334,7 +350,28 @@ export async function updateRecordRow(
   );
 
   const updated = await db.all(
-    sql`update ${raw(quoteIdent(physicalTableName(workspace, table.tableName)))} set ${sql.join(assignments, sql`, `)} where "id" = ${recordId} returning "id"`,
+    sql`update ${raw(quoteIdent(physicalTableName(workspace, table.tableName)))} set ${sql.join(assignments, sql`, `)} where "id" = ${recordId} ${ownerId ? sql`and "created_by" = ${ownerId}` : sql``} returning "id"`,
   );
   return updated.length > 0;
+}
+
+export async function countOwnedRecords(
+  workspace: string,
+  table: Table,
+  ids: (string | number)[],
+  ownerId: string,
+) {
+  const unique = [...new Set(ids)];
+  let owned = 0;
+  for (let start = 0; start < unique.length; start += 50) {
+    const part = unique.slice(start, start + 50);
+    const [row] = await db.all<{ n: number }>(
+      sql`select count(*) as n from ${raw(quoteIdent(physicalTableName(workspace, table.tableName)))} where "created_by" = ${ownerId} and "id" in (${sql.join(
+        part.map((id) => sql`${id}`),
+        sql`, `,
+      )})`,
+    );
+    owned += Number(row?.n ?? 0);
+  }
+  return owned;
 }

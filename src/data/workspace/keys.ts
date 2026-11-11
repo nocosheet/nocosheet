@@ -1,6 +1,10 @@
 export const workspaceKeys = {
   all: ["workspace"] as const,
   members: () => [...workspaceKeys.all, "members"] as const,
+  access: () => [...workspaceKeys.all, "access"] as const,
+  roles: () => [...workspaceKeys.all, "roles"] as const,
+  role: (id: number) => [...workspaceKeys.roles(), id] as const,
+  roleAssignments: () => [...workspaceKeys.roles(), "assignments"] as const,
   tables: () => [...workspaceKeys.all, "tables"] as const,
   records: (id: number, query: object) => [...workspaceKeys.table(id), "records", query] as const,
   record: (id: number, recordId: string) =>

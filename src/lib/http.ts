@@ -2,7 +2,7 @@ import { HTTPException } from "hono/http-exception";
 
 import { classifyDbError } from "./db-errors";
 
-export function httpError(status: 400 | 404 | 409, message: string, field?: string) {
+export function httpError(status: 400 | 403 | 404 | 409, message: string, field?: string) {
   return new HTTPException(
     status,
     field ? { res: Response.json({ message, field }, { status }) } : { message },

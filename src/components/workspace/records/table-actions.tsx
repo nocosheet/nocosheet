@@ -14,14 +14,16 @@ import { Button } from "@/components/ui/button";
 import { Group, GroupSeparator } from "@/components/ui/group";
 import { Menu, MenuItem, MenuLinkItem, MenuPopup, MenuTrigger } from "@/components/ui/menu";
 import { workspaceKeys } from "@/data/workspace/keys";
-import { useWorkspace } from "@/hooks/use-workspace";
+import { useAccess } from "@/hooks/use-access";
 
 import { useExportRecords } from "./use-export-records";
 
 export function TableActions({ workspace, table }: { workspace: string; table: string }) {
-  const { isAdmin } = useWorkspace();
+  const access = useAccess();
   const queryClient = useQueryClient();
-  const exportRecords = useExportRecords(workspace, Number(table));
+  const tableId = Number(table);
+  const exportRecords = useExportRecords(workspace, tableId);
+  const canExport = access.can("export", tableId) && access.can("read", tableId);
 
   const menu = (
     <Menu>
@@ -37,14 +39,16 @@ export function TableActions({ workspace, table }: { workspace: string; table: s
           <SlidersHorizontalIcon />
           Definition
         </MenuLinkItem>
-        <MenuItem
-          disabled={exportRecords.isPending}
-          onClick={() => exportRecords.mutate(undefined)}
-        >
-          <DownloadIcon />
-          Export
-        </MenuItem>
-        {isAdmin && (
+        {canExport && (
+          <MenuItem
+            disabled={exportRecords.isPending}
+            onClick={() => exportRecords.mutate(undefined)}
+          >
+            <DownloadIcon />
+            Export
+          </MenuItem>
+        )}
+        {access.admin && (
           <MenuLinkItem
             render={<Link to="/w/$workspace/tables/$table/trash" params={{ workspace, table }} />}
           >
@@ -64,7 +68,7 @@ export function TableActions({ workspace, table }: { workspace: string; table: s
     </Menu>
   );
 
-  if (!isAdmin) return menu;
+  if (!access.can("create", tableId)) return menu;
 
   return (
     <Group>

@@ -10,6 +10,7 @@ import {
 } from "void/schema-d1";
 
 import { userTable } from "../.void/better-auth-schema";
+import { PERMISSIONS } from "../src/lib/roles/permissions";
 
 const RESOURCE_KINDS = ["table", "view", "widget"] as const;
 
@@ -221,6 +222,71 @@ export const workspaceSchema = <W extends string = "default">(workspaceId: W = "
     (t) => [index(name("trash_table_deleted")).on(t.tableId, t.deletedAt)],
   );
 
+  const roleTable = sqliteTable(
+    name("role"),
+    {
+      id: integer("id").primaryKey({ autoIncrement: true }),
+      name: text("name").notNull(),
+      description: text("description"),
+      isSystem: integer("is_system", { mode: "boolean" }).notNull().default(false),
+      isDefault: integer("is_default", { mode: "boolean" }).notNull().default(false),
+      position: integer("position").notNull().default(0),
+      ...timestamps,
+    },
+    (t) => [
+      uniqueIndex(name("role_name")).on(lower(t.name)),
+      uniqueIndex(name("role_default"))
+        .on(t.isDefault)
+        .where(sql`${t.isDefault} = 1`),
+    ],
+  );
+
+  const roleMemberTable = sqliteTable(
+    name("role_member"),
+    {
+      userId: text("user_id")
+        .primaryKey()
+        .references(() => userTable.id, { onDelete: "cascade" }),
+      roleId: integer("role_id")
+        .notNull()
+        .references(() => roleTable.id, { onDelete: "restrict" }),
+      assignedBy: text("assigned_by").references(() => userTable.id, { onDelete: "set null" }),
+      assignedAt: integer("assigned_at", { mode: "timestamp_ms" })
+        .notNull()
+        .$defaultFn(() => new Date()),
+    },
+    (t) => [index(name("role_member_role")).on(t.roleId)],
+  );
+
+  const rolePermissionTable = sqliteTable(
+    name("role_permission"),
+    {
+      id: integer("id").primaryKey({ autoIncrement: true }),
+      roleId: integer("role_id")
+        .notNull()
+        .references(() => roleTable.id, { onDelete: "cascade" }),
+      resourceId: integer("resource_id").references(() => resourceTable.id, {
+        onDelete: "cascade",
+      }),
+      permission: text("permission", { enum: PERMISSIONS }).notNull(),
+      action: text("action").generatedAlwaysAs(
+        sql`(case when instr("permission", ':') > 0 then substr("permission", 1, instr("permission", ':') - 1) else "permission" end)`,
+        { mode: "virtual" },
+      ),
+    },
+    (t) => [
+      check(
+        name("role_permission_check"),
+        sql`${t.permission} in (${sql.raw(PERMISSIONS.map((item) => `'${item}'`).join(", "))})`,
+      ),
+      uniqueIndex(name("role_permission_unique")).on(
+        t.roleId,
+        sql`(case when ${t.resourceId} is null then 0 else ${t.resourceId} end)`,
+        t.action,
+      ),
+    ],
+  );
+
   return {
     settingTable,
     resourceTable,
@@ -230,6 +296,9 @@ export const workspaceSchema = <W extends string = "default">(workspaceId: W = "
     widgetTable,
     favoriteTable,
     trashTable,
+    roleTable,
+    roleMemberTable,
+    rolePermissionTable,
   };
 };
 
@@ -242,4 +311,7 @@ export const {
   widgetTable,
   favoriteTable,
   trashTable,
+  roleTable,
+  roleMemberTable,
+  rolePermissionTable,
 } = workspaceSchema();
