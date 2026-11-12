@@ -24,7 +24,6 @@ import { workspaceKeys } from "@/data/workspace/keys";
 import { tableQueryOptions, updateTableMutationOptions } from "@/data/workspace/tables";
 import { formSchema } from "@/lib/tables/form";
 import { TITLE_FORMATS } from "@/lib/tables/formats";
-import { toTableName } from "@/lib/tables/naming";
 import { tableInputSchema } from "@/lib/tables/validation";
 
 import { ColumnsEditor } from "./columns-editor";
@@ -128,17 +127,6 @@ export function TableDefinition({ workspace, tableId }: { workspace: string; tab
                         onBlur={field.handleBlur}
                         onChange={(event) => field.handleChange(event.target.value)}
                       />
-                      <FieldDescription>
-                        Stored as{" "}
-                        <code>
-                          {field.state.value.trim() === table.name
-                            ? table.tableName
-                            : toTableName(field.state.value) || "…"}
-                        </code>
-                        {field.state.value.trim() !== table.name &&
-                          toTableName(field.state.value) !== table.tableName &&
-                          ". Saving renames the database table."}
-                      </FieldDescription>
                       <FieldError match={field.state.meta.isTouched && !field.state.meta.isValid}>
                         {field.state.meta.errors.map((item) => item?.message).join(", ")}
                       </FieldError>

@@ -42,7 +42,8 @@ type TableDetail = {
     isSearchable: boolean;
     isHidden: boolean;
     isRequired: boolean;
-    isGenerated: boolean;
+    checkExpression: string | null;
+    generatedExpression: string | null;
     description: string | null;
     defaultValue: string | null;
   }[];

@@ -1,4 +1,4 @@
-import { columnTable, favoriteTable, resourceTable, tableTable, trashTable } from "@db/schema";
+import { columnTable, favoriteTable, resourceTable, tableTable } from "@db/schema";
 import {
   and,
   asc,
@@ -15,7 +15,6 @@ import {
   sql,
 } from "void/db";
 
-import { classifyDbError } from "../db-errors";
 import type { TrashQuery } from "../trash/query";
 import {
   buildAddColumn,
@@ -24,15 +23,13 @@ import {
   buildDropColumn,
   buildDropIndex,
   buildDropTable,
-  buildRenameColumn,
-  buildRenameTable,
   columnSqliteType,
+  compileExpressions,
   indexKind,
   indexName,
   type RelationTarget,
 } from "./ddl";
-import { parseColumnExpressions } from "./definition";
-import { physicalTableName, toColumnName, toTableName } from "./naming";
+import { newColumnName, newTableName, physicalTableName } from "./naming";
 import type { TablesQuery } from "./query";
 import type { ColumnValues, TableValues } from "./validation";
 
@@ -100,16 +97,6 @@ export async function listColumns(tableId: number) {
     .orderBy(asc(columnTable.position));
 }
 
-export async function readColumnExpressions(
-  workspace: string,
-  table: Pick<Table, "tableName">,
-) {
-  const [master] = await db.all<{ sql: string | null }>(
-    sql`select sql from sqlite_master where type = 'table' and name = ${physicalTableName(workspace, table.tableName)}`,
-  );
-  return Object.fromEntries(parseColumnExpressions(master?.sql));
-}
-
 export async function listTables(query: TablesQuery) {
   const { page, pageSize, sort, order, q } = query;
 
@@ -121,7 +108,6 @@ export async function listTables(query: TablesQuery) {
     pattern
       ? or(
           sql`${tableTable.name} like ${pattern} escape '\\'`,
-          sql`${tableTable.tableName} like ${pattern} escape '\\'`,
           sql`${tableTable.description} like ${pattern} escape '\\'`,
         )
       : undefined,
@@ -140,7 +126,6 @@ export async function listTables(query: TablesQuery) {
       .select({
         id: tableTable.id,
         name: tableTable.name,
-        tableName: tableTable.tableName,
         icon: tableTable.icon,
         groupName: tableTable.groupName,
         description: tableTable.description,
@@ -189,26 +174,19 @@ export async function removeFavorite(userId: string, tableId: number) {
     .where(and(eq(favoriteTable.userId, userId), eq(favoriteTable.tableId, tableId)));
 }
 
-export async function findTableByTableName(tableName: string) {
-  const [row] = await db
-    .select({ name: tableTable.name, deletedAt: tableTable.deletedAt })
-    .from(tableTable)
-    .where(eq(tableTable.tableName, tableName))
-    .limit(1);
-  return row;
-}
-
-export async function findTrashedTableByName(tableName: string) {
+export async function findTrashedTableByName(name: string) {
   const [row] = await db
     .select({ name: tableTable.name })
     .from(tableTable)
-    .where(and(eq(tableTable.tableName, tableName), isNotNull(tableTable.deletedAt)))
+    .where(
+      and(sql`lower(${tableTable.name}) = lower(${name})`, isNotNull(tableTable.deletedAt)),
+    )
     .limit(1);
   return row;
 }
 
 export async function createTable(workspace: string, body: TableValues, userId: string) {
-  const tableName = toTableName(body.name);
+  const tableName = newTableName();
   const physicalName = physicalTableName(workspace, tableName);
 
   const [, , inserted] = await db.batch([
@@ -235,6 +213,7 @@ export async function createTable(workspace: string, body: TableValues, userId: 
 export async function updateTable(
   id: number,
   fields: {
+    name?: string;
     icon?: string | null;
     groupName?: string | null;
     description?: string | null;
@@ -247,43 +226,6 @@ export async function updateTable(
     .where(eq(tableTable.id, id))
     .returning();
   return updated;
-}
-
-export async function renameTable(
-  workspace: string,
-  table: Table,
-  name: string,
-  tableName: string,
-  fields: {
-    icon?: string | null;
-    groupName?: string | null;
-    description?: string | null;
-    titleColumnId?: number | null;
-  },
-) {
-  const rename =
-    tableName !== table.tableName
-      ? [
-          db.run(
-            sql.raw(
-              buildRenameTable(
-                physicalTableName(workspace, table.tableName),
-                physicalTableName(workspace, tableName),
-              ),
-            ),
-          ),
-        ]
-      : [];
-
-  const results = (await db.batch([
-    ...rename,
-    db
-      .update(tableTable)
-      .set({ ...defined(fields), name, tableName, updatedAt: new Date() })
-      .where(eq(tableTable.id, table.id))
-      .returning(),
-  ] as never)) as unknown[];
-  return (results.at(-1) as Table[])[0];
 }
 
 export async function findRelationTarget(workspace: string, tableId: number) {
@@ -300,13 +242,6 @@ export async function findRelationTarget(workspace: string, tableId: number) {
   };
 }
 
-async function nextColumnId(workspace: string) {
-  const [row] = await db.all<{ next: number }>(
-    sql`select coalesce((select seq from sqlite_sequence where name = ${`${workspace}__column`}), 0) + 1 as next`,
-  );
-  return Number(row.next);
-}
-
 export async function createColumn(
   workspace: string,
   table: Table,
@@ -314,50 +249,50 @@ export async function createColumn(
   targets: Map<number, RelationTarget>,
 ) {
   const physicalName = physicalTableName(workspace, table.tableName);
-  const columnName = toColumnName(body.name);
+  const columnName = newColumnName();
 
-  for (let attempt = 0; ; attempt++) {
-    const id = await nextColumnId(workspace);
-    const [first, ...rest] = buildAddColumn(workspace, physicalName, id, body, targets).map(
-      (statement) => db.run(sql.raw(statement)),
-    );
+  const references = new Map(
+    (await listColumns(table.id)).map((item) => [item.name.toLowerCase(), item.columnName]),
+  );
+  references.set(body.name.toLowerCase(), columnName);
 
-    try {
-      await db.batch([
-        first,
-        ...rest,
-        db.insert(columnTable).values({
-          id,
-          tableId: table.id,
-          columnName,
-          name: body.name,
-          icon: body.icon,
-          description: body.description,
-          type: columnSqliteType(body, targets),
-          format: body.format,
-          options: body.options,
-          isRequired: body.isRequired,
-          isFilterable: body.isFilterable,
-          isSortable: body.isSortable,
-          isSearchable: body.isSearchable,
-          isUnique: body.isUnique,
-          isHidden: body.isHidden,
-          isGenerated: Boolean(body.generatedExpression),
-          defaultValue: body.defaultValue,
-          position: body.position,
-        }),
-        db.update(tableTable).set({ updatedAt: new Date() }).where(eq(tableTable.id, table.id)),
-      ]);
-      break;
-    } catch (error) {
-      const failure = classifyDbError(error);
-      if (attempt < 2 && failure.kind === "unique" && failure.column === "id") continue;
-      throw error;
-    }
-  }
+  const { generated, check } = compileExpressions(body, references);
+  const [first, ...rest] = buildAddColumn(
+    workspace,
+    physicalName,
+    columnName,
+    body,
+    targets,
+    references,
+  ).map((statement) => db.run(sql.raw(statement)));
 
-  const column = await findColumnByName(table.id, columnName);
-  return column as Column;
+  await db.batch([
+    first,
+    ...rest,
+    db.insert(columnTable).values({
+      tableId: table.id,
+      columnName,
+      name: body.name,
+      icon: body.icon,
+      description: body.description,
+      type: columnSqliteType(body, targets),
+      format: body.format,
+      options: body.options,
+      checkExpression: check?.stored ?? null,
+      generatedExpression: generated?.stored ?? null,
+      isRequired: body.isRequired,
+      isFilterable: body.isFilterable,
+      isSortable: body.isSortable,
+      isSearchable: body.isSearchable,
+      isUnique: body.isUnique,
+      isHidden: body.isHidden,
+      defaultValue: body.defaultValue,
+      position: body.position,
+    }),
+    db.update(tableTable).set({ updatedAt: new Date() }).where(eq(tableTable.id, table.id)),
+  ]);
+
+  return (await findColumnByName(table.id, columnName)) as Column;
 }
 
 export async function updateColumn(
@@ -365,58 +300,35 @@ export async function updateColumn(
   table: Table,
   column: Column,
   patch: Partial<Column>,
-  rename?: { columnName: string },
 ) {
   const physicalName = physicalTableName(workspace, table.tableName);
   const changes = defined(patch);
-  const nextName = rename?.columnName ?? column.columnName;
   const before = indexKind(column);
   const after = indexKind({ ...column, ...changes });
   const statements = [];
-  if (rename)
-    statements.push(
-      db.run(sql.raw(buildRenameColumn(physicalName, column.columnName, rename.columnName))),
-    );
   if (before !== after) {
     if (before)
-      statements.push(db.run(sql.raw(buildDropIndex(indexName(workspace, column.id, before)))));
+      statements.push(
+        db.run(sql.raw(buildDropIndex(indexName(workspace, column.columnName, before)))),
+      );
     if (after)
       statements.push(
         db.run(
           sql.raw(
-            buildCreateIndex(indexName(workspace, column.id, after), physicalName, nextName, after),
+            buildCreateIndex(
+              indexName(workspace, column.columnName, after),
+              physicalName,
+              column.columnName,
+              after,
+            ),
           ),
         ),
       );
   }
 
-  const snapshots = rename
-    ? (() => {
-        const from = `$.${column.columnName}`;
-        const to = `$.${rename.columnName}`;
-        return [
-          db
-            .update(trashTable)
-            .set({
-              data: sql`json_set(json_remove(${trashTable.data}, ${from}), ${to}, json(${trashTable.data} -> ${from}))`,
-            })
-            .where(
-              and(
-                eq(trashTable.tableId, table.id),
-                sql`json_type(${trashTable.data}, ${from}) is not null`,
-              ),
-            ),
-        ];
-      })()
-    : [];
-
   await db.batch([
     ...statements,
-    db
-      .update(columnTable)
-      .set({ ...changes, ...(rename ? { columnName: rename.columnName } : {}) })
-      .where(eq(columnTable.id, column.id)),
-    ...snapshots,
+    db.update(columnTable).set(changes).where(eq(columnTable.id, column.id)),
     db.update(tableTable).set({ updatedAt: new Date() }).where(eq(tableTable.id, table.id)),
   ] as never);
 
@@ -440,7 +352,11 @@ export async function dropColumn(workspace: string, table: Table, column: Column
   const kind = indexKind(column);
 
   await db.batch([
-    db.run(sql.raw(kind ? buildDropIndex(indexName(workspace, column.id, kind)) : "select 1")),
+    db.run(
+      sql.raw(
+        kind ? buildDropIndex(indexName(workspace, column.columnName, kind)) : "select 1",
+      ),
+    ),
     db.run(sql.raw(buildDropColumn(physicalName, column.columnName))),
     db.delete(columnTable).where(eq(columnTable.id, column.id)),
     db.update(tableTable).set({ updatedAt: new Date() }).where(eq(tableTable.id, table.id)),
@@ -492,7 +408,6 @@ export async function listDeletedTables(query: TrashQuery) {
     pattern
       ? or(
           sql`${tableTable.name} like ${pattern} escape '\\'`,
-          sql`${tableTable.tableName} like ${pattern} escape '\\'`,
         )
       : undefined,
   );
@@ -505,7 +420,6 @@ export async function listDeletedTables(query: TrashQuery) {
       .select({
         id: tableTable.id,
         name: tableTable.name,
-        tableName: tableTable.tableName,
         icon: tableTable.icon,
         deletedAt: tableTable.deletedAt,
         deletedBy: tableTable.deletedBy,

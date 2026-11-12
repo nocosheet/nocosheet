@@ -4,13 +4,11 @@ import { z } from "zod";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { conflictOrBadRequest, httpError } from "@/lib/http";
 import { TITLE_FORMATS } from "@/lib/tables/formats";
-import { toTableName } from "@/lib/tables/naming";
 import {
   findColumnByName,
   findTable,
-  findTableByTableName,
+  findTrashedTableByName,
   listColumns,
-  renameTable,
   updateTable,
 } from "@/lib/tables/repository";
 import { tableUpdateSchema } from "@/lib/tables/validation";
@@ -39,31 +37,17 @@ export const PATCH = defineHandler(
       titleColumnId = match.id;
     }
 
-    const { name, ...rest } = fields;
-    const values = { ...rest, titleColumnId };
-
-    if (name !== undefined && name !== table.name) {
-      const tableName = toTableName(name);
-      if (tableName !== table.tableName) {
-        const clash = await findTableByTableName(tableName);
-        if (clash)
-          throw httpError(
-            409,
-            clash.deletedAt
-              ? `A deleted table named "${clash.name}" is still in the trash. Restore it or delete it forever from the trash first.`
-              : `A table named "${clash.name}" already exists.`,
-          );
-      }
-
-      try {
-        return await renameTable(c.get("workspaceId"), table, name, tableName, values);
-      } catch (error) {
-        conflictOrBadRequest(error, "A table with this name already exists.");
-      }
+    if (fields.name !== undefined && fields.name !== table.name) {
+      const trashed = await findTrashedTableByName(fields.name);
+      if (trashed)
+        throw httpError(
+          409,
+          `A deleted table named "${trashed.name}" is still in the trash. Restore it or delete it forever from the trash first.`,
+        );
     }
 
     try {
-      return await updateTable(table.id, values);
+      return await updateTable(table.id, { ...fields, titleColumnId });
     } catch (error) {
       conflictOrBadRequest(error, "A table with this name already exists.");
     }

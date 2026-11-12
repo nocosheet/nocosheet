@@ -5,7 +5,6 @@ import { requireAdmin } from "@/lib/auth/require-admin";
 import { classifyDbError } from "@/lib/db-errors";
 import { conflictOrBadRequest, httpError } from "@/lib/http";
 import { SEARCHABLE_FORMATS } from "@/lib/tables/formats";
-import { RESERVED_COLUMN_NAMES, toColumnName } from "@/lib/tables/naming";
 import {
   dropColumn,
   findColumn,
@@ -31,18 +30,8 @@ export const PATCH = defineHandler(
     if (body.isSearchable && !SEARCHABLE_FORMATS.includes(column.format as never))
       throw httpError(400, "Only text columns can be searchable.");
 
-    const columnName =
-      body.name !== undefined && body.name !== column.name ? toColumnName(body.name) : undefined;
-    let rename: { columnName: string } | undefined;
-    if (columnName !== undefined && columnName !== column.columnName) {
-      if (!columnName) throw httpError(400, "Name must contain letters or numbers.", "name");
-      if (RESERVED_COLUMN_NAMES.includes(columnName))
-        throw httpError(400, `"${columnName}" is reserved for the table.`, "name");
-      rename = { columnName };
-    }
-
     try {
-      return await updateColumn(c.get("workspaceId"), table, column, body, rename);
+      return await updateColumn(c.get("workspaceId"), table, column, body);
     } catch (error) {
       conflictOrBadRequest(error, "A column with this name already exists.");
     }

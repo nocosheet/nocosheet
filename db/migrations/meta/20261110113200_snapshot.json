@@ -227,13 +227,19 @@
           "autoincrement": false,
           "default": false
         },
-        "is_generated": {
-          "name": "is_generated",
-          "type": "integer",
+        "check_expression": {
+          "name": "check_expression",
+          "type": "text",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": false
+          "notNull": false,
+          "autoincrement": false
+        },
+        "generated_expression": {
+          "name": "generated_expression",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
         },
         "default_value": {
           "name": "default_value",

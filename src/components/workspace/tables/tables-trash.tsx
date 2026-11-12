@@ -26,7 +26,6 @@ import { NamedIcon } from "./named-icon";
 type DeletedTable = {
   id: number;
   name: string;
-  tableName: string;
   icon: string | null;
   deletedAt: number;
   deletedBy: { id: string; label: string | null } | null;

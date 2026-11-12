@@ -5,15 +5,16 @@ import {
   buildAddColumn,
   buildCreateTable,
   columnSqliteType,
+  compileExpressions,
   type RelationTarget,
 } from "../../src/lib/tables/ddl";
 import { SEARCHABLE_FORMATS, type ColumnFormat } from "../../src/lib/tables/formats";
 import {
+  newColumnName,
+  newTableName,
   physicalTableName,
   quoteIdent,
-  toColumnName,
   toSlug,
-  toTableName,
 } from "../../src/lib/tables/naming";
 import { columnInputSchema } from "../../src/lib/tables/validation";
 import type { SeedUsers } from "./users";
@@ -100,7 +101,7 @@ export async function seedTable(
   users: SeedUsers,
 ) {
   const idType = def.idType ?? "increment";
-  const tableName = toTableName(def.name);
+  const tableName = newTableName();
   const physicalName = physicalTableName(WORKSPACE, tableName);
 
   const [resource] = await db
@@ -152,12 +153,17 @@ export async function seedTable(
   });
 
   const columnIds = new Map<string, number>();
+  const columnNames = new Map<string, string>();
+  const references = new Map<string, string>();
   for (const { column } of columns) {
+    const columnName = newColumnName();
+    references.set(column.name.toLowerCase(), columnName);
+    const compiled = compileExpressions(column, references);
     const [created] = await db
       .insert(schema.columnTable)
       .values({
         tableId: resource.id,
-        columnName: toColumnName(column.name),
+        columnName,
         name: column.name,
         icon: column.icon,
         description: column.description,
@@ -170,14 +176,23 @@ export async function seedTable(
         isSearchable: column.isSearchable,
         isUnique: column.isUnique,
         isHidden: column.isHidden,
-        isGenerated: Boolean(column.generatedExpression),
+        checkExpression: compiled.check?.stored ?? null,
+        generatedExpression: compiled.generated?.stored ?? null,
         defaultValue: column.defaultValue,
         position: column.position,
       })
       .returning({ id: schema.columnTable.id });
-    for (const statement of buildAddColumn(WORKSPACE, physicalName, created.id, column, targets))
+    for (const statement of buildAddColumn(
+      WORKSPACE,
+      physicalName,
+      columnName,
+      column,
+      targets,
+      references,
+    ))
       db.run(statement);
     columnIds.set(column.name, created.id);
+    columnNames.set(column.name, columnName);
   }
 
   const titleId = columnIds.get(def.title);
@@ -208,7 +223,7 @@ export async function seedTable(
     for (const { spec, column, relation } of writable) {
       const value = row[column.name];
       if (value === undefined) continue;
-      names.push(toColumnName(column.name));
+      names.push(columnNames.get(column.name) as string);
       if (relation) {
         const target = relation.titles.get(text(value));
         if (target === undefined)

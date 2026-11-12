@@ -7,13 +7,13 @@ type ColumnLike = {
   format: string;
   options: Record<string, unknown>;
   isRequired: boolean;
-  isGenerated: boolean;
+  generatedExpression: string | null;
 };
 
 const NOT_EDITABLE: ColumnFormat[] = ["binary"];
 
-export const isEditableColumn = (column: Pick<ColumnLike, "format" | "isGenerated">) =>
-  !column.isGenerated && !NOT_EDITABLE.includes(column.format as ColumnFormat);
+export const isEditableColumn = (column: Pick<ColumnLike, "format" | "generatedExpression">) =>
+  column.generatedExpression === null && !NOT_EDITABLE.includes(column.format as ColumnFormat);
 
 const choicesOf = (options: Record<string, unknown>) =>
   ((options.choices as SelectChoice[] | undefined) ?? []).map((choice) => choice.value);

@@ -1,5 +1,6 @@
 import { FORMATS, type SelectChoice, type SqliteType } from "./formats";
-import { quoteIdent, toColumnName } from "./naming";
+import { compileExpression, ExpressionError } from "./expression";
+import { quoteIdent } from "./naming";
 import type { ColumnValues } from "./validation";
 
 export class DdlError extends Error {}
@@ -69,20 +70,44 @@ function relationClause(column: ColumnValues, targets: Map<number, RelationTarge
   return `REFERENCES ${quoteIdent(target.physicalName)} ("id") ON DELETE ${onDelete}`;
 }
 
-function columnDefinition(column: ColumnValues, targets: Map<number, RelationTarget>) {
-  const type = columnSqliteType(column, targets);
-  const parts = [quoteIdent(toColumnName(column.name)), type.toUpperCase()];
+export type CompiledExpressions = { generated: string | null; check: string | null };
 
-  if (column.generatedExpression) {
-    parts.push(`GENERATED ALWAYS AS (${column.generatedExpression}) VIRTUAL`);
+export function compileExpressions(
+  column: Pick<ColumnValues, "generatedExpression" | "checkExpression">,
+  columns: Map<string, string>,
+) {
+  try {
+    const generated = column.generatedExpression
+      ? compileExpression(column.generatedExpression, columns)
+      : null;
+    const check = column.checkExpression ? compileExpression(column.checkExpression, columns) : null;
+    return { generated, check };
+  } catch (error) {
+    if (error instanceof ExpressionError) throw new DdlError(error.message);
+    throw error;
+  }
+}
+
+function columnDefinition(
+  columnName: string,
+  column: ColumnValues,
+  targets: Map<number, RelationTarget>,
+  columns: Map<string, string>,
+) {
+  const type = columnSqliteType(column, targets);
+  const parts = [quoteIdent(columnName), type.toUpperCase()];
+  const { generated, check } = compileExpressions(column, columns);
+
+  if (generated) {
+    parts.push(`GENERATED ALWAYS AS (${generated.sql}) VIRTUAL`);
   } else {
     const literal = defaultLiteral(column, type);
     if (literal !== null) parts.push(`DEFAULT ${literal}`);
   }
 
   if (column.format === "checkbox")
-    parts.push(`CHECK (${quoteIdent(toColumnName(column.name))} IN (0, 1))`);
-  if (column.checkExpression) parts.push(`CHECK (${column.checkExpression})`);
+    parts.push(`CHECK (${quoteIdent(columnName)} IN (0, 1))`);
+  if (check) parts.push(`CHECK (${check.sql})`);
   if (column.format === "relation") parts.push(relationClause(column, targets));
 
   return parts.join(" ");
@@ -113,8 +138,8 @@ export const indexKind = (flags: {
 }): IndexKind | null =>
   flags.isUnique ? "uq" : flags.isFilterable || flags.isSortable ? "idx" : null;
 
-export const indexName = (workspace: string, columnId: number, kind: IndexKind) =>
-  `${workspace}__ix_${columnId}_${kind}`;
+export const indexName = (workspace: string, columnName: string, kind: IndexKind) =>
+  `${workspace}__ix_${columnName}_${kind}`;
 
 export const buildCreateIndex = (
   name: string,
@@ -132,32 +157,22 @@ export const buildDropColumn = (physicalName: string, columnName: string) =>
 export function buildAddColumn(
   workspace: string,
   physicalName: string,
-  columnId: number,
+  columnName: string,
   column: ColumnValues,
   targets: Map<number, RelationTarget>,
+  columns: Map<string, string>,
 ) {
   const statements = [
-    `ALTER TABLE ${quoteIdent(physicalName)} ADD COLUMN ${columnDefinition(column, targets)}`,
+    `ALTER TABLE ${quoteIdent(physicalName)} ADD COLUMN ${columnDefinition(columnName, column, targets, columns)}`,
   ];
 
   const kind = indexKind(column);
   if (kind)
     statements.push(
-      buildCreateIndex(
-        indexName(workspace, columnId, kind),
-        physicalName,
-        toColumnName(column.name),
-        kind,
-      ),
+      buildCreateIndex(indexName(workspace, columnName, kind), physicalName, columnName, kind),
     );
 
   return statements;
 }
-
-export const buildRenameTable = (from: string, to: string) =>
-  `ALTER TABLE ${quoteIdent(from)} RENAME TO ${quoteIdent(to)}`;
-
-export const buildRenameColumn = (physicalName: string, from: string, to: string) =>
-  `ALTER TABLE ${quoteIdent(physicalName)} RENAME COLUMN ${quoteIdent(from)} TO ${quoteIdent(to)}`;
 
 export const buildDropTable = (physicalName: string) => `DROP TABLE ${quoteIdent(physicalName)}`;

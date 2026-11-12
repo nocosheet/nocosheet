@@ -23,3 +23,47 @@ export function isSafeExpression(expression: string) {
 
   return quote === null && depth === 0 && expression.trim().length > 0;
 }
+
+export class ExpressionError extends Error {}
+
+export function compileExpression(expression: string, columns: Map<string, string>) {
+  let sql = "";
+  let stored = "";
+  let quote: "'" | '"' | null = null;
+
+  for (let i = 0; i < expression.length; i++) {
+    const char = expression[i];
+
+    if (quote) {
+      sql += char;
+      stored += char;
+      if (char === quote) {
+        if (expression[i + 1] === quote) {
+          sql += quote;
+          stored += quote;
+          i++;
+        } else quote = null;
+      }
+      continue;
+    }
+
+    if (char === "'" || char === '"') {
+      quote = char;
+    } else if (char === "{") {
+      const end = expression.indexOf("}", i);
+      if (end === -1) throw new ExpressionError("Close every { with a }");
+      const name = expression.slice(i + 1, end).trim();
+      const key = columns.get(name.toLowerCase());
+      if (!key) throw new ExpressionError(`"${name}" isn't a column of this table`);
+      sql += `"${key}"`;
+      stored += `{${key}}`;
+      i = end;
+      continue;
+    }
+
+    sql += char;
+    stored += char;
+  }
+
+  return { sql, stored };
+}

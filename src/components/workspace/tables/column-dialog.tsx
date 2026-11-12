@@ -32,7 +32,6 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { formSchema } from "@/lib/tables/form";
 import { FORMATS, SEARCHABLE_FORMATS, type SelectChoice } from "@/lib/tables/formats";
-import { toColumnName } from "@/lib/tables/naming";
 import { columnDraftSchema, defaultOptions } from "@/lib/tables/validation";
 
 import { newColumnDraft, type ColumnDraft } from "./column-draft";
@@ -60,8 +59,6 @@ export function ColumnDialog({
   onOpenChange,
   formKey,
   initial,
-  storedName,
-  expression,
   taken,
   onSave,
 }: {
@@ -69,8 +66,6 @@ export function ColumnDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
   initial: ColumnDraft | null;
-  storedName?: string;
-  expression?: { generated: string | null; check: string | null };
   taken: string[];
   onSave: (column: ColumnDraft) => Promise<unknown>;
 }) {
@@ -89,8 +84,6 @@ export function ColumnDialog({
           key={formKey}
           initial={initial ?? newColumnDraft()}
           locked={initial !== null}
-          storedName={storedName}
-          expression={expression}
           taken={taken}
           onSave={async (column) => {
             await onSave(column);
@@ -105,15 +98,11 @@ export function ColumnDialog({
 function ColumnForm({
   initial,
   locked,
-  storedName,
-  expression,
   taken,
   onSave,
 }: {
   initial: ColumnDraft;
   locked: boolean;
-  storedName?: string;
-  expression?: { generated: string | null; check: string | null };
   taken: string[];
   onSave: (column: ColumnDraft) => Promise<unknown>;
 }) {
@@ -122,10 +111,7 @@ function ColumnForm({
   const schema = useMemo(
     () =>
       columnDraftSchema.superRefine((column, ctx) => {
-        if (
-          taken.includes(column.name.trim().toLowerCase()) ||
-          taken.includes(toColumnName(column.name))
-        )
+        if (taken.includes(column.name.trim().toLowerCase()))
           ctx.addIssue({
             code: "custom",
             path: ["name"],
@@ -189,18 +175,6 @@ function ColumnForm({
                     onBlur={field.handleBlur}
                     onChange={(event) => field.handleChange(event.target.value)}
                   />
-                  <FieldDescription>
-                    Stored as{" "}
-                    <code>
-                      {locked && field.state.value.trim() === initial.name
-                        ? storedName
-                        : toColumnName(field.state.value) || "…"}
-                    </code>
-                    {locked &&
-                      field.state.value.trim() !== initial.name &&
-                      toColumnName(field.state.value) !== storedName &&
-                      ". Saving renames the database column."}
-                  </FieldDescription>
                   <FieldError match={field.state.meta.isTouched && !field.state.meta.isValid}>
                     {field.state.meta.errors.map((item) => item?.message).join(", ")}
                   </FieldError>
@@ -243,26 +217,6 @@ function ColumnForm({
               </Field>
             )}
           </form.Field>
-
-          {locked && (expression?.generated || expression?.check) && (
-            <div className="flex flex-col gap-2 rounded-lg border bg-muted/40 p-3 text-sm">
-              {expression.generated && (
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-muted-foreground text-xs">Computed value</span>
-                  <code className="break-all">{expression.generated}</code>
-                </div>
-              )}
-              {expression.check && (
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-muted-foreground text-xs">Check</span>
-                  <code className="break-all">{expression.check}</code>
-                </div>
-              )}
-              <p className="text-muted-foreground text-xs">
-                Read from the database. These can't be changed after the column is created.
-              </p>
-            </div>
-          )}
 
           {!locked && (
             <div className="flex flex-wrap items-start gap-4 empty:hidden">
@@ -383,13 +337,12 @@ function ColumnForm({
                         <Input
                           autoComplete="off"
                           className="font-mono"
-                          placeholder="price >= 0"
+                          placeholder="{Price} >= 0"
                           value={field.state.value}
                           onChange={(event) => field.handleChange(event.target.value)}
                         />
                         <FieldDescription>
-                          A SQL condition every value must satisfy. Refer to columns by their stored
-                          name.
+                          A SQL condition every value must satisfy. Refer to columns as {"{Column name}"}.
                         </FieldDescription>
                         <FieldError match={field.state.meta.errors.length > 0}>
                           {field.state.meta.errors.map((item) => item?.message).join(", ")}
@@ -404,13 +357,12 @@ function ColumnForm({
                         <Input
                           autoComplete="off"
                           className="font-mono"
-                          placeholder="price * quantity"
+                          placeholder="{Price} * {Quantity}"
                           value={field.state.value}
                           onChange={(event) => field.handleChange(event.target.value)}
                         />
                         <FieldDescription>
-                          Makes this a virtual column calculated from the other columns, so it can't
-                          be edited.
+                          Makes this a virtual column calculated from other columns, written as {"{Column name}"}. It can't be edited.
                         </FieldDescription>
                         <FieldError match={field.state.meta.errors.length > 0}>
                           {field.state.meta.errors.map((item) => item?.message).join(", ")}

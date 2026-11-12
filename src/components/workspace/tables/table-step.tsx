@@ -17,7 +17,6 @@ import { createTableMutationOptions } from "@/data/workspace/tables";
 import { useWorkspace } from "@/hooks/use-workspace";
 import { formSchema } from "@/lib/tables/form";
 import { DEFAULT_TABLE_ICON } from "@/lib/tables/icons";
-import { toTableName } from "@/lib/tables/naming";
 import { tableInputSchema } from "@/lib/tables/validation";
 
 import { IconPicker } from "./icon-picker";
@@ -108,9 +107,6 @@ export function TableStep({ onDone }: { onDone: (tableId: number) => void }) {
                     onBlur={field.handleBlur}
                     onChange={(event) => field.handleChange(event.target.value)}
                   />
-                  <FieldDescription>
-                    Will be stored as <code>{toTableName(field.state.value) || "…"}</code>
-                  </FieldDescription>
                   <FieldError match={field.state.meta.isTouched && !field.state.meta.isValid}>
                     {field.state.meta.errors.map((item) => item?.message).join(", ")}
                   </FieldError>

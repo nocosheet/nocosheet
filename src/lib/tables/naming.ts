@@ -1,5 +1,3 @@
-export const RESERVED_COLUMN_NAMES = ["id", "created_at", "updated_at", "created_by", "updated_by"];
-
 export function toSlug(name: string) {
   const slug = name
     .trim()
@@ -9,8 +7,16 @@ export function toSlug(name: string) {
   return /^[0-9]/.test(slug) ? `_${slug}` : slug;
 }
 
-export const toTableName = toSlug;
-export const toColumnName = toSlug;
+const ALPHABET = "abcdefghijklmnopqrstuvwxyz0123456789";
+const KEY_LENGTH = 10;
+
+function randomKey() {
+  const bytes = crypto.getRandomValues(new Uint8Array(KEY_LENGTH));
+  return Array.from(bytes, (byte) => ALPHABET[byte % ALPHABET.length]).join("");
+}
+
+export const newTableName = () => randomKey();
+export const newColumnName = () => `c_${randomKey()}`;
 
 export const physicalTableName = (workspace: string, tableName: string) =>
   `${workspace}__t_${tableName}`;

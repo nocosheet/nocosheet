@@ -11,7 +11,6 @@ import {
   type ColumnFormat,
 } from "./formats";
 import { ICON_NAME_PATTERN } from "./icons";
-import { RESERVED_COLUMN_NAMES, toColumnName, toTableName } from "./naming";
 
 const optionalText = (max: number) =>
   z
@@ -36,8 +35,7 @@ export const tableInputSchema = z.object({
     .string()
     .trim()
     .min(1, "Name is required")
-    .max(64, "Name must be 64 characters or fewer")
-    .refine((value) => toTableName(value).length > 0, "Name must contain letters or numbers"),
+    .max(64, "Name must be 64 characters or fewer"),
   icon: iconName,
   groupName: optionalText(64),
   description: optionalText(500),
@@ -85,11 +83,6 @@ type ColumnFields = z.output<typeof columnFields>;
 function refineColumn(column: ColumnFields, ctx: z.core.$RefinementCtx) {
   const issue = (path: string, message: string) =>
     ctx.addIssue({ code: "custom", path: [path], message });
-
-  const columnName = toColumnName(column.name);
-  if (!columnName) issue("name", "Name must contain letters or numbers");
-  else if (RESERVED_COLUMN_NAMES.includes(columnName))
-    issue("name", `"${columnName}" is reserved for the table`);
 
   if (column.isSearchable && !SEARCHABLE_FORMATS.includes(column.format))
     issue("isSearchable", "Only text columns can be searchable");

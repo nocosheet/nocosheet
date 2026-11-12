@@ -17,32 +17,24 @@ import { NamedIcon } from "./named-icon";
 type ListColumn = {
   id: number;
   name: string;
-  columnName: string;
   format: string;
   icon: string | null;
   isRequired: boolean;
   isUnique: boolean;
   isHidden: boolean;
-  isGenerated: boolean;
+  generatedExpression: string | null;
 };
-
-export type ColumnExpressions = Record<
-  string,
-  { generated: string | null; check: string | null } | undefined
->;
 
 const rowClass = "flex items-center gap-3 bg-background px-4 py-3";
 
 function ColumnRow<T extends ListColumn>({
   column,
-  expression,
   titleColumnId,
   handle,
   onEdit,
   onDelete,
 }: {
   column: T;
-  expression?: { generated: string | null; check: string | null };
   titleColumnId: number | null;
   handle?: React.ReactNode;
   onEdit?: (column: T) => void;
@@ -61,22 +53,15 @@ function ColumnRow<T extends ListColumn>({
       <div className="flex min-w-0 flex-1 flex-col">
         <span className="truncate font-medium text-sm">{column.name}</span>
         <span className="truncate text-muted-foreground text-xs">
-          {format.label} · {column.columnName}
+          {format.label}
         </span>
-        {(expression?.generated || expression?.check) && (
-          <span className="truncate font-mono text-muted-foreground text-xs">
-            {expression.generated && `= ${expression.generated}`}
-            {expression.generated && expression.check && " · "}
-            {expression.check && `check ${expression.check}`}
-          </span>
-        )}
       </div>
       <div className="hidden items-center gap-1 sm:flex">
         {column.id === titleColumnId && <Badge>Title</Badge>}
         {column.isRequired && <Badge variant="outline">Required</Badge>}
         {column.isUnique && <Badge variant="outline">Unique</Badge>}
         {column.isHidden && <Badge variant="outline">Hidden</Badge>}
-        {column.isGenerated && <Badge variant="outline">Computed</Badge>}
+        {column.generatedExpression !== null && <Badge variant="outline">Computed</Badge>}
       </div>
       {onEdit && (
         <Button
@@ -104,7 +89,6 @@ function ColumnRow<T extends ListColumn>({
 
 export function ColumnsList<T extends ListColumn>({
   columns,
-  expressions,
   titleColumnId,
   empty,
   onEdit,
@@ -112,7 +96,6 @@ export function ColumnsList<T extends ListColumn>({
   onReorder,
 }: {
   columns: T[];
-  expressions?: ColumnExpressions;
   titleColumnId: number | null;
   empty: string;
   onEdit?: (column: T) => void;
@@ -134,7 +117,6 @@ export function ColumnsList<T extends ListColumn>({
           <div key={column.id} className={rowClass}>
             <ColumnRow
               column={column}
-              expression={expressions?.[column.columnName]}
               titleColumnId={titleColumnId}
               onEdit={onEdit}
               onDelete={onDelete}
@@ -160,7 +142,6 @@ export function ColumnsList<T extends ListColumn>({
           >
             <ColumnRow
               column={column}
-              expression={expressions?.[column.columnName]}
               titleColumnId={titleColumnId}
               onEdit={onEdit}
               onDelete={onDelete}
@@ -183,7 +164,6 @@ export function ColumnsList<T extends ListColumn>({
             <div className={cn(rowClass, "rounded-lg border shadow-lg")}>
               <ColumnRow
                 column={column}
-                expression={expressions?.[column.columnName]}
                 titleColumnId={titleColumnId}
                 handle={
                   <GripVerticalIcon className="-ms-1 size-4 shrink-0 text-muted-foreground" />

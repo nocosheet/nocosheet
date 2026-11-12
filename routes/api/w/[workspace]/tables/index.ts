@@ -3,7 +3,6 @@ import { requireAuth } from "void/auth";
 
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { conflictOrBadRequest, httpError } from "@/lib/http";
-import { toTableName } from "@/lib/tables/naming";
 import { resolveTablesQuery, tablesSearchSchema } from "@/lib/tables/query";
 import {
   createTable,
@@ -25,7 +24,7 @@ export const POST = defineHandler(
   defineHandler.withValidator({ body: tableInputSchema })(async (c, { body }) => {
     const user = requireAuth(c);
 
-    const trashed = await findTrashedTableByName(toTableName(body.name));
+    const trashed = await findTrashedTableByName(body.name);
     if (trashed)
       throw httpError(
         409,
