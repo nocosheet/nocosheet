@@ -1,8 +1,6 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 
-import { StarIcon } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -18,7 +16,6 @@ import { sidebarQueryOptions } from "@/data/workspace/sidebar";
 import { useAccess } from "@/hooks/use-access";
 import { formatRelativeTime } from "@/lib/format-relative-time";
 
-const FAVORITES_SHOWN = 6;
 const RECENT_SHOWN = 6;
 
 export function TableShortcuts({ workspace }: { workspace: string }) {
@@ -30,42 +27,6 @@ export function TableShortcuts({ workspace }: { workspace: string }) {
 
   return (
     <>
-      {sidebar.favorites.length > 0 && (
-        <CardFrame>
-          <CardFrameHeader>
-            <CardFrameTitle>Favorites</CardFrameTitle>
-            <CardFrameDescription>Tables you pinned for quick access.</CardFrameDescription>
-          </CardFrameHeader>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {sidebar.favorites.slice(0, FAVORITES_SHOWN).map((table) => (
-              <Card
-                key={table.id}
-                render={
-                  <Link
-                    to="/w/$workspace/tables/$table"
-                    params={{ workspace, table: String(table.id) }}
-                  />
-                }
-                className="transition-colors hover:bg-accent/40"
-              >
-                <CardPanel className="flex items-center gap-3">
-                  <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-                    <NamedIcon name={table.icon} className="size-4" />
-                  </span>
-                  <span className="flex min-w-0 flex-1 flex-col">
-                    <span className="truncate font-medium text-sm">{table.name}</span>
-                    <span className="truncate text-muted-foreground text-xs">
-                      {table.groupName ?? "No group"}
-                    </span>
-                  </span>
-                  <StarIcon className="size-4 shrink-0 fill-warning text-warning" />
-                </CardPanel>
-              </Card>
-            ))}
-          </div>
-        </CardFrame>
-      )}
-
       <CardFrame>
         <CardFrameHeader>
           <CardFrameTitle>Recent tables</CardFrameTitle>
