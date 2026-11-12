@@ -49,6 +49,7 @@ export function RecordsGrid<TSelected extends { rowSelection: Record<string, boo
   onToggleGroup,
   onOpenRecord,
   onCellChange,
+  selectable = true,
 }: {
   table: ReactTable<typeof dataTableFeatures, ViewerRow, TSelected>;
   columns: ViewerColumn[];
@@ -65,8 +66,9 @@ export function RecordsGrid<TSelected extends { rowSelection: Record<string, boo
   groups: Record<string, number> | undefined;
   collapsed: ReadonlySet<string>;
   onToggleGroup: (key: string) => void;
-  onOpenRecord: (id: string | number) => void;
+  onOpenRecord?: (id: string | number) => void;
   onCellChange: (original: ViewerRow, draft: ViewerRow, column: ViewerColumn) => void;
+  selectable?: boolean;
 }) {
   const byKey = useMemo(() => new Map(columns.map((column) => [column.key, column])), [columns]);
   const visible = table.getVisibleLeafColumns();
@@ -108,6 +110,7 @@ export function RecordsGrid<TSelected extends { rowSelection: Record<string, boo
         cellClass: "records-row-number",
         headerCellClass: "records-row-number",
         renderHeaderCell: () => {
+          if (!selectable) return null;
           const all = table.getIsAllPageRowsSelected();
           return (
             <Checkbox
@@ -128,21 +131,25 @@ export function RecordsGrid<TSelected extends { rowSelection: Record<string, boo
               <span className="records-row-index">
                 {(page - 1) * pageSize + (dataIndex.get(row.id) ?? 0) + 1}
               </span>
-              <Checkbox
-                aria-label="Select row"
-                className="records-row-check"
-                checked={!!selection[String(row.id)]}
-                onCheckedChange={(value) => table.getRow(String(row.id)).toggleSelected(!!value)}
-              />
-              <Button
-                variant="ghost"
-                size="icon-xs"
-                aria-label="Open record"
-                className="records-row-open"
-                onClick={() => onOpenRecord(row.id)}
-              >
-                <Maximize2Icon />
-              </Button>
+              {selectable && (
+                <Checkbox
+                  aria-label="Select row"
+                  className="records-row-check"
+                  checked={!!selection[String(row.id)]}
+                  onCheckedChange={(value) => table.getRow(String(row.id)).toggleSelected(!!value)}
+                />
+              )}
+              {onOpenRecord && (
+                <Button
+                  variant="ghost"
+                  size="icon-xs"
+                  aria-label="Open record"
+                  className="records-row-open"
+                  onClick={() => onOpenRecord(row.id)}
+                >
+                  <Maximize2Icon />
+                </Button>
+              )}
             </>
           ),
       },
@@ -214,6 +221,7 @@ export function RecordsGrid<TSelected extends { rowSelection: Record<string, boo
       groupBy,
       onToggleGroup,
       dataIndex,
+      selectable,
     ],
   );
 
@@ -249,7 +257,7 @@ export function RecordsGrid<TSelected extends { rowSelection: Record<string, boo
         const meta = byKey.get(String(column.key));
         if (!meta) return;
         const mode = canEdit ? cellMode(meta) : "readonly";
-        if (mode === "readonly" || mode === "sheet") onOpenRecord(row.id);
+        if (mode === "readonly" || mode === "sheet") onOpenRecord?.(row.id);
       }}
       rowHeight={ROW_HEIGHT}
       headerRowHeight={ROW_HEIGHT}

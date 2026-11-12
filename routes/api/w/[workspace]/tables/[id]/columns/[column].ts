@@ -12,6 +12,7 @@ import {
   updateColumn,
 } from "@/lib/tables/repository";
 import { columnPatchSchema } from "@/lib/tables/validation";
+import { findViewsUsingColumn } from "@/lib/views/repository";
 
 const params = z.object({
   workspace: z.string(),
@@ -45,6 +46,13 @@ export const DELETE = defineHandler(
     if (!table) throw httpError(404, "Table not found.");
     const column = await findColumn(table.id, params.column);
     if (!column) throw httpError(404, "Column not found.");
+
+    const views = await findViewsUsingColumn(table.id, column.columnName);
+    if (views.length > 0)
+      throw httpError(
+        409,
+        `"${column.name}" is used by ${views.map((view) => (view.deletedAt ? `the deleted view "${view.name}"` : `the view "${view.name}"`)).join(", ")}, so it can't be deleted.`,
+      );
 
     try {
       await dropColumn(c.get("workspaceId"), table, column);

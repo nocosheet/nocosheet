@@ -1,7 +1,7 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 
 import { WorkspaceContent, WorkspaceHeader } from "@/components/layout/workspace-header";
-import { GridView } from "@/components/workspace/records/grid-view";
+import { TableGridView } from "@/components/workspace/records/grid/table-grid-view";
 import { TableActions } from "@/components/workspace/records/table-actions";
 import { recordsQueryOptions } from "@/data/workspace/records";
 import { resolveRecordsQuery, validateRecordsSearch } from "@/lib/records/query";
@@ -27,7 +27,7 @@ function ViewerPage() {
         <TableActions workspace={workspace} table={table} />
       </WorkspaceHeader>
       <WorkspaceContent className="flex max-w-none flex-col px-0 pb-0 md:px-0">
-        <GridView
+        <TableGridView
           workspace={workspace}
           tableId={Number(table)}
           onOpenRecord={(id) =>

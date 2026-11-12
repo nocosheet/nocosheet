@@ -932,40 +932,40 @@ const pdf = (name: string, size: number) => ({
 const assets: SeedRow[] = [
   {
     Name: "Primary logo",
-    Category: "Logo",
+    Category: "logo",
     Preview: [photo("logo-primary")],
     Files: [pdf("logo-guidelines.pdf", 482_000)],
     Notes: "Use on light backgrounds only.",
   },
   {
     Name: "Dark logo",
-    Category: "Logo",
+    Category: "logo",
     Preview: [photo("logo-dark")],
     Files: [],
     Notes: "Use on dark backgrounds.",
   },
   {
     Name: "Homepage hero",
-    Category: "Photography",
+    Category: "photography",
     Preview: [photo("hero-home", 960, 540)],
     Files: [pdf("hero-usage-rights.pdf", 126_000)],
     Notes: "Licensed for web and print.",
   },
   {
     Name: "Team offsite",
-    Category: "Photography",
+    Category: "photography",
     Preview: [photo("offsite")],
     Files: [],
   },
   {
     Name: "Brand guidelines",
-    Category: "Document",
+    Category: "document",
     Files: [pdf("brand-guidelines.pdf", 2_480_000), pdf("typography.pdf", 640_000)],
     Notes: "Version 3, updated this quarter.",
   },
   {
     Name: "Product screenshots",
-    Category: "Screenshot",
+    Category: "screenshot",
     Preview: [photo("screens-dashboard", 960, 600)],
     Files: [pdf("release-notes.pdf", 310_000)],
   },
@@ -1143,6 +1143,22 @@ export const tables: SeedTable[] = [
       col.multi("Skills", ["Frontend", "Backend", "Design", "Data", "DevOps", "Writing"]),
     ],
     rows: team,
+    views: [
+      {
+        name: "Active team",
+        icon: "users",
+        description: "Team members who are currently active.",
+        columns: ["Name", "Role", "Location", "Skills"],
+        where: [{ column: "Active", op: "is", value: true }],
+      },
+      {
+        name: "Engineers",
+        icon: "code",
+        description: "Everyone with the Engineer role.",
+        columns: ["Name", "Email", "Location", "Skills"],
+        where: [{ column: "Role", op: "is", value: "Engineer" }],
+      },
+    ],
   },
   {
     name: "Time Off",
@@ -1160,6 +1176,15 @@ export const tables: SeedTable[] = [
       col.select("Status", ["Pending", "Approved", "Rejected"], { default: "pending" }),
     ],
     rows: timeOff,
+    views: [
+      {
+        name: "Pending approval",
+        icon: "clock",
+        description: "Leave requests waiting for a decision.",
+        columns: ["Summary", "Employee", "Type", "Start date", "End date"],
+        where: [{ column: "Status", op: "is", value: "Pending" }],
+      },
+    ],
   },
   {
     name: "Clients",
@@ -1178,6 +1203,22 @@ export const tables: SeedTable[] = [
       col.long("Notes"),
     ],
     rows: clients,
+    views: [
+      {
+        name: "Active clients",
+        icon: "badge-check",
+        description: "Accounts we are currently working with.",
+        columns: ["Company", "Industry", "Contact email", "Annual revenue"],
+        where: [{ column: "Status", op: "is", value: "Active" }],
+      },
+      {
+        name: "Open leads",
+        icon: "target",
+        description: "Prospects that have not signed yet.",
+        columns: ["Company", "Industry", "Contact email", "Website"],
+        where: [{ column: "Status", op: "is", value: "Lead" }],
+      },
+    ],
   },
   {
     name: "Projects",
@@ -1200,6 +1241,22 @@ export const tables: SeedTable[] = [
       col.long("Description"),
     ],
     rows: projects,
+    views: [
+      {
+        name: "In progress",
+        icon: "loader",
+        description: "Projects being worked on right now.",
+        columns: ["Name", "Client", "Owner", "Priority", "Due date", "Progress"],
+        where: [{ column: "Status", op: "is", value: "In progress" }],
+      },
+      {
+        name: "High priority",
+        icon: "flag",
+        description: "High and urgent projects.",
+        columns: ["Name", "Client", "Status", "Due date", "Budget"],
+        where: [{ column: "Priority", op: "is_any_of", value: ["High", "Urgent"] }],
+      },
+    ],
   },
   {
     name: "Tasks",
@@ -1236,6 +1293,26 @@ export const tables: SeedTable[] = [
       col.long("Notes"),
     ],
     rows: tasks,
+    views: [
+      {
+        name: "Open tasks",
+        icon: "list-todo",
+        description: "Tasks that are not done yet.",
+        columns: ["Title", "Project", "Assignee", "Status", "Priority", "Due date"],
+        where: [{ column: "Done", op: "is", value: false }],
+      },
+      {
+        name: "Urgent and open",
+        icon: "siren",
+        description: "Urgent tasks still to do.",
+        columns: ["Title", "Assignee", "Status", "Due date", "Estimate (hours)"],
+        where: [
+          { column: "Priority", op: "is", value: "Urgent" },
+          { column: "Done", op: "is", value: false },
+        ],
+        join: "and",
+      },
+    ],
   },
   {
     name: "Invoices",
@@ -1254,6 +1331,22 @@ export const tables: SeedTable[] = [
       col.check("Paid"),
     ],
     rows: invoices,
+    views: [
+      {
+        name: "Unpaid invoices",
+        icon: "wallet",
+        description: "Invoices that have not been paid.",
+        columns: ["Number", "Client", "Amount", "Status", "Due"],
+        where: [{ column: "Paid", op: "is", value: false }],
+      },
+      {
+        name: "Overdue invoices",
+        icon: "triangle-alert",
+        description: "Invoices past their due date.",
+        columns: ["Number", "Client", "Project", "Amount", "Due"],
+        where: [{ column: "Status", op: "is", value: "Overdue" }],
+      },
+    ],
   },
   {
     name: "Products",
@@ -1278,6 +1371,22 @@ export const tables: SeedTable[] = [
       col.check("Discontinued"),
     ],
     rows: products,
+    views: [
+      {
+        name: "Low stock",
+        icon: "trending-down",
+        description: "Products with fewer than 10 units left.",
+        columns: ["SKU", "Name", "Stock", "Reorder level", "Supplier"],
+        where: [{ column: "Stock", op: "lt", value: 10 }],
+      },
+      {
+        name: "Active catalog",
+        icon: "package-check",
+        description: "Products that are still on sale.",
+        columns: ["SKU", "Name", "Category", "Price", "Stock"],
+        where: [{ column: "Discontinued", op: "is", value: false }],
+      },
+    ],
   },
   {
     name: "Bug Reports",
@@ -1297,6 +1406,19 @@ export const tables: SeedTable[] = [
       col.long("Steps to reproduce"),
     ],
     rows: bugs,
+    views: [
+      {
+        name: "Needs attention",
+        icon: "bug",
+        description: "High and critical bugs that are not fixed.",
+        columns: ["Title", "Severity", "Status", "Project", "Reporter", "Votes"],
+        where: [
+          { column: "Severity", op: "is_any_of", value: ["High", "Critical"] },
+          { column: "Status", op: "is_not", value: "Fixed" },
+        ],
+        join: "and",
+      },
+    ],
   },
   {
     name: "Content Calendar",
@@ -1314,6 +1436,22 @@ export const tables: SeedTable[] = [
       col.rating("Quality"),
     ],
     rows: posts,
+    views: [
+      {
+        name: "Scheduled posts",
+        icon: "calendar-clock",
+        description: "Posts ready to go out.",
+        columns: ["Title", "Channel", "Author", "Publish date"],
+        where: [{ column: "Status", op: "is", value: "Scheduled" }],
+      },
+      {
+        name: "Published",
+        icon: "calendar-check",
+        description: "Everything that is already live.",
+        columns: ["Title", "Channel", "Author", "Publish date", "URL", "Quality"],
+        where: [{ column: "Status", op: "is", value: "Published" }],
+      },
+    ],
   },
   {
     name: "Brand Assets",
@@ -1329,5 +1467,14 @@ export const tables: SeedTable[] = [
       col.long("Notes"),
     ],
     rows: assets,
+    views: [
+      {
+        name: "Logos",
+        icon: "image",
+        description: "Logo files only.",
+        columns: ["Name", "Preview", "Files"],
+        where: [{ column: "Category", op: "is", value: "Logo" }],
+      },
+    ],
   },
 ];

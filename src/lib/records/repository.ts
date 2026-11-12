@@ -5,7 +5,8 @@ import { sqliteTable, text } from "void/schema-d1";
 import { SEARCHABLE_FORMATS, type SelectChoice } from "../tables/formats";
 import { physicalTableName, quoteIdent } from "../tables/naming";
 import type { Column, Table } from "../tables/repository";
-import { type FilterCondition, type FilterKind, filterKind } from "./filters";
+import { conditionText } from "./condition";
+import { type FilterCondition, filterKind } from "./filters";
 import { groupKeyOf, isGroupableSystemKey } from "./grouping";
 import type { ResolvedRecordsQuery } from "./query";
 import { shapeRecord } from "./shape";
@@ -24,84 +25,7 @@ const raw = (text: string) => sql.raw(text);
 const col = (name: string) => raw(`t.${quoteIdent(name)}`);
 const like = (value: string) => `%${value.replaceAll(/[\\%_]/g, "\\$&")}%`;
 
-function dateExpression(column: Column): Fragment {
-  if (column.format === "datetime") return sql`date(${col(column.columnName)} / 1000, 'unixepoch')`;
-  if (column.format === "datetime_tz") return sql`date(${col(column.columnName)})`;
-  return col(column.columnName);
-}
-
-function conditionSql(column: Column, kind: FilterKind, condition: FilterCondition): Fragment {
-  const target = col(column.columnName);
-  const value = condition.value;
-  const text = typeof value === "string" ? value : "";
-  const list = Array.isArray(value) ? value : [];
-
-  switch (condition.op) {
-    case "is_empty":
-      return kind === "multi_select"
-        ? sql`(${target} is null or ${target} = '[]')`
-        : kind === "text" || kind === "single_select"
-          ? sql`(${target} is null or ${target} = '')`
-          : sql`${target} is null`;
-    case "is_not_empty":
-      return kind === "multi_select"
-        ? sql`(${target} is not null and ${target} != '[]')`
-        : kind === "text" || kind === "single_select"
-          ? sql`(${target} is not null and ${target} != '')`
-          : sql`${target} is not null`;
-    case "contains":
-      return sql`${target} like ${like(text)} escape '\\'`;
-    case "not_contains":
-      return sql`(${target} is null or ${target} not like ${like(text)} escape '\\')`;
-    case "starts_with":
-      return sql`${target} like ${`${like(text).slice(1, -1)}%`} escape '\\'`;
-    case "ends_with":
-      return sql`${target} like ${`%${like(text).slice(1, -1)}`} escape '\\'`;
-    case "equals":
-      return sql`${target} = ${text} collate nocase`;
-    case "not_equals":
-      return sql`(${target} is null or ${target} != ${text} collate nocase)`;
-    case "eq":
-      return kind === "date"
-        ? sql`${dateExpression(column)} = ${text}`
-        : sql`${target} = ${Number(value)}`;
-    case "neq":
-      return sql`(${target} is null or ${target} != ${Number(value)})`;
-    case "gt":
-      return sql`${target} > ${Number(value)}`;
-    case "gte":
-      return sql`${target} >= ${Number(value)}`;
-    case "lt":
-      return sql`${target} < ${Number(value)}`;
-    case "lte":
-      return sql`${target} <= ${Number(value)}`;
-    case "before":
-      return sql`${dateExpression(column)} < ${text}`;
-    case "after":
-      return sql`${dateExpression(column)} > ${text}`;
-    case "on_or_before":
-      return sql`${dateExpression(column)} <= ${text}`;
-    case "on_or_after":
-      return sql`${dateExpression(column)} >= ${text}`;
-    case "is":
-      if (kind === "checkbox") return sql`coalesce(${target}, 0) = ${value === true ? 1 : 0}`;
-      return sql`${target} = ${text}`;
-    case "is_not":
-      return sql`(${target} is null or ${target} != ${text})`;
-    case "is_any_of":
-      return sql`${target} in (${sql.join(
-        list.map((item) => sql`${item}`),
-        sql`, `,
-      )})`;
-    case "has_any_of":
-      return sql`exists (select 1 from json_each(${target}) where value in (${sql.join(
-        list.map((item) => sql`${item}`),
-        sql`, `,
-      )}))`;
-  }
-}
-
-async function recordSource(workspace: string, table: Table, columns: Column[]) {
+async function recordSource(workspace: string, table: Table, columns: Column[], source?: string) {
   const targetIds = columns
     .filter((column) => column.format === "relation")
     .map((column) => Number((column.options as { tableId?: number }).tableId));
@@ -143,22 +67,40 @@ async function recordSource(workspace: string, table: Table, columns: Column[]) 
   return {
     labelled,
     select: raw(selects.join(", ")),
-    from: sql`${raw(quoteIdent(physicalTableName(workspace, table.tableName)))} t`,
+    from: sql`${raw(quoteIdent(source ?? physicalTableName(workspace, table.tableName)))} t`,
   };
 }
 
-function filterWhere(columns: Column[], query: ResolvedRecordsQuery, ownerId?: string) {
+function conditionsWhere(columns: Column[], filters: FilterCondition[], join: "and" | "or") {
   const byName = new Map(columns.map((column) => [column.columnName, column]));
-  const where: Fragment[] = ownerId ? [sql`t."created_by" = ${ownerId}`] : [];
+  const params: (string | number)[] = [];
+  const bind = (value: string | number) => {
+    params.push(value);
+    return "?";
+  };
 
-  const conditions: Fragment[] = [];
-  for (const condition of query.filters) {
+  const conditions: string[] = [];
+  for (const condition of filters) {
     const column = byName.get(condition.column);
     const kind = column ? filterKind(column.format) : null;
-    if (column && kind) conditions.push(conditionSql(column, kind, condition));
+    if (column && kind) conditions.push(conditionText(column, kind, condition, bind));
   }
-  if (conditions.length)
-    where.push(sql`(${sql.join(conditions, query.join === "or" ? sql` or ` : sql` and `)})`);
+  if (!conditions.length) return undefined;
+
+  const parts = `(${conditions.join(join === "or" ? " or " : " and ")})`.split("?");
+  return sql.join(
+    parts.flatMap((part, index) =>
+      index < params.length ? [raw(part), sql`${params[index]}`] : [raw(part)],
+    ),
+    raw(""),
+  );
+}
+
+function filterWhere(columns: Column[], query: ResolvedRecordsQuery, ownerId?: string) {
+  const where: Fragment[] = ownerId ? [sql`t."created_by" = ${ownerId}`] : [];
+
+  const filtered = conditionsWhere(columns, query.filters, query.join);
+  if (filtered) where.push(filtered);
 
   if (query.q) {
     const searchable = columns.filter(
@@ -246,8 +188,9 @@ export async function findRecords(
   columns: Column[],
   query: ResolvedRecordsQuery,
   ownerId?: string,
+  source?: string,
 ) {
-  const { select, from, labelled } = await recordSource(workspace, table, columns);
+  const { select, from, labelled } = await recordSource(workspace, table, columns, source);
   const condition = filterWhere(columns, query, ownerId);
   const grouping = query.group ? groupSpec(columns, query.group, labelled) : undefined;
   const order = recordsOrder(columns, query);

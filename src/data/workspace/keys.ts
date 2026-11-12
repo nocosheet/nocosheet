@@ -10,6 +10,9 @@ export const workspaceKeys = {
   record: (id: number, recordId: string) =>
     [...workspaceKeys.table(id), "record", recordId] as const,
   recordsExport: (id: number) => [...workspaceKeys.table(id), "export"] as const,
+  views: (id: number) => [...workspaceKeys.table(id), "views"] as const,
+  viewList: (id: number, query: object) => [...workspaceKeys.views(id), "list", query] as const,
+  viewsTrash: (id: number, query: object) => [...workspaceKeys.views(id), "trash", query] as const,
   trash: (id: number) => [...workspaceKeys.table(id), "trash"] as const,
   trashList: (id: number, query: object) => [...workspaceKeys.trash(id), "list", query] as const,
   trashEntry: (id: number, entryId: number) =>

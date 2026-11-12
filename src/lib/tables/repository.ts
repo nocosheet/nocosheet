@@ -1,4 +1,4 @@
-import { columnTable, favoriteTable, resourceTable, tableTable } from "@db/schema";
+import { columnTable, favoriteTable, resourceTable, tableTable, viewTable } from "@db/schema";
 import {
   and,
   asc,
@@ -16,6 +16,8 @@ import {
 } from "void/db";
 
 import type { TrashQuery } from "../trash/query";
+import { buildDropView } from "../views/ddl";
+import { physicalViewName } from "../views/naming";
 import {
   buildAddColumn,
   buildCreateIndex,
@@ -178,9 +180,7 @@ export async function findTrashedTableByName(name: string) {
   const [row] = await db
     .select({ name: tableTable.name })
     .from(tableTable)
-    .where(
-      and(sql`lower(${tableTable.name}) = lower(${name})`, isNotNull(tableTable.deletedAt)),
-    )
+    .where(and(sql`lower(${tableTable.name}) = lower(${name})`, isNotNull(tableTable.deletedAt)))
     .limit(1);
   return row;
 }
@@ -353,9 +353,7 @@ export async function dropColumn(workspace: string, table: Table, column: Column
 
   await db.batch([
     db.run(
-      sql.raw(
-        kind ? buildDropIndex(indexName(workspace, column.columnName, kind)) : "select 1",
-      ),
+      sql.raw(kind ? buildDropIndex(indexName(workspace, column.columnName, kind)) : "select 1"),
     ),
     db.run(sql.raw(buildDropColumn(physicalName, column.columnName))),
     db.delete(columnTable).where(eq(columnTable.id, column.id)),
@@ -387,29 +385,37 @@ export async function softDeleteTables(ids: number[], userId: string) {
 }
 
 export async function dropTables(workspace: string, rows: { id: number; tableName: string }[]) {
+  const ids = rows.map((row) => row.id);
+  const views = await db
+    .select({ viewName: viewTable.viewName })
+    .from(viewTable)
+    .where(inArray(viewTable.tableId, ids));
+
   await db.batch([
     db.run(sql`pragma defer_foreign_keys = on`),
+    ...views.map((view) =>
+      db.run(sql.raw(buildDropView(physicalViewName(workspace, view.viewName)))),
+    ),
     ...rows.map((row) =>
       db.run(sql.raw(buildDropTable(physicalTableName(workspace, row.tableName)))),
     ),
-    db.delete(resourceTable).where(
-      inArray(
-        resourceTable.id,
-        rows.map((row) => row.id),
+    db
+      .delete(resourceTable)
+      .where(
+        inArray(
+          resourceTable.id,
+          db.select({ id: viewTable.id }).from(viewTable).where(inArray(viewTable.tableId, ids)),
+        ),
       ),
-    ),
-  ]);
+    db.delete(resourceTable).where(inArray(resourceTable.id, ids)),
+  ] as never);
 }
 
 export async function listDeletedTables(query: TrashQuery) {
   const pattern = query.q ? `%${query.q.replaceAll(/[\\%_]/g, "\\$&")}%` : null;
   const where = and(
     isNotNull(tableTable.deletedAt),
-    pattern
-      ? or(
-          sql`${tableTable.name} like ${pattern} escape '\\'`,
-        )
-      : undefined,
+    pattern ? or(sql`${tableTable.name} like ${pattern} escape '\\'`) : undefined,
   );
   const sortExpression =
     query.sort === "name" ? sql`lower(${tableTable.name})` : tableTable.deletedAt;
@@ -486,14 +492,14 @@ export async function restoreTable(id: number) {
     .where(eq(tableTable.id, id));
 }
 
-export async function listExpiredTables(cutoff: Date) {
+async function listExpiredTables(cutoff: Date) {
   return db
     .select({ id: tableTable.id, tableName: tableTable.tableName })
     .from(tableTable)
     .where(and(isNotNull(tableTable.deletedAt), lt(tableTable.deletedAt, cutoff)));
 }
 
-export async function findLinkTargetsFromOutside(ids: number[]) {
+async function findLinkTargetsFromOutside(ids: number[]) {
   const rows = await db
     .select({ target: linkTarget })
     .from(columnTable)
@@ -506,4 +512,17 @@ export async function findLinkTargetsFromOutside(ids: number[]) {
       ),
     );
   return rows.map((row) => Number(row.target));
+}
+
+export async function purgeExpiredTables(workspace: string, cutoff: Date) {
+  let doomed = await listExpiredTables(cutoff);
+
+  for (let blocked = true; blocked && doomed.length > 0; ) {
+    const stuck = new Set(await findLinkTargetsFromOutside(doomed.map((row) => row.id)));
+    blocked = stuck.size > 0;
+    doomed = doomed.filter((row) => !stuck.has(row.id));
+  }
+
+  if (doomed.length > 0) await dropTables(workspace, doomed);
+  return doomed.length;
 }

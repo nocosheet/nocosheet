@@ -21,7 +21,7 @@ const optionalText = (max: number) =>
     .nullish()
     .transform((value) => value ?? null);
 
-const iconName = z
+export const iconName = z
   .string()
   .max(64)
   .regex(ICON_NAME_PATTERN, "Unknown icon")
@@ -31,11 +31,7 @@ const iconName = z
 export const ID_TYPES = ["increment", "uuid"] as const;
 
 export const tableInputSchema = z.object({
-  name: z
-    .string()
-    .trim()
-    .min(1, "Name is required")
-    .max(64, "Name must be 64 characters or fewer"),
+  name: z.string().trim().min(1, "Name is required").max(64, "Name must be 64 characters or fewer"),
   icon: iconName,
   groupName: optionalText(64),
   description: optionalText(500),

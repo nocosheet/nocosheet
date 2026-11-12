@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import type { SeedContext } from "void/seed";
 
+import type { FilterCondition } from "../../src/lib/records/filters";
 import {
   buildAddColumn,
   buildCreateTable,
@@ -17,6 +18,10 @@ import {
   toSlug,
 } from "../../src/lib/tables/naming";
 import { columnInputSchema } from "../../src/lib/tables/validation";
+import { buildCreateView } from "../../src/lib/views/ddl";
+import { newViewName, physicalViewName } from "../../src/lib/views/naming";
+import { checkViewDefinition, viewInputSchema } from "../../src/lib/views/validation";
+import { buildViewWhere } from "../../src/lib/views/where";
 import type { SeedUsers } from "./users";
 
 type Schema = typeof import("../schema");
@@ -58,6 +63,19 @@ export type SeedColumn = {
 
 export type SeedRow = Record<string, unknown>;
 
+export type SeedView = {
+  name: string;
+  icon: string;
+  description: string;
+  columns: string[];
+  where?: {
+    column: string;
+    op: FilterCondition["op"];
+    value?: string | number | boolean | string[];
+  }[];
+  join?: "and" | "or";
+};
+
 export type SeedTable = {
   name: string;
   icon: string;
@@ -67,6 +85,7 @@ export type SeedTable = {
   title: string;
   columns: SeedColumn[];
   rows: SeedRow[];
+  views?: SeedView[];
 };
 
 type Seeded = {
@@ -154,6 +173,7 @@ export async function seedTable(
 
   const columnIds = new Map<string, number>();
   const columnNames = new Map<string, string>();
+  const columnRows = new Map<string, typeof schema.columnTable.$inferSelect>();
   const references = new Map<string, string>();
   for (const { column } of columns) {
     const columnName = newColumnName();
@@ -181,7 +201,7 @@ export async function seedTable(
         defaultValue: column.defaultValue,
         position: column.position,
       })
-      .returning({ id: schema.columnTable.id });
+      .returning();
     for (const statement of buildAddColumn(
       WORKSPACE,
       physicalName,
@@ -192,6 +212,7 @@ export async function seedTable(
     ))
       db.run(statement);
     columnIds.set(column.name, created.id);
+    columnRows.set(column.name, created);
     columnNames.set(column.name, columnName);
   }
 
@@ -242,6 +263,74 @@ export async function seedTable(
     seeded.titles.set(text(row[def.title]), id);
   });
 
+  const allColumns = [...columnRows.values()];
+  for (const [index, view] of (def.views ?? []).entries()) {
+    const column = (name: string) => {
+      const found = columnRows.get(name);
+      if (!found) throw new Error(`${def.name}: view "${view.name}" uses unknown column ${name}`);
+      return found;
+    };
+    const choiceValue = (name: string, label: unknown) => {
+      const choices = (column(name).options as { choices?: { label: string; value: string }[] })
+        .choices;
+      if (!choices) return label;
+      const found = choices.find((choice) => choice.label === label);
+      if (!found)
+        throw new Error(`${def.name}: view "${view.name}" has no choice ${String(label)}`);
+      return found.value;
+    };
+
+    const input = viewInputSchema.parse({
+      name: view.name,
+      description: view.description,
+      icon: view.icon,
+      selectColumns: view.columns.map((name) => column(name).columnName),
+      join: view.join ?? "and",
+      filters: (view.where ?? []).map((condition) => ({
+        column: column(condition.column).columnName,
+        op: condition.op,
+        ...(condition.value === undefined
+          ? {}
+          : {
+              value: Array.isArray(condition.value)
+                ? condition.value.map((item) => choiceValue(condition.column, item))
+                : choiceValue(condition.column, condition.value),
+            }),
+      })),
+    });
+    const problem = checkViewDefinition(allColumns, input);
+    if (problem) throw new Error(`${def.name}: view "${view.name}": ${problem}`);
+
+    const selected = allColumns
+      .filter((item) => input.selectColumns.includes(item.columnName))
+      .map((item) => item.columnName);
+    const where = buildViewWhere(allColumns, input.filters, input.join);
+    const viewName = newViewName();
+
+    const [viewResource] = await db
+      .insert(schema.resourceTable)
+      .values({ kind: "view" })
+      .returning({ id: schema.resourceTable.id });
+    await db.insert(schema.viewTable).values({
+      id: viewResource.id,
+      tableId: resource.id,
+      viewName,
+      name: input.name,
+      description: input.description,
+      icon: input.icon,
+      type: "grid",
+      position: index,
+      selectColumns: selected,
+      whereExpression: where,
+      createdBy: users.admin,
+      createdAt: new Date(at(-45 + position + index)),
+      updatedAt: new Date(at(-45 + position + index)),
+    });
+    db.run(buildCreateView(physicalViewName(WORKSPACE, viewName), physicalName, selected, where));
+  }
+
   state.set(def.name, seeded);
-  console.log(`  ${def.name}: ${def.columns.length} columns, ${def.rows.length} records`);
+  console.log(
+    `  ${def.name}: ${def.columns.length} columns, ${def.rows.length} records, ${def.views?.length ?? 0} views`,
+  );
 }

@@ -10,7 +10,7 @@ export function toSlug(name: string) {
 const ALPHABET = "abcdefghijklmnopqrstuvwxyz0123456789";
 const KEY_LENGTH = 10;
 
-function randomKey() {
+export function randomKey() {
   const bytes = crypto.getRandomValues(new Uint8Array(KEY_LENGTH));
   return Array.from(bytes, (byte) => ALPHABET[byte % ALPHABET.length]).join("");
 }

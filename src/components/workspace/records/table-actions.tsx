@@ -1,4 +1,4 @@
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 
 import {
@@ -13,7 +13,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Group, GroupSeparator } from "@/components/ui/group";
 import { Menu, MenuItem, MenuLinkItem, MenuPopup, MenuTrigger } from "@/components/ui/menu";
+import { ViewsMenu } from "@/components/workspace/views/views-menu";
 import { workspaceKeys } from "@/data/workspace/keys";
+import { viewsQueryOptions } from "@/data/workspace/views";
 import { useAccess } from "@/hooks/use-access";
 
 import { useExportRecords } from "./use-export-records";
@@ -23,10 +25,12 @@ export function TableActions({ workspace, table }: { workspace: string; table: s
   const queryClient = useQueryClient();
   const tableId = Number(table);
   const exportRecords = useExportRecords(workspace, tableId);
+  const { data: views } = useQuery(viewsQueryOptions(workspace, tableId));
+  const showViews = access.admin || (views?.length ?? 0) > 0;
   const canExport = access.can("export", tableId) && access.can("read", tableId);
 
   const menu = (
-    <Menu>
+    <Menu key="menu">
       <MenuTrigger render={<Button size="icon-sm" variant="outline" aria-label="More actions" />}>
         <EllipsisIcon />
       </MenuTrigger>
@@ -68,11 +72,10 @@ export function TableActions({ workspace, table }: { workspace: string; table: s
     </Menu>
   );
 
-  if (!access.can("create", tableId)) return menu;
-
-  return (
-    <Group>
+  const parts = [
+    access.can("create", tableId) && (
       <Button
+        key="new"
         size="sm"
         variant="outline"
         aria-label="New record"
@@ -88,8 +91,18 @@ export function TableActions({ workspace, table }: { workspace: string; table: s
         <PlusIcon />
         <span className="max-sm:hidden">New record</span>
       </Button>
-      <GroupSeparator />
-      {menu}
-    </Group>
+    ),
+    menu,
+  ].filter(Boolean);
+
+  return (
+    <div className="flex items-center gap-2">
+      {showViews && <ViewsMenu workspace={workspace} table={table} />}
+      <Group>
+        {parts.flatMap((part, index) =>
+          index === 0 ? [part] : [<GroupSeparator key={`separator-${index}`} />, part],
+        )}
+      </Group>
+    </div>
   );
 }
