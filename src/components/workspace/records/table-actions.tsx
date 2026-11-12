@@ -37,7 +37,7 @@ export function TableActions({ workspace, table }: { workspace: string; table: s
       <MenuPopup align="end">
         <MenuLinkItem
           render={
-            <Link to="/w/$workspace/tables/$table/definition" params={{ workspace, table }} />
+            <Link to="/workspaces/$workspace/tables/$table/definition" params={{ workspace, table }} />
           }
         >
           <SlidersHorizontalIcon />
@@ -54,7 +54,7 @@ export function TableActions({ workspace, table }: { workspace: string; table: s
         )}
         {access.admin && (
           <MenuLinkItem
-            render={<Link to="/w/$workspace/tables/$table/trash" params={{ workspace, table }} />}
+            render={<Link to="/workspaces/$workspace/tables/$table/trash" params={{ workspace, table }} />}
           >
             <Trash2Icon />
             Trash
@@ -82,7 +82,7 @@ export function TableActions({ workspace, table }: { workspace: string; table: s
         className="max-sm:w-8 max-sm:px-0"
         render={
           <Link
-            to="/w/$workspace/tables/$table/new"
+            to="/workspaces/$workspace/tables/$table/new"
             params={{ workspace, table }}
             search={(previous) => previous}
           />

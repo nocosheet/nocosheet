@@ -174,7 +174,7 @@ function ViewForm({
           await queryClient.invalidateQueries({ queryKey: workspaceKeys.table(tableId) });
           onSaved();
           void navigate({
-            to: "/w/$workspace/tables/$table/view/$view",
+            to: "/workspaces/$workspace/tables/$table/views/$view",
             params: { workspace, table: String(tableId), view: String(created.id) },
           });
           return;

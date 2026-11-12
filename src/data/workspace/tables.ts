@@ -19,7 +19,7 @@ export const tablesQueryOptions = (workspace: string, query: TablesQuery) =>
     queryKey: workspaceKeys.tableList(query),
     queryFn: () =>
       unwrapFetch(
-        fetch("/api/w/:workspace/tables", {
+        fetch("/api/workspaces/:workspace/tables", {
           params: { workspace },
           query: {
             page: query.page,
@@ -37,7 +37,7 @@ export const tableQueryOptions = (workspace: string, id: number) =>
   queryOptions({
     queryKey: workspaceKeys.table(id),
     queryFn: () =>
-      unwrapFetch(fetch("/api/w/:workspace/tables/:id", { params: { workspace, id: String(id) } })),
+      unwrapFetch(fetch("/api/workspaces/:workspace/tables/:table", { params: { workspace, table: String(id) } })),
     staleTime: 30_000,
   });
 
@@ -45,7 +45,7 @@ export const createTableMutationOptions = mutationOptions({
   mutationKey: workspaceKeys.mutation("create-table"),
   mutationFn: ({ workspace, ...values }: { workspace: string } & TableInput) =>
     unwrapFetch(
-      fetch("/api/w/:workspace/tables", { method: "POST", params: { workspace }, body: values }),
+      fetch("/api/workspaces/:workspace/tables", { method: "POST", params: { workspace }, body: values }),
     ),
 });
 
@@ -61,7 +61,7 @@ export const deleteTablesMutationOptions = mutationOptions({
     permanent?: boolean;
   }) =>
     unwrapFetch(
-      fetch("/api/w/:workspace/tables", {
+      fetch("/api/workspaces/:workspace/tables", {
         method: "DELETE",
         params: { workspace },
         body: permanent ? { ids, permanent } : { ids },
@@ -73,7 +73,7 @@ export const discardTableMutationOptions = mutationOptions({
   mutationKey: workspaceKeys.mutation("discard-table"),
   mutationFn: ({ workspace, id }: { workspace: string; id: number }) =>
     unwrapFetch(
-      fetch("/api/w/:workspace/tables", {
+      fetch("/api/workspaces/:workspace/tables", {
         method: "DELETE",
         params: { workspace },
         body: { ids: [id], permanent: true },
@@ -86,7 +86,7 @@ export const deletedTablesQueryOptions = (workspace: string, query: TrashQuery) 
     queryKey: workspaceKeys.tablesTrash(query),
     queryFn: () =>
       unwrapFetch(
-        fetch("/api/w/:workspace/tables/trash", {
+        fetch("/api/workspaces/:workspace/tables/trash", {
           params: { workspace },
           query: {
             page: query.page,
@@ -105,9 +105,9 @@ export const restoreTableMutationOptions = mutationOptions({
   mutationKey: workspaceKeys.mutation("restore-table"),
   mutationFn: ({ workspace, id }: { workspace: string; id: number }) =>
     unwrapFetch(
-      fetch("/api/w/:workspace/tables/trash/:id/restore", {
+      fetch("/api/workspaces/:workspace/tables/trash/:table/restore", {
         method: "POST",
-        params: { workspace, id: String(id) },
+        params: { workspace, table: String(id) },
       }),
     ),
 });
@@ -116,9 +116,9 @@ export const purgeTableMutationOptions = mutationOptions({
   mutationKey: workspaceKeys.mutation("purge-table"),
   mutationFn: ({ workspace, id }: { workspace: string; id: number }) =>
     unwrapFetch(
-      fetch("/api/w/:workspace/tables/trash/:id", {
+      fetch("/api/workspaces/:workspace/tables/trash/:table", {
         method: "DELETE",
-        params: { workspace, id: String(id) },
+        params: { workspace, table: String(id) },
       }),
     ),
 });
@@ -135,9 +135,9 @@ export const updateTableMutationOptions = mutationOptions({
     values: TableUpdateInput;
   }) =>
     unwrapFetch(
-      fetch("/api/w/:workspace/tables/:id", {
+      fetch("/api/workspaces/:workspace/tables/:table", {
         method: "PATCH",
-        params: { workspace, id: String(id) },
+        params: { workspace, table: String(id) },
         body: values,
       }),
     ),
@@ -147,9 +147,9 @@ export const createColumnMutationOptions = mutationOptions({
   mutationKey: workspaceKeys.mutation("create-column"),
   mutationFn: ({ workspace, id, column }: { workspace: string; id: number; column: ColumnInput }) =>
     unwrapFetch(
-      fetch("/api/w/:workspace/tables/:id/columns", {
+      fetch("/api/workspaces/:workspace/tables/:table/columns", {
         method: "POST",
-        params: { workspace, id: String(id) },
+        params: { workspace, table: String(id) },
         body: column,
       }),
     ),
@@ -169,9 +169,9 @@ export const updateColumnMutationOptions = mutationOptions({
     patch: ColumnPatchInput;
   }) =>
     unwrapFetch(
-      fetch("/api/w/:workspace/tables/:id/columns/:column", {
+      fetch("/api/workspaces/:workspace/tables/:table/columns/:column", {
         method: "PATCH",
-        params: { workspace, id: String(id), column: String(columnId) },
+        params: { workspace, table: String(id), column: String(columnId) },
         body: patch,
       }),
     ),
@@ -181,9 +181,9 @@ export const reorderColumnsMutationOptions = mutationOptions({
   mutationKey: workspaceKeys.mutation("reorder-columns"),
   mutationFn: ({ workspace, id, ids }: { workspace: string; id: number; ids: number[] }) =>
     unwrapFetch(
-      fetch("/api/w/:workspace/tables/:id/columns/order", {
+      fetch("/api/workspaces/:workspace/tables/:table/columns/order", {
         method: "PUT",
-        params: { workspace, id: String(id) },
+        params: { workspace, table: String(id) },
         body: { ids },
       }),
     ),
@@ -193,9 +193,9 @@ export const deleteColumnMutationOptions = mutationOptions({
   mutationKey: workspaceKeys.mutation("delete-column"),
   mutationFn: ({ workspace, id, columnId }: { workspace: string; id: number; columnId: number }) =>
     unwrapFetch(
-      fetch("/api/w/:workspace/tables/:id/columns/:column", {
+      fetch("/api/workspaces/:workspace/tables/:table/columns/:column", {
         method: "DELETE",
-        params: { workspace, id: String(id), column: String(columnId) },
+        params: { workspace, table: String(id), column: String(columnId) },
       }),
     ),
 });

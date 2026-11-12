@@ -42,7 +42,7 @@ export function TableMenu({ table, workspace }: { table: SidebarTable; workspace
       }),
   });
 
-  const path = `/w/${workspace}/tables/${table.id}`;
+  const path = `/workspaces/${workspace}/tables/${table.id}`;
 
   const copyLink = async () => {
     try {
@@ -87,7 +87,7 @@ export function TableMenu({ table, workspace }: { table: SidebarTable; workspace
           <MenuLinkItem
             render={
               <Link
-                to="/w/$workspace/tables/$table/definition"
+                to="/workspaces/$workspace/tables/$table/definition"
                 params={{ workspace, table: String(table.id) }}
               />
             }

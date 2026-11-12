@@ -64,7 +64,7 @@ export function viewsColumns({
           />
           <div className="flex min-w-0 flex-col">
             <Link
-              to="/w/$workspace/tables/$table/view/$view"
+              to="/workspaces/$workspace/tables/$table/views/$view"
               params={{ workspace, table, view: String(row.original.id) }}
               className="truncate font-medium hover:underline"
             >

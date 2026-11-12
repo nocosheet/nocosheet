@@ -18,7 +18,7 @@ export function NavSecondary({ workspace }: { workspace: string }) {
           tooltip="Settings"
           render={
             <Link
-              to="/w/$workspace/settings"
+              to="/workspaces/$workspace/settings"
               params={{ workspace }}
               viewTransition={{ types: ["sidebar-forward"] }}
             />

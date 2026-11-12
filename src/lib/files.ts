@@ -7,9 +7,9 @@ export const fileKey = (workspace: string, tableId: number, id: string) =>
   `uploads/${workspace}/${tableId}/${id}`;
 
 export const fileUrl = (workspace: string, tableId: number, id: string) =>
-  `/api/w/${workspace}/tables/${tableId}/files/${id}`;
+  `/api/workspaces/${workspace}/tables/${tableId}/files/${id}`;
 
-const isFileUrl = (url: string) => url.startsWith("/api/w/") || url.startsWith("https://");
+const isFileUrl = (url: string) => url.startsWith("/api/workspaces/") || url.startsWith("https://");
 
 export const fileValueSchema = z.object({
   url: z.string().max(2048).refine(isFileUrl, "Invalid file URL"),

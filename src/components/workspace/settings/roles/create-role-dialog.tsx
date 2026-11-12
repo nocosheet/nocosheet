@@ -43,7 +43,7 @@ export function CreateRoleDialog({ workspace }: { workspace: string }) {
       await queryClient.invalidateQueries({ queryKey: workspaceKeys.roles() });
       setOpen(false);
       await navigate({
-        to: "/w/$workspace/settings/members/roles/$roleId",
+        to: "/workspaces/$workspace/settings/members/roles/$roleId",
         params: { workspace, roleId: String(role.id) },
       });
     },

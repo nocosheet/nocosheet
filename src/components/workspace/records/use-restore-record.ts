@@ -46,7 +46,7 @@ export function useRestoreRecord(workspace: string, tableId: number) {
         },
       );
       void navigate({
-        to: "/w/$workspace/tables/$table/trash/$entry",
+        to: "/workspaces/$workspace/tables/$table/trash/$entry",
         params: { workspace, table: String(tableId), entry: String(failed.entryId) },
       });
     }

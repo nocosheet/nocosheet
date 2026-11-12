@@ -66,7 +66,7 @@ export function WorkspaceSwitcher({ workspace, user }: WorkspaceSwitcherProps) {
           >
             <MenuGroup>
               <MenuGroupLabel>Workspace</MenuGroupLabel>
-              <MenuLinkItem render={<Link to="/w/$workspace" params={{ workspace }} />}>
+              <MenuLinkItem render={<Link to="/workspaces/$workspace" params={{ workspace }} />}>
                 <span className="flex size-6 items-center justify-center rounded-md border">
                   <LogoMark className="size-4" />
                 </span>

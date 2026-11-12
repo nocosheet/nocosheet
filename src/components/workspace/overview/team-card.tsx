@@ -56,7 +56,7 @@ export function TeamCard({ workspace }: { workspace: string }) {
           <Button
             variant="outline"
             size="sm"
-            render={<Link to="/w/$workspace/settings/members" params={{ workspace }} />}
+            render={<Link to="/workspaces/$workspace/settings/members" params={{ workspace }} />}
           >
             {access.admin ? (
               <>

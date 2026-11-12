@@ -8,6 +8,6 @@ import { workspaceKeys } from "./keys";
 export const accessQueryOptions = (workspace: string) =>
   queryOptions({
     queryKey: workspaceKeys.access(),
-    queryFn: () => unwrapFetch(fetch("/api/w/:workspace/access", { params: { workspace } })),
+    queryFn: () => unwrapFetch(fetch("/api/workspaces/:workspace/access", { params: { workspace } })),
     staleTime: 30_000,
   });

@@ -27,7 +27,7 @@ export function TablesEmpty({ workspace }: { workspace: string }) {
         </EmptyHeader>
         <Button
           render={
-            <Link to="/w/$workspace/tables/new" params={{ workspace }} search={{ step: 1 }} />
+            <Link to="/workspaces/$workspace/tables/new" params={{ workspace }} search={{ step: 1 }} />
           }
         >
           <PlusIcon />

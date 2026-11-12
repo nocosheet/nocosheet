@@ -48,7 +48,7 @@ export function MemberAccess({ userId }: { userId: string }) {
     onSuccess: async () => {
       // Everything cached so far belongs to the admin, so start fresh as the member.
       await refreshSession({ signedOut: true });
-      await navigate({ to: "/w/$workspace", params: { workspace: DEFAULT_WORKSPACE } });
+      await navigate({ to: "/workspaces/$workspace", params: { workspace: DEFAULT_WORKSPACE } });
     },
     onError: (error) =>
       toastManager.add({

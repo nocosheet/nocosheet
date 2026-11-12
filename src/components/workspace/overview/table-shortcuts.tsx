@@ -35,7 +35,7 @@ export function TableShortcuts({ workspace }: { workspace: string }) {
             <Button
               variant="ghost"
               size="sm"
-              render={<Link to="/w/$workspace/tables" params={{ workspace }} />}
+              render={<Link to="/workspaces/$workspace/tables" params={{ workspace }} />}
             >
               View all
             </Button>
@@ -45,7 +45,7 @@ export function TableShortcuts({ workspace }: { workspace: string }) {
           {tables.slice(0, RECENT_SHOWN).map((table) => (
             <Link
               key={table.id}
-              to="/w/$workspace/tables/$table"
+              to="/workspaces/$workspace/tables/$table"
               params={{ workspace, table: String(table.id) }}
               className="flex items-center gap-3 p-4 transition-colors not-last:border-b hover:bg-accent/40 md:px-6"
             >
@@ -78,7 +78,7 @@ export function TableShortcuts({ workspace }: { workspace: string }) {
                   size="sm"
                   render={
                     <Link
-                      to="/w/$workspace/tables/new"
+                      to="/workspaces/$workspace/tables/new"
                       params={{ workspace }}
                       search={{ step: 1 }}
                     />

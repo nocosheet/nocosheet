@@ -39,10 +39,10 @@ export function NavFavorites({ workspace }: { workspace: string }) {
             <SidebarMenuItem key={table.id}>
               <SidebarMenuButton
                 tooltip={table.name}
-                isActive={isActive(`/w/${workspace}/tables/${table.id}`)}
+                isActive={isActive(`/workspaces/${workspace}/tables/${table.id}`)}
                 render={
                   <Link
-                    to="/w/$workspace/tables/$table"
+                    to="/workspaces/$workspace/tables/$table"
                     params={{ workspace, table: String(table.id) }}
                   />
                 }

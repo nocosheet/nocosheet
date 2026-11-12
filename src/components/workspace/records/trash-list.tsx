@@ -93,7 +93,7 @@ const columns = (
     cell: ({ row }) => (
       <div className="flex min-w-0 flex-col">
         <Link
-          to="/w/$workspace/tables/$table/trash/$entry"
+          to="/workspaces/$workspace/tables/$table/trash/$entry"
           params={{ workspace, table, entry: String(row.original.id) }}
           search={(previous) => previous}
           className="truncate font-medium hover:underline"

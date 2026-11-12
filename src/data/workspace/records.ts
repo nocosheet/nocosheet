@@ -16,8 +16,8 @@ export const recordsQueryOptions = (
     queryKey: workspaceKeys.records(tableId, query),
     queryFn: () =>
       unwrapFetch(
-        fetch("/api/w/:workspace/tables/:id/records", {
-          params: { workspace, id: String(tableId) },
+        fetch("/api/workspaces/:workspace/tables/:table/records", {
+          params: { workspace, table: String(tableId) },
           query: {
             page: query.page,
             pageSize: query.pageSize,
@@ -39,8 +39,8 @@ export const recordQueryOptions = (workspace: string, tableId: number, recordId:
     queryKey: workspaceKeys.record(tableId, recordId),
     queryFn: () =>
       unwrapFetch(
-        fetch("/api/w/:workspace/tables/:id/records/:record", {
-          params: { workspace, id: String(tableId), record: recordId },
+        fetch("/api/workspaces/:workspace/tables/:table/records/:record", {
+          params: { workspace, table: String(tableId), record: recordId },
         }),
       ),
     staleTime: 15_000,
@@ -52,8 +52,8 @@ export const recordsExportQueryOptions = (workspace: string, tableId: number) =>
     queryKey: workspaceKeys.recordsExport(tableId),
     queryFn: () =>
       unwrapFetch(
-        fetch("/api/w/:workspace/tables/:id/export", {
-          params: { workspace, id: String(tableId) },
+        fetch("/api/workspaces/:workspace/tables/:table/export", {
+          params: { workspace, table: String(tableId) },
         }),
       ),
     staleTime: 0,
@@ -66,8 +66,8 @@ export const recordOptionsQueryOptions = (workspace: string, tableId: number, te
     queryKey: workspaceKeys.recordOptions(tableId, term),
     queryFn: () =>
       unwrapFetch(
-        fetch("/api/w/:workspace/tables/:id/options", {
-          params: { workspace, id: String(tableId) },
+        fetch("/api/workspaces/:workspace/tables/:table/options", {
+          params: { workspace, table: String(tableId) },
           query: term ? { q: term } : {},
         }),
       ),
@@ -87,9 +87,9 @@ export const deleteRecordsMutationOptions = mutationOptions({
     ids: (string | number)[];
   }) =>
     unwrapFetch(
-      fetch("/api/w/:workspace/tables/:id/records", {
+      fetch("/api/workspaces/:workspace/tables/:table/records", {
         method: "DELETE",
-        params: { workspace, id: String(tableId) },
+        params: { workspace, table: String(tableId) },
         body: { ids },
       }),
     ),
@@ -109,9 +109,9 @@ export const updateRecordMutationOptions = mutationOptions({
     values: Record<string, unknown>;
   }) =>
     unwrapFetch(
-      fetch("/api/w/:workspace/tables/:id/records/:record", {
+      fetch("/api/workspaces/:workspace/tables/:table/records/:record", {
         method: "PATCH",
-        params: { workspace, id: String(tableId), record: recordId },
+        params: { workspace, table: String(tableId), record: recordId },
         body: { values },
       }),
     ),
@@ -129,9 +129,9 @@ export const createRecordMutationOptions = mutationOptions({
     values: Record<string, unknown>;
   }) =>
     unwrapFetch(
-      fetch("/api/w/:workspace/tables/:id/records", {
+      fetch("/api/workspaces/:workspace/tables/:table/records", {
         method: "POST",
-        params: { workspace, id: String(tableId) },
+        params: { workspace, table: String(tableId) },
         body: { values },
       }),
     ),
@@ -153,9 +153,9 @@ export const uploadFileMutationOptions = mutationOptions({
     body.set("file", file);
     body.set("column", column);
     return unwrapFetch(
-      fetch("/api/w/:workspace/tables/:id/files", {
+      fetch("/api/workspaces/:workspace/tables/:table/files", {
         method: "POST",
-        params: { workspace, id: String(tableId) },
+        params: { workspace, table: String(tableId) },
         body,
       }),
     );

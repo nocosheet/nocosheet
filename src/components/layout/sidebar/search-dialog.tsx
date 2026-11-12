@@ -99,7 +99,7 @@ export function SearchDialog({ workspace }: { workspace: string }) {
 
   function handleItemClick(item: Item) {
     setOpen(false);
-    navigate({ href: `/w/${workspace}${item.path}` });
+    navigate({ href: `/workspaces/${workspace}${item.path}` });
   }
 
   return (

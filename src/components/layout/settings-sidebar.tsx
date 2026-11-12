@@ -9,7 +9,7 @@ type SettingsSidebarProps = {
   user: { name: string; email: string; image?: string | null };
 };
 
-/** Inset sidebar for everything under `/w/$workspace/settings`, laid out like the app sidebar. */
+/** Inset sidebar for everything under `/workspaces/$workspace/settings`, laid out like the app sidebar. */
 export function SettingsSidebar({ workspace, user }: SettingsSidebarProps) {
   return (
     <Sidebar variant="inset" collapsible="icon">

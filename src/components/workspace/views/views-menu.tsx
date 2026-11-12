@@ -58,7 +58,7 @@ export function ViewsMenu({
         </MenuTrigger>
         <MenuPopup align="start" className="min-w-52">
           <MenuLinkItem
-            render={<Link to="/w/$workspace/tables/$table" params={{ workspace, table }} />}
+            render={<Link to="/workspaces/$workspace/tables/$table" params={{ workspace, table }} />}
           >
             All records
             {!active && <CheckIcon className="ms-auto" />}
@@ -68,7 +68,7 @@ export function ViewsMenu({
               key={view.id}
               render={
                 <Link
-                  to="/w/$workspace/tables/$table/view/$view"
+                  to="/workspaces/$workspace/tables/$table/views/$view"
                   params={{ workspace, table, view: String(view.id) }}
                 />
               }
@@ -84,7 +84,7 @@ export function ViewsMenu({
           ))}
           <MenuSeparator />
           <MenuLinkItem
-            render={<Link to="/w/$workspace/tables/$table/view" params={{ workspace, table }} />}
+            render={<Link to="/workspaces/$workspace/tables/$table/views" params={{ workspace, table }} />}
           >
             <ListIcon />
             All views
@@ -109,7 +109,7 @@ export function ViewsMenu({
               )}
               <MenuLinkItem
                 render={
-                  <Link to="/w/$workspace/tables/$table/view/trash" params={{ workspace, table }} />
+                  <Link to="/workspaces/$workspace/tables/$table/views/trash" params={{ workspace, table }} />
                 }
               >
                 <ArchiveRestoreIcon />
@@ -136,7 +136,7 @@ export function ViewsMenu({
           open={dialog === "delete"}
           onOpenChange={(open) => !open && setDialog(null)}
           onDeleted={() =>
-            void navigate({ to: "/w/$workspace/tables/$table", params: { workspace, table } })
+            void navigate({ to: "/workspaces/$workspace/tables/$table", params: { workspace, table } })
           }
         />
       )}

@@ -36,7 +36,7 @@ export function DeleteMemberDialog({ userId, name, email }: DeleteMemberDialogPr
     ...removeUserMutationOptions,
     onSuccess: async () => {
       await navigate({
-        to: "/w/$workspace/settings/members",
+        to: "/workspaces/$workspace/settings/members",
         params: { workspace: DEFAULT_WORKSPACE },
       });
       queryClient.removeQueries({ queryKey: adminKeys.user(userId) });

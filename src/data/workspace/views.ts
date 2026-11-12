@@ -15,8 +15,8 @@ export const viewsQueryOptions = (workspace: string, tableId: number) =>
     queryKey: workspaceKeys.views(tableId),
     queryFn: () =>
       unwrapFetch(
-        fetch("/api/w/:workspace/tables/:id/views", {
-          params: { workspace, id: String(tableId) },
+        fetch("/api/workspaces/:workspace/tables/:table/views/all", {
+          params: { workspace, table: String(tableId) },
         }),
       ),
     staleTime: 30_000,
@@ -28,8 +28,8 @@ export const viewsPageQueryOptions = (workspace: string, tableId: number, query:
     queryKey: workspaceKeys.viewList(tableId, query),
     queryFn: () =>
       unwrapFetch(
-        fetch("/api/w/:workspace/tables/:id/views/list", {
-          params: { workspace, id: String(tableId) },
+        fetch("/api/workspaces/:workspace/tables/:table/views", {
+          params: { workspace, table: String(tableId) },
           query: {
             page: query.page,
             pageSize: query.pageSize,
@@ -53,8 +53,8 @@ export const viewRecordsQueryOptions = (
     queryKey: workspaceKeys.records(tableId, { view: viewId, ...query }),
     queryFn: () =>
       unwrapFetch(
-        fetch("/api/w/:workspace/tables/:id/views/:view/records", {
-          params: { workspace, id: String(tableId), view: String(viewId) },
+        fetch("/api/workspaces/:workspace/tables/:table/views/:view/records", {
+          params: { workspace, table: String(tableId), view: String(viewId) },
           query: {
             page: query.page,
             pageSize: query.pageSize,
@@ -79,9 +79,9 @@ export const createViewMutationOptions = mutationOptions({
     ...values
   }: { workspace: string; tableId: number } & ViewInput) =>
     unwrapFetch(
-      fetch("/api/w/:workspace/tables/:id/views", {
+      fetch("/api/workspaces/:workspace/tables/:table/views", {
         method: "POST",
-        params: { workspace, id: String(tableId) },
+        params: { workspace, table: String(tableId) },
         body: values,
       }),
     ),
@@ -96,9 +96,9 @@ export const updateViewMutationOptions = mutationOptions({
     ...values
   }: { workspace: string; tableId: number; viewId: number } & ViewPatchInput) =>
     unwrapFetch(
-      fetch("/api/w/:workspace/tables/:id/views/:view", {
+      fetch("/api/workspaces/:workspace/tables/:table/views/:view", {
         method: "PATCH",
-        params: { workspace, id: String(tableId), view: String(viewId) },
+        params: { workspace, table: String(tableId), view: String(viewId) },
         body: values,
       }),
     ),
@@ -116,9 +116,9 @@ export const deleteViewsMutationOptions = mutationOptions({
     ids: number[];
   }) =>
     unwrapFetch(
-      fetch("/api/w/:workspace/tables/:id/views", {
+      fetch("/api/workspaces/:workspace/tables/:table/views", {
         method: "DELETE",
-        params: { workspace, id: String(tableId) },
+        params: { workspace, table: String(tableId) },
         body: { ids },
       }),
     ),
@@ -136,9 +136,9 @@ export const deleteViewMutationOptions = mutationOptions({
     viewId: number;
   }) =>
     unwrapFetch(
-      fetch("/api/w/:workspace/tables/:id/views/:view", {
+      fetch("/api/workspaces/:workspace/tables/:table/views/:view", {
         method: "DELETE",
-        params: { workspace, id: String(tableId), view: String(viewId) },
+        params: { workspace, table: String(tableId), view: String(viewId) },
       }),
     ),
 });
@@ -148,8 +148,8 @@ export const deletedViewsQueryOptions = (workspace: string, tableId: number, que
     queryKey: workspaceKeys.viewsTrash(tableId, query),
     queryFn: () =>
       unwrapFetch(
-        fetch("/api/w/:workspace/tables/:id/views/trash", {
-          params: { workspace, id: String(tableId) },
+        fetch("/api/workspaces/:workspace/tables/:table/views/trash", {
+          params: { workspace, table: String(tableId) },
           query: {
             page: query.page,
             pageSize: query.pageSize,
@@ -175,9 +175,9 @@ export const restoreViewMutationOptions = mutationOptions({
     viewId: number;
   }) =>
     unwrapFetch(
-      fetch("/api/w/:workspace/tables/:id/views/trash/:view/restore", {
+      fetch("/api/workspaces/:workspace/tables/:table/views/trash/:view/restore", {
         method: "POST",
-        params: { workspace, id: String(tableId), view: String(viewId) },
+        params: { workspace, table: String(tableId), view: String(viewId) },
       }),
     ),
 });
@@ -194,9 +194,9 @@ export const purgeViewMutationOptions = mutationOptions({
     viewId: number;
   }) =>
     unwrapFetch(
-      fetch("/api/w/:workspace/tables/:id/views/trash/:view", {
+      fetch("/api/workspaces/:workspace/tables/:table/views/trash/:view", {
         method: "DELETE",
-        params: { workspace, id: String(tableId), view: String(viewId) },
+        params: { workspace, table: String(tableId), view: String(viewId) },
       }),
     ),
 });

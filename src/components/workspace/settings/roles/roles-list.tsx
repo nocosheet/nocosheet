@@ -94,7 +94,7 @@ export function RolesList({ workspace }: { workspace: string }) {
             <div className="flex min-w-0 flex-col gap-1.5">
               <div className="flex flex-wrap items-center gap-2">
                 <Link
-                  to="/w/$workspace/settings/members/roles/$roleId"
+                  to="/workspaces/$workspace/settings/members/roles/$roleId"
                   params={{ workspace, roleId: String(role.id) }}
                   className="font-medium text-sm hover:underline"
                 >
@@ -138,7 +138,7 @@ export function RolesList({ workspace }: { workspace: string }) {
                 size="sm"
                 render={
                   <Link
-                    to="/w/$workspace/settings/members/roles/$roleId"
+                    to="/workspaces/$workspace/settings/members/roles/$roleId"
                     params={{ workspace, roleId: String(role.id) }}
                   />
                 }

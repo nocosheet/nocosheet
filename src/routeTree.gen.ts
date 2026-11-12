@@ -23,39 +23,39 @@ import { Route as AuthSignInRouteImport } from './routes/auth/sign-in'
 import { Route as AuthSignUpRouteImport } from './routes/auth/sign-up'
 import { Route as AuthTwoFactorRouteImport } from './routes/auth/two-factor'
 import { Route as AuthVerifyEmailRouteImport } from './routes/auth/verify-email'
-import { Route as WWorkspaceRouteRouteImport } from './routes/w/$workspace/route'
-import { Route as WWorkspaceCoreRouteRouteImport } from './routes/w/$workspace/_core/route'
-import { Route as WWorkspaceSettingsRouteRouteImport } from './routes/w/$workspace/settings/route'
-import { Route as WWorkspaceCoreIndexRouteImport } from './routes/w/$workspace/_core/index'
-import { Route as WWorkspaceCoreTablesRouteRouteImport } from './routes/w/$workspace/_core/tables/route'
-import { Route as WWorkspaceSettingsIndexRouteImport } from './routes/w/$workspace/settings/index'
-import { Route as WWorkspaceSettingsApiRouteImport } from './routes/w/$workspace/settings/api'
-import { Route as WWorkspaceSettingsAppearanceRouteImport } from './routes/w/$workspace/settings/appearance'
-import { Route as WWorkspaceSettingsBillingRouteImport } from './routes/w/$workspace/settings/billing'
-import { Route as WWorkspaceSettingsDataRouteImport } from './routes/w/$workspace/settings/data'
-import { Route as WWorkspaceSettingsIntegrationsRouteImport } from './routes/w/$workspace/settings/integrations'
-import { Route as WWorkspaceSettingsMembersRouteRouteImport } from './routes/w/$workspace/settings/members/route'
-import { Route as WWorkspaceSettingsRoleRouteImport } from './routes/w/$workspace/settings/role'
-import { Route as WWorkspaceCoreTablesIndexRouteImport } from './routes/w/$workspace/_core/tables/index'
-import { Route as WWorkspaceCoreTablesTableRouteRouteImport } from './routes/w/$workspace/_core/tables/$table/route'
-import { Route as WWorkspaceCoreTablesNewRouteImport } from './routes/w/$workspace/_core/tables/new'
-import { Route as WWorkspaceCoreTablesTrashRouteImport } from './routes/w/$workspace/_core/tables/trash'
-import { Route as WWorkspaceSettingsMembersIndexRouteImport } from './routes/w/$workspace/settings/members/index'
-import { Route as WWorkspaceSettingsMembersUserIdRouteImport } from './routes/w/$workspace/settings/members/$userId'
-import { Route as WWorkspaceSettingsMembersRolesRouteRouteImport } from './routes/w/$workspace/settings/members/roles/route'
-import { Route as WWorkspaceCoreTablesTableViewerRouteRouteImport } from './routes/w/$workspace/_core/tables/$table/_viewer/route'
-import { Route as WWorkspaceCoreTablesTableDefinitionRouteImport } from './routes/w/$workspace/_core/tables/$table/definition'
-import { Route as WWorkspaceCoreTablesTableTrashRouteRouteImport } from './routes/w/$workspace/_core/tables/$table/trash/route'
-import { Route as WWorkspaceCoreTablesTableViewRouteRouteImport } from './routes/w/$workspace/_core/tables/$table/view/route'
-import { Route as WWorkspaceSettingsMembersRolesIndexRouteImport } from './routes/w/$workspace/settings/members/roles/index'
-import { Route as WWorkspaceSettingsMembersRolesRoleIdRouteImport } from './routes/w/$workspace/settings/members/roles/$roleId'
-import { Route as WWorkspaceCoreTablesTableViewerIndexRouteImport } from './routes/w/$workspace/_core/tables/$table/_viewer/index'
-import { Route as WWorkspaceCoreTablesTableViewerRecordRouteImport } from './routes/w/$workspace/_core/tables/$table/_viewer/$record'
-import { Route as WWorkspaceCoreTablesTableViewerNewRouteImport } from './routes/w/$workspace/_core/tables/$table/_viewer/new'
-import { Route as WWorkspaceCoreTablesTableTrashEntryRouteImport } from './routes/w/$workspace/_core/tables/$table/trash/$entry'
-import { Route as WWorkspaceCoreTablesTableViewIndexRouteImport } from './routes/w/$workspace/_core/tables/$table/view/index'
-import { Route as WWorkspaceCoreTablesTableViewViewRouteImport } from './routes/w/$workspace/_core/tables/$table/view/$view'
-import { Route as WWorkspaceCoreTablesTableViewTrashRouteImport } from './routes/w/$workspace/_core/tables/$table/view/trash'
+import { Route as WorkspacesWorkspaceRouteRouteImport } from './routes/workspaces/$workspace/route'
+import { Route as WorkspacesWorkspaceCoreRouteRouteImport } from './routes/workspaces/$workspace/_core/route'
+import { Route as WorkspacesWorkspaceSettingsRouteRouteImport } from './routes/workspaces/$workspace/settings/route'
+import { Route as WorkspacesWorkspaceCoreIndexRouteImport } from './routes/workspaces/$workspace/_core/index'
+import { Route as WorkspacesWorkspaceCoreTablesRouteRouteImport } from './routes/workspaces/$workspace/_core/tables/route'
+import { Route as WorkspacesWorkspaceSettingsIndexRouteImport } from './routes/workspaces/$workspace/settings/index'
+import { Route as WorkspacesWorkspaceSettingsApiRouteImport } from './routes/workspaces/$workspace/settings/api'
+import { Route as WorkspacesWorkspaceSettingsAppearanceRouteImport } from './routes/workspaces/$workspace/settings/appearance'
+import { Route as WorkspacesWorkspaceSettingsBillingRouteImport } from './routes/workspaces/$workspace/settings/billing'
+import { Route as WorkspacesWorkspaceSettingsDataRouteImport } from './routes/workspaces/$workspace/settings/data'
+import { Route as WorkspacesWorkspaceSettingsIntegrationsRouteImport } from './routes/workspaces/$workspace/settings/integrations'
+import { Route as WorkspacesWorkspaceSettingsMembersRouteRouteImport } from './routes/workspaces/$workspace/settings/members/route'
+import { Route as WorkspacesWorkspaceSettingsRoleRouteImport } from './routes/workspaces/$workspace/settings/role'
+import { Route as WorkspacesWorkspaceCoreTablesIndexRouteImport } from './routes/workspaces/$workspace/_core/tables/index'
+import { Route as WorkspacesWorkspaceCoreTablesTableRouteRouteImport } from './routes/workspaces/$workspace/_core/tables/$table/route'
+import { Route as WorkspacesWorkspaceCoreTablesNewRouteImport } from './routes/workspaces/$workspace/_core/tables/new'
+import { Route as WorkspacesWorkspaceCoreTablesTrashRouteImport } from './routes/workspaces/$workspace/_core/tables/trash'
+import { Route as WorkspacesWorkspaceSettingsMembersIndexRouteImport } from './routes/workspaces/$workspace/settings/members/index'
+import { Route as WorkspacesWorkspaceSettingsMembersUserIdRouteImport } from './routes/workspaces/$workspace/settings/members/$userId'
+import { Route as WorkspacesWorkspaceSettingsMembersRolesRouteRouteImport } from './routes/workspaces/$workspace/settings/members/roles/route'
+import { Route as WorkspacesWorkspaceCoreTablesTableViewerRouteRouteImport } from './routes/workspaces/$workspace/_core/tables/$table/_viewer/route'
+import { Route as WorkspacesWorkspaceCoreTablesTableDefinitionRouteImport } from './routes/workspaces/$workspace/_core/tables/$table/definition'
+import { Route as WorkspacesWorkspaceCoreTablesTableTrashRouteRouteImport } from './routes/workspaces/$workspace/_core/tables/$table/trash/route'
+import { Route as WorkspacesWorkspaceCoreTablesTableViewsRouteRouteImport } from './routes/workspaces/$workspace/_core/tables/$table/views/route'
+import { Route as WorkspacesWorkspaceSettingsMembersRolesIndexRouteImport } from './routes/workspaces/$workspace/settings/members/roles/index'
+import { Route as WorkspacesWorkspaceSettingsMembersRolesRoleIdRouteImport } from './routes/workspaces/$workspace/settings/members/roles/$roleId'
+import { Route as WorkspacesWorkspaceCoreTablesTableViewerIndexRouteImport } from './routes/workspaces/$workspace/_core/tables/$table/_viewer/index'
+import { Route as WorkspacesWorkspaceCoreTablesTableViewerRecordRouteImport } from './routes/workspaces/$workspace/_core/tables/$table/_viewer/$record'
+import { Route as WorkspacesWorkspaceCoreTablesTableViewerNewRouteImport } from './routes/workspaces/$workspace/_core/tables/$table/_viewer/new'
+import { Route as WorkspacesWorkspaceCoreTablesTableTrashEntryRouteImport } from './routes/workspaces/$workspace/_core/tables/$table/trash/$entry'
+import { Route as WorkspacesWorkspaceCoreTablesTableViewsIndexRouteImport } from './routes/workspaces/$workspace/_core/tables/$table/views/index'
+import { Route as WorkspacesWorkspaceCoreTablesTableViewsViewRouteImport } from './routes/workspaces/$workspace/_core/tables/$table/views/$view'
+import { Route as WorkspacesWorkspaceCoreTablesTableViewsTrashRouteImport } from './routes/workspaces/$workspace/_core/tables/$table/views/trash'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -127,199 +127,208 @@ const AuthVerifyEmailRoute = AuthVerifyEmailRouteImport.update({
   path: '/verify-email',
   getParentRoute: () => AuthRouteRoute,
 } as any)
-const WWorkspaceRouteRoute = WWorkspaceRouteRouteImport.update({
-  id: '/w/$workspace',
-  path: '/w/$workspace',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const WWorkspaceCoreRouteRoute = WWorkspaceCoreRouteRouteImport.update({
-  id: '/_core',
-  getParentRoute: () => WWorkspaceRouteRoute,
-} as any)
-const WWorkspaceSettingsRouteRoute = WWorkspaceSettingsRouteRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => WWorkspaceRouteRoute,
-} as any)
-const WWorkspaceCoreIndexRoute = WWorkspaceCoreIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => WWorkspaceCoreRouteRoute,
-} as any)
-const WWorkspaceCoreTablesRouteRoute =
-  WWorkspaceCoreTablesRouteRouteImport.update({
+const WorkspacesWorkspaceRouteRoute =
+  WorkspacesWorkspaceRouteRouteImport.update({
+    id: '/workspaces/$workspace',
+    path: '/workspaces/$workspace',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const WorkspacesWorkspaceCoreRouteRoute =
+  WorkspacesWorkspaceCoreRouteRouteImport.update({
+    id: '/_core',
+    getParentRoute: () => WorkspacesWorkspaceRouteRoute,
+  } as any)
+const WorkspacesWorkspaceSettingsRouteRoute =
+  WorkspacesWorkspaceSettingsRouteRouteImport.update({
+    id: '/settings',
+    path: '/settings',
+    getParentRoute: () => WorkspacesWorkspaceRouteRoute,
+  } as any)
+const WorkspacesWorkspaceCoreIndexRoute =
+  WorkspacesWorkspaceCoreIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => WorkspacesWorkspaceCoreRouteRoute,
+  } as any)
+const WorkspacesWorkspaceCoreTablesRouteRoute =
+  WorkspacesWorkspaceCoreTablesRouteRouteImport.update({
     id: '/tables',
     path: '/tables',
-    getParentRoute: () => WWorkspaceCoreRouteRoute,
+    getParentRoute: () => WorkspacesWorkspaceCoreRouteRoute,
   } as any)
-const WWorkspaceSettingsIndexRoute = WWorkspaceSettingsIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => WWorkspaceSettingsRouteRoute,
-} as any)
-const WWorkspaceSettingsApiRoute = WWorkspaceSettingsApiRouteImport.update({
-  id: '/api',
-  path: '/api',
-  getParentRoute: () => WWorkspaceSettingsRouteRoute,
-} as any)
-const WWorkspaceSettingsAppearanceRoute =
-  WWorkspaceSettingsAppearanceRouteImport.update({
+const WorkspacesWorkspaceSettingsIndexRoute =
+  WorkspacesWorkspaceSettingsIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => WorkspacesWorkspaceSettingsRouteRoute,
+  } as any)
+const WorkspacesWorkspaceSettingsApiRoute =
+  WorkspacesWorkspaceSettingsApiRouteImport.update({
+    id: '/api',
+    path: '/api',
+    getParentRoute: () => WorkspacesWorkspaceSettingsRouteRoute,
+  } as any)
+const WorkspacesWorkspaceSettingsAppearanceRoute =
+  WorkspacesWorkspaceSettingsAppearanceRouteImport.update({
     id: '/appearance',
     path: '/appearance',
-    getParentRoute: () => WWorkspaceSettingsRouteRoute,
+    getParentRoute: () => WorkspacesWorkspaceSettingsRouteRoute,
   } as any)
-const WWorkspaceSettingsBillingRoute =
-  WWorkspaceSettingsBillingRouteImport.update({
+const WorkspacesWorkspaceSettingsBillingRoute =
+  WorkspacesWorkspaceSettingsBillingRouteImport.update({
     id: '/billing',
     path: '/billing',
-    getParentRoute: () => WWorkspaceSettingsRouteRoute,
+    getParentRoute: () => WorkspacesWorkspaceSettingsRouteRoute,
   } as any)
-const WWorkspaceSettingsDataRoute = WWorkspaceSettingsDataRouteImport.update({
-  id: '/data',
-  path: '/data',
-  getParentRoute: () => WWorkspaceSettingsRouteRoute,
-} as any)
-const WWorkspaceSettingsIntegrationsRoute =
-  WWorkspaceSettingsIntegrationsRouteImport.update({
+const WorkspacesWorkspaceSettingsDataRoute =
+  WorkspacesWorkspaceSettingsDataRouteImport.update({
+    id: '/data',
+    path: '/data',
+    getParentRoute: () => WorkspacesWorkspaceSettingsRouteRoute,
+  } as any)
+const WorkspacesWorkspaceSettingsIntegrationsRoute =
+  WorkspacesWorkspaceSettingsIntegrationsRouteImport.update({
     id: '/integrations',
     path: '/integrations',
-    getParentRoute: () => WWorkspaceSettingsRouteRoute,
+    getParentRoute: () => WorkspacesWorkspaceSettingsRouteRoute,
   } as any)
-const WWorkspaceSettingsMembersRouteRoute =
-  WWorkspaceSettingsMembersRouteRouteImport.update({
+const WorkspacesWorkspaceSettingsMembersRouteRoute =
+  WorkspacesWorkspaceSettingsMembersRouteRouteImport.update({
     id: '/members',
     path: '/members',
-    getParentRoute: () => WWorkspaceSettingsRouteRoute,
+    getParentRoute: () => WorkspacesWorkspaceSettingsRouteRoute,
   } as any)
-const WWorkspaceSettingsRoleRoute = WWorkspaceSettingsRoleRouteImport.update({
-  id: '/role',
-  path: '/role',
-  getParentRoute: () => WWorkspaceSettingsRouteRoute,
-} as any)
-const WWorkspaceCoreTablesIndexRoute =
-  WWorkspaceCoreTablesIndexRouteImport.update({
+const WorkspacesWorkspaceSettingsRoleRoute =
+  WorkspacesWorkspaceSettingsRoleRouteImport.update({
+    id: '/role',
+    path: '/role',
+    getParentRoute: () => WorkspacesWorkspaceSettingsRouteRoute,
+  } as any)
+const WorkspacesWorkspaceCoreTablesIndexRoute =
+  WorkspacesWorkspaceCoreTablesIndexRouteImport.update({
     id: '/',
     path: '/',
-    getParentRoute: () => WWorkspaceCoreTablesRouteRoute,
+    getParentRoute: () => WorkspacesWorkspaceCoreTablesRouteRoute,
   } as any)
-const WWorkspaceCoreTablesTableRouteRoute =
-  WWorkspaceCoreTablesTableRouteRouteImport.update({
+const WorkspacesWorkspaceCoreTablesTableRouteRoute =
+  WorkspacesWorkspaceCoreTablesTableRouteRouteImport.update({
     id: '/$table',
     path: '/$table',
-    getParentRoute: () => WWorkspaceCoreTablesRouteRoute,
+    getParentRoute: () => WorkspacesWorkspaceCoreTablesRouteRoute,
   } as any)
-const WWorkspaceCoreTablesNewRoute = WWorkspaceCoreTablesNewRouteImport.update({
-  id: '/new',
-  path: '/new',
-  getParentRoute: () => WWorkspaceCoreTablesRouteRoute,
-} as any)
-const WWorkspaceCoreTablesTrashRoute =
-  WWorkspaceCoreTablesTrashRouteImport.update({
-    id: '/trash',
-    path: '/trash',
-    getParentRoute: () => WWorkspaceCoreTablesRouteRoute,
-  } as any)
-const WWorkspaceSettingsMembersIndexRoute =
-  WWorkspaceSettingsMembersIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => WWorkspaceSettingsMembersRouteRoute,
-  } as any)
-const WWorkspaceSettingsMembersUserIdRoute =
-  WWorkspaceSettingsMembersUserIdRouteImport.update({
-    id: '/$userId',
-    path: '/$userId',
-    getParentRoute: () => WWorkspaceSettingsMembersRouteRoute,
-  } as any)
-const WWorkspaceSettingsMembersRolesRouteRoute =
-  WWorkspaceSettingsMembersRolesRouteRouteImport.update({
-    id: '/roles',
-    path: '/roles',
-    getParentRoute: () => WWorkspaceSettingsMembersRouteRoute,
-  } as any)
-const WWorkspaceCoreTablesTableViewerRouteRoute =
-  WWorkspaceCoreTablesTableViewerRouteRouteImport.update({
-    id: '/_viewer',
-    getParentRoute: () => WWorkspaceCoreTablesTableRouteRoute,
-  } as any)
-const WWorkspaceCoreTablesTableDefinitionRoute =
-  WWorkspaceCoreTablesTableDefinitionRouteImport.update({
-    id: '/definition',
-    path: '/definition',
-    getParentRoute: () => WWorkspaceCoreTablesTableRouteRoute,
-  } as any)
-const WWorkspaceCoreTablesTableTrashRouteRoute =
-  WWorkspaceCoreTablesTableTrashRouteRouteImport.update({
-    id: '/trash',
-    path: '/trash',
-    getParentRoute: () => WWorkspaceCoreTablesTableRouteRoute,
-  } as any)
-const WWorkspaceCoreTablesTableViewRouteRoute =
-  WWorkspaceCoreTablesTableViewRouteRouteImport.update({
-    id: '/view',
-    path: '/view',
-    getParentRoute: () => WWorkspaceCoreTablesTableRouteRoute,
-  } as any)
-const WWorkspaceSettingsMembersRolesIndexRoute =
-  WWorkspaceSettingsMembersRolesIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => WWorkspaceSettingsMembersRolesRouteRoute,
-  } as any)
-const WWorkspaceSettingsMembersRolesRoleIdRoute =
-  WWorkspaceSettingsMembersRolesRoleIdRouteImport.update({
-    id: '/$roleId',
-    path: '/$roleId',
-    getParentRoute: () => WWorkspaceSettingsMembersRolesRouteRoute,
-  } as any)
-const WWorkspaceCoreTablesTableViewerIndexRoute =
-  WWorkspaceCoreTablesTableViewerIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => WWorkspaceCoreTablesTableViewerRouteRoute,
-  } as any)
-const WWorkspaceCoreTablesTableViewerRecordRoute =
-  WWorkspaceCoreTablesTableViewerRecordRouteImport.update({
-    id: '/$record',
-    path: '/$record',
-    getParentRoute: () => WWorkspaceCoreTablesTableViewerRouteRoute,
-  } as any)
-const WWorkspaceCoreTablesTableViewerNewRoute =
-  WWorkspaceCoreTablesTableViewerNewRouteImport.update({
+const WorkspacesWorkspaceCoreTablesNewRoute =
+  WorkspacesWorkspaceCoreTablesNewRouteImport.update({
     id: '/new',
     path: '/new',
-    getParentRoute: () => WWorkspaceCoreTablesTableViewerRouteRoute,
+    getParentRoute: () => WorkspacesWorkspaceCoreTablesRouteRoute,
   } as any)
-const WWorkspaceCoreTablesTableTrashEntryRoute =
-  WWorkspaceCoreTablesTableTrashEntryRouteImport.update({
-    id: '/$entry',
-    path: '/$entry',
-    getParentRoute: () => WWorkspaceCoreTablesTableTrashRouteRoute,
-  } as any)
-const WWorkspaceCoreTablesTableViewIndexRoute =
-  WWorkspaceCoreTablesTableViewIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => WWorkspaceCoreTablesTableViewRouteRoute,
-  } as any)
-const WWorkspaceCoreTablesTableViewViewRoute =
-  WWorkspaceCoreTablesTableViewViewRouteImport.update({
-    id: '/$view',
-    path: '/$view',
-    getParentRoute: () => WWorkspaceCoreTablesTableViewRouteRoute,
-  } as any)
-const WWorkspaceCoreTablesTableViewTrashRoute =
-  WWorkspaceCoreTablesTableViewTrashRouteImport.update({
+const WorkspacesWorkspaceCoreTablesTrashRoute =
+  WorkspacesWorkspaceCoreTablesTrashRouteImport.update({
     id: '/trash',
     path: '/trash',
-    getParentRoute: () => WWorkspaceCoreTablesTableViewRouteRoute,
+    getParentRoute: () => WorkspacesWorkspaceCoreTablesRouteRoute,
+  } as any)
+const WorkspacesWorkspaceSettingsMembersIndexRoute =
+  WorkspacesWorkspaceSettingsMembersIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => WorkspacesWorkspaceSettingsMembersRouteRoute,
+  } as any)
+const WorkspacesWorkspaceSettingsMembersUserIdRoute =
+  WorkspacesWorkspaceSettingsMembersUserIdRouteImport.update({
+    id: '/$userId',
+    path: '/$userId',
+    getParentRoute: () => WorkspacesWorkspaceSettingsMembersRouteRoute,
+  } as any)
+const WorkspacesWorkspaceSettingsMembersRolesRouteRoute =
+  WorkspacesWorkspaceSettingsMembersRolesRouteRouteImport.update({
+    id: '/roles',
+    path: '/roles',
+    getParentRoute: () => WorkspacesWorkspaceSettingsMembersRouteRoute,
+  } as any)
+const WorkspacesWorkspaceCoreTablesTableViewerRouteRoute =
+  WorkspacesWorkspaceCoreTablesTableViewerRouteRouteImport.update({
+    id: '/_viewer',
+    getParentRoute: () => WorkspacesWorkspaceCoreTablesTableRouteRoute,
+  } as any)
+const WorkspacesWorkspaceCoreTablesTableDefinitionRoute =
+  WorkspacesWorkspaceCoreTablesTableDefinitionRouteImport.update({
+    id: '/definition',
+    path: '/definition',
+    getParentRoute: () => WorkspacesWorkspaceCoreTablesTableRouteRoute,
+  } as any)
+const WorkspacesWorkspaceCoreTablesTableTrashRouteRoute =
+  WorkspacesWorkspaceCoreTablesTableTrashRouteRouteImport.update({
+    id: '/trash',
+    path: '/trash',
+    getParentRoute: () => WorkspacesWorkspaceCoreTablesTableRouteRoute,
+  } as any)
+const WorkspacesWorkspaceCoreTablesTableViewsRouteRoute =
+  WorkspacesWorkspaceCoreTablesTableViewsRouteRouteImport.update({
+    id: '/views',
+    path: '/views',
+    getParentRoute: () => WorkspacesWorkspaceCoreTablesTableRouteRoute,
+  } as any)
+const WorkspacesWorkspaceSettingsMembersRolesIndexRoute =
+  WorkspacesWorkspaceSettingsMembersRolesIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => WorkspacesWorkspaceSettingsMembersRolesRouteRoute,
+  } as any)
+const WorkspacesWorkspaceSettingsMembersRolesRoleIdRoute =
+  WorkspacesWorkspaceSettingsMembersRolesRoleIdRouteImport.update({
+    id: '/$roleId',
+    path: '/$roleId',
+    getParentRoute: () => WorkspacesWorkspaceSettingsMembersRolesRouteRoute,
+  } as any)
+const WorkspacesWorkspaceCoreTablesTableViewerIndexRoute =
+  WorkspacesWorkspaceCoreTablesTableViewerIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => WorkspacesWorkspaceCoreTablesTableViewerRouteRoute,
+  } as any)
+const WorkspacesWorkspaceCoreTablesTableViewerRecordRoute =
+  WorkspacesWorkspaceCoreTablesTableViewerRecordRouteImport.update({
+    id: '/$record',
+    path: '/$record',
+    getParentRoute: () => WorkspacesWorkspaceCoreTablesTableViewerRouteRoute,
+  } as any)
+const WorkspacesWorkspaceCoreTablesTableViewerNewRoute =
+  WorkspacesWorkspaceCoreTablesTableViewerNewRouteImport.update({
+    id: '/new',
+    path: '/new',
+    getParentRoute: () => WorkspacesWorkspaceCoreTablesTableViewerRouteRoute,
+  } as any)
+const WorkspacesWorkspaceCoreTablesTableTrashEntryRoute =
+  WorkspacesWorkspaceCoreTablesTableTrashEntryRouteImport.update({
+    id: '/$entry',
+    path: '/$entry',
+    getParentRoute: () => WorkspacesWorkspaceCoreTablesTableTrashRouteRoute,
+  } as any)
+const WorkspacesWorkspaceCoreTablesTableViewsIndexRoute =
+  WorkspacesWorkspaceCoreTablesTableViewsIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => WorkspacesWorkspaceCoreTablesTableViewsRouteRoute,
+  } as any)
+const WorkspacesWorkspaceCoreTablesTableViewsViewRoute =
+  WorkspacesWorkspaceCoreTablesTableViewsViewRouteImport.update({
+    id: '/$view',
+    path: '/$view',
+    getParentRoute: () => WorkspacesWorkspaceCoreTablesTableViewsRouteRoute,
+  } as any)
+const WorkspacesWorkspaceCoreTablesTableViewsTrashRoute =
+  WorkspacesWorkspaceCoreTablesTableViewsTrashRouteImport.update({
+    id: '/trash',
+    path: '/trash',
+    getParentRoute: () => WorkspacesWorkspaceCoreTablesTableViewsRouteRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/account': typeof AccountRouteRouteWithChildren
   '/auth': typeof AuthRouteRouteWithChildren
-  '/w/$workspace': typeof WWorkspaceRouteRouteWithChildren
+  '/workspaces/$workspace': typeof WorkspacesWorkspaceRouteRouteWithChildren
   '/account/devices': typeof AccountDevicesRoute
   '/account/profile': typeof AccountProfileRoute
   '/account/security': typeof AccountSecurityRoute
@@ -331,41 +340,41 @@ export interface FileRoutesByFullPath {
   '/auth/two-factor': typeof AuthTwoFactorRoute
   '/auth/verify-email': typeof AuthVerifyEmailRoute
   '/account/': typeof AccountIndexRoute
-  '/w/$workspace/settings': typeof WWorkspaceSettingsRouteRouteWithChildren
-  '/w/$workspace/tables': typeof WWorkspaceCoreTablesRouteRouteWithChildren
-  '/w/$workspace/settings/members': typeof WWorkspaceSettingsMembersRouteRouteWithChildren
-  '/w/$workspace/settings/api': typeof WWorkspaceSettingsApiRoute
-  '/w/$workspace/settings/appearance': typeof WWorkspaceSettingsAppearanceRoute
-  '/w/$workspace/settings/billing': typeof WWorkspaceSettingsBillingRoute
-  '/w/$workspace/settings/data': typeof WWorkspaceSettingsDataRoute
-  '/w/$workspace/settings/integrations': typeof WWorkspaceSettingsIntegrationsRoute
-  '/w/$workspace/settings/role': typeof WWorkspaceSettingsRoleRoute
-  '/w/$workspace/': typeof WWorkspaceCoreIndexRoute
-  '/w/$workspace/settings/': typeof WWorkspaceSettingsIndexRoute
-  '/w/$workspace/tables/$table': typeof WWorkspaceCoreTablesTableRouteRouteWithChildren
-  '/w/$workspace/settings/members/roles': typeof WWorkspaceSettingsMembersRolesRouteRouteWithChildren
-  '/w/$workspace/tables/new': typeof WWorkspaceCoreTablesNewRoute
-  '/w/$workspace/tables/trash': typeof WWorkspaceCoreTablesTrashRoute
-  '/w/$workspace/settings/members/$userId': typeof WWorkspaceSettingsMembersUserIdRoute
-  '/w/$workspace/tables/': typeof WWorkspaceCoreTablesIndexRoute
-  '/w/$workspace/settings/members/': typeof WWorkspaceSettingsMembersIndexRoute
-  '/w/$workspace/tables/$table/trash': typeof WWorkspaceCoreTablesTableTrashRouteRouteWithChildren
-  '/w/$workspace/tables/$table/view': typeof WWorkspaceCoreTablesTableViewRouteRouteWithChildren
-  '/w/$workspace/tables/$table/definition': typeof WWorkspaceCoreTablesTableDefinitionRoute
-  '/w/$workspace/settings/members/roles/$roleId': typeof WWorkspaceSettingsMembersRolesRoleIdRoute
-  '/w/$workspace/settings/members/roles/': typeof WWorkspaceSettingsMembersRolesIndexRoute
-  '/w/$workspace/tables/$table/$record': typeof WWorkspaceCoreTablesTableViewerRecordRoute
-  '/w/$workspace/tables/$table/new': typeof WWorkspaceCoreTablesTableViewerNewRoute
-  '/w/$workspace/tables/$table/trash/$entry': typeof WWorkspaceCoreTablesTableTrashEntryRoute
-  '/w/$workspace/tables/$table/view/$view': typeof WWorkspaceCoreTablesTableViewViewRoute
-  '/w/$workspace/tables/$table/view/trash': typeof WWorkspaceCoreTablesTableViewTrashRoute
-  '/w/$workspace/tables/$table/': typeof WWorkspaceCoreTablesTableViewerIndexRoute
-  '/w/$workspace/tables/$table/view/': typeof WWorkspaceCoreTablesTableViewIndexRoute
+  '/workspaces/$workspace/settings': typeof WorkspacesWorkspaceSettingsRouteRouteWithChildren
+  '/workspaces/$workspace/tables': typeof WorkspacesWorkspaceCoreTablesRouteRouteWithChildren
+  '/workspaces/$workspace/settings/members': typeof WorkspacesWorkspaceSettingsMembersRouteRouteWithChildren
+  '/workspaces/$workspace/settings/api': typeof WorkspacesWorkspaceSettingsApiRoute
+  '/workspaces/$workspace/settings/appearance': typeof WorkspacesWorkspaceSettingsAppearanceRoute
+  '/workspaces/$workspace/settings/billing': typeof WorkspacesWorkspaceSettingsBillingRoute
+  '/workspaces/$workspace/settings/data': typeof WorkspacesWorkspaceSettingsDataRoute
+  '/workspaces/$workspace/settings/integrations': typeof WorkspacesWorkspaceSettingsIntegrationsRoute
+  '/workspaces/$workspace/settings/role': typeof WorkspacesWorkspaceSettingsRoleRoute
+  '/workspaces/$workspace/': typeof WorkspacesWorkspaceCoreIndexRoute
+  '/workspaces/$workspace/settings/': typeof WorkspacesWorkspaceSettingsIndexRoute
+  '/workspaces/$workspace/tables/$table': typeof WorkspacesWorkspaceCoreTablesTableRouteRouteWithChildren
+  '/workspaces/$workspace/settings/members/roles': typeof WorkspacesWorkspaceSettingsMembersRolesRouteRouteWithChildren
+  '/workspaces/$workspace/tables/new': typeof WorkspacesWorkspaceCoreTablesNewRoute
+  '/workspaces/$workspace/tables/trash': typeof WorkspacesWorkspaceCoreTablesTrashRoute
+  '/workspaces/$workspace/settings/members/$userId': typeof WorkspacesWorkspaceSettingsMembersUserIdRoute
+  '/workspaces/$workspace/tables/': typeof WorkspacesWorkspaceCoreTablesIndexRoute
+  '/workspaces/$workspace/settings/members/': typeof WorkspacesWorkspaceSettingsMembersIndexRoute
+  '/workspaces/$workspace/tables/$table/trash': typeof WorkspacesWorkspaceCoreTablesTableTrashRouteRouteWithChildren
+  '/workspaces/$workspace/tables/$table/views': typeof WorkspacesWorkspaceCoreTablesTableViewsRouteRouteWithChildren
+  '/workspaces/$workspace/tables/$table/definition': typeof WorkspacesWorkspaceCoreTablesTableDefinitionRoute
+  '/workspaces/$workspace/settings/members/roles/$roleId': typeof WorkspacesWorkspaceSettingsMembersRolesRoleIdRoute
+  '/workspaces/$workspace/settings/members/roles/': typeof WorkspacesWorkspaceSettingsMembersRolesIndexRoute
+  '/workspaces/$workspace/tables/$table/$record': typeof WorkspacesWorkspaceCoreTablesTableViewerRecordRoute
+  '/workspaces/$workspace/tables/$table/new': typeof WorkspacesWorkspaceCoreTablesTableViewerNewRoute
+  '/workspaces/$workspace/tables/$table/trash/$entry': typeof WorkspacesWorkspaceCoreTablesTableTrashEntryRoute
+  '/workspaces/$workspace/tables/$table/views/$view': typeof WorkspacesWorkspaceCoreTablesTableViewsViewRoute
+  '/workspaces/$workspace/tables/$table/views/trash': typeof WorkspacesWorkspaceCoreTablesTableViewsTrashRoute
+  '/workspaces/$workspace/tables/$table/': typeof WorkspacesWorkspaceCoreTablesTableViewerIndexRoute
+  '/workspaces/$workspace/tables/$table/views/': typeof WorkspacesWorkspaceCoreTablesTableViewsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteRouteWithChildren
-  '/w/$workspace': typeof WWorkspaceCoreIndexRoute
+  '/workspaces/$workspace': typeof WorkspacesWorkspaceCoreIndexRoute
   '/account/devices': typeof AccountDevicesRoute
   '/account/profile': typeof AccountProfileRoute
   '/account/security': typeof AccountSecurityRoute
@@ -377,36 +386,36 @@ export interface FileRoutesByTo {
   '/auth/two-factor': typeof AuthTwoFactorRoute
   '/auth/verify-email': typeof AuthVerifyEmailRoute
   '/account': typeof AccountIndexRoute
-  '/w/$workspace/settings/api': typeof WWorkspaceSettingsApiRoute
-  '/w/$workspace/settings/appearance': typeof WWorkspaceSettingsAppearanceRoute
-  '/w/$workspace/settings/billing': typeof WWorkspaceSettingsBillingRoute
-  '/w/$workspace/settings/data': typeof WWorkspaceSettingsDataRoute
-  '/w/$workspace/settings/integrations': typeof WWorkspaceSettingsIntegrationsRoute
-  '/w/$workspace/settings/role': typeof WWorkspaceSettingsRoleRoute
-  '/w/$workspace/settings': typeof WWorkspaceSettingsIndexRoute
-  '/w/$workspace/tables/$table': typeof WWorkspaceCoreTablesTableViewerIndexRoute
-  '/w/$workspace/tables/new': typeof WWorkspaceCoreTablesNewRoute
-  '/w/$workspace/tables/trash': typeof WWorkspaceCoreTablesTrashRoute
-  '/w/$workspace/settings/members/$userId': typeof WWorkspaceSettingsMembersUserIdRoute
-  '/w/$workspace/tables': typeof WWorkspaceCoreTablesIndexRoute
-  '/w/$workspace/settings/members': typeof WWorkspaceSettingsMembersIndexRoute
-  '/w/$workspace/tables/$table/trash': typeof WWorkspaceCoreTablesTableTrashRouteRouteWithChildren
-  '/w/$workspace/tables/$table/definition': typeof WWorkspaceCoreTablesTableDefinitionRoute
-  '/w/$workspace/settings/members/roles/$roleId': typeof WWorkspaceSettingsMembersRolesRoleIdRoute
-  '/w/$workspace/settings/members/roles': typeof WWorkspaceSettingsMembersRolesIndexRoute
-  '/w/$workspace/tables/$table/$record': typeof WWorkspaceCoreTablesTableViewerRecordRoute
-  '/w/$workspace/tables/$table/new': typeof WWorkspaceCoreTablesTableViewerNewRoute
-  '/w/$workspace/tables/$table/trash/$entry': typeof WWorkspaceCoreTablesTableTrashEntryRoute
-  '/w/$workspace/tables/$table/view/$view': typeof WWorkspaceCoreTablesTableViewViewRoute
-  '/w/$workspace/tables/$table/view/trash': typeof WWorkspaceCoreTablesTableViewTrashRoute
-  '/w/$workspace/tables/$table/view': typeof WWorkspaceCoreTablesTableViewIndexRoute
+  '/workspaces/$workspace/settings/api': typeof WorkspacesWorkspaceSettingsApiRoute
+  '/workspaces/$workspace/settings/appearance': typeof WorkspacesWorkspaceSettingsAppearanceRoute
+  '/workspaces/$workspace/settings/billing': typeof WorkspacesWorkspaceSettingsBillingRoute
+  '/workspaces/$workspace/settings/data': typeof WorkspacesWorkspaceSettingsDataRoute
+  '/workspaces/$workspace/settings/integrations': typeof WorkspacesWorkspaceSettingsIntegrationsRoute
+  '/workspaces/$workspace/settings/role': typeof WorkspacesWorkspaceSettingsRoleRoute
+  '/workspaces/$workspace/settings': typeof WorkspacesWorkspaceSettingsIndexRoute
+  '/workspaces/$workspace/tables/$table': typeof WorkspacesWorkspaceCoreTablesTableViewerIndexRoute
+  '/workspaces/$workspace/tables/new': typeof WorkspacesWorkspaceCoreTablesNewRoute
+  '/workspaces/$workspace/tables/trash': typeof WorkspacesWorkspaceCoreTablesTrashRoute
+  '/workspaces/$workspace/settings/members/$userId': typeof WorkspacesWorkspaceSettingsMembersUserIdRoute
+  '/workspaces/$workspace/tables': typeof WorkspacesWorkspaceCoreTablesIndexRoute
+  '/workspaces/$workspace/settings/members': typeof WorkspacesWorkspaceSettingsMembersIndexRoute
+  '/workspaces/$workspace/tables/$table/trash': typeof WorkspacesWorkspaceCoreTablesTableTrashRouteRouteWithChildren
+  '/workspaces/$workspace/tables/$table/definition': typeof WorkspacesWorkspaceCoreTablesTableDefinitionRoute
+  '/workspaces/$workspace/settings/members/roles/$roleId': typeof WorkspacesWorkspaceSettingsMembersRolesRoleIdRoute
+  '/workspaces/$workspace/settings/members/roles': typeof WorkspacesWorkspaceSettingsMembersRolesIndexRoute
+  '/workspaces/$workspace/tables/$table/$record': typeof WorkspacesWorkspaceCoreTablesTableViewerRecordRoute
+  '/workspaces/$workspace/tables/$table/new': typeof WorkspacesWorkspaceCoreTablesTableViewerNewRoute
+  '/workspaces/$workspace/tables/$table/trash/$entry': typeof WorkspacesWorkspaceCoreTablesTableTrashEntryRoute
+  '/workspaces/$workspace/tables/$table/views/$view': typeof WorkspacesWorkspaceCoreTablesTableViewsViewRoute
+  '/workspaces/$workspace/tables/$table/views/trash': typeof WorkspacesWorkspaceCoreTablesTableViewsTrashRoute
+  '/workspaces/$workspace/tables/$table/views': typeof WorkspacesWorkspaceCoreTablesTableViewsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/account': typeof AccountRouteRouteWithChildren
   '/auth': typeof AuthRouteRouteWithChildren
-  '/w/$workspace': typeof WWorkspaceRouteRouteWithChildren
+  '/workspaces/$workspace': typeof WorkspacesWorkspaceRouteRouteWithChildren
   '/account/devices': typeof AccountDevicesRoute
   '/account/profile': typeof AccountProfileRoute
   '/account/security': typeof AccountSecurityRoute
@@ -418,38 +427,38 @@ export interface FileRoutesById {
   '/auth/two-factor': typeof AuthTwoFactorRoute
   '/auth/verify-email': typeof AuthVerifyEmailRoute
   '/account/': typeof AccountIndexRoute
-  '/w/$workspace/_core': typeof WWorkspaceCoreRouteRouteWithChildren
-  '/w/$workspace/settings': typeof WWorkspaceSettingsRouteRouteWithChildren
-  '/w/$workspace/_core/tables': typeof WWorkspaceCoreTablesRouteRouteWithChildren
-  '/w/$workspace/settings/members': typeof WWorkspaceSettingsMembersRouteRouteWithChildren
-  '/w/$workspace/settings/api': typeof WWorkspaceSettingsApiRoute
-  '/w/$workspace/settings/appearance': typeof WWorkspaceSettingsAppearanceRoute
-  '/w/$workspace/settings/billing': typeof WWorkspaceSettingsBillingRoute
-  '/w/$workspace/settings/data': typeof WWorkspaceSettingsDataRoute
-  '/w/$workspace/settings/integrations': typeof WWorkspaceSettingsIntegrationsRoute
-  '/w/$workspace/settings/role': typeof WWorkspaceSettingsRoleRoute
-  '/w/$workspace/_core/': typeof WWorkspaceCoreIndexRoute
-  '/w/$workspace/settings/': typeof WWorkspaceSettingsIndexRoute
-  '/w/$workspace/_core/tables/$table': typeof WWorkspaceCoreTablesTableRouteRouteWithChildren
-  '/w/$workspace/settings/members/roles': typeof WWorkspaceSettingsMembersRolesRouteRouteWithChildren
-  '/w/$workspace/_core/tables/new': typeof WWorkspaceCoreTablesNewRoute
-  '/w/$workspace/_core/tables/trash': typeof WWorkspaceCoreTablesTrashRoute
-  '/w/$workspace/settings/members/$userId': typeof WWorkspaceSettingsMembersUserIdRoute
-  '/w/$workspace/_core/tables/': typeof WWorkspaceCoreTablesIndexRoute
-  '/w/$workspace/settings/members/': typeof WWorkspaceSettingsMembersIndexRoute
-  '/w/$workspace/_core/tables/$table/_viewer': typeof WWorkspaceCoreTablesTableViewerRouteRouteWithChildren
-  '/w/$workspace/_core/tables/$table/trash': typeof WWorkspaceCoreTablesTableTrashRouteRouteWithChildren
-  '/w/$workspace/_core/tables/$table/view': typeof WWorkspaceCoreTablesTableViewRouteRouteWithChildren
-  '/w/$workspace/_core/tables/$table/definition': typeof WWorkspaceCoreTablesTableDefinitionRoute
-  '/w/$workspace/settings/members/roles/$roleId': typeof WWorkspaceSettingsMembersRolesRoleIdRoute
-  '/w/$workspace/settings/members/roles/': typeof WWorkspaceSettingsMembersRolesIndexRoute
-  '/w/$workspace/_core/tables/$table/_viewer/$record': typeof WWorkspaceCoreTablesTableViewerRecordRoute
-  '/w/$workspace/_core/tables/$table/_viewer/new': typeof WWorkspaceCoreTablesTableViewerNewRoute
-  '/w/$workspace/_core/tables/$table/trash/$entry': typeof WWorkspaceCoreTablesTableTrashEntryRoute
-  '/w/$workspace/_core/tables/$table/view/$view': typeof WWorkspaceCoreTablesTableViewViewRoute
-  '/w/$workspace/_core/tables/$table/view/trash': typeof WWorkspaceCoreTablesTableViewTrashRoute
-  '/w/$workspace/_core/tables/$table/_viewer/': typeof WWorkspaceCoreTablesTableViewerIndexRoute
-  '/w/$workspace/_core/tables/$table/view/': typeof WWorkspaceCoreTablesTableViewIndexRoute
+  '/workspaces/$workspace/_core': typeof WorkspacesWorkspaceCoreRouteRouteWithChildren
+  '/workspaces/$workspace/settings': typeof WorkspacesWorkspaceSettingsRouteRouteWithChildren
+  '/workspaces/$workspace/_core/tables': typeof WorkspacesWorkspaceCoreTablesRouteRouteWithChildren
+  '/workspaces/$workspace/settings/members': typeof WorkspacesWorkspaceSettingsMembersRouteRouteWithChildren
+  '/workspaces/$workspace/settings/api': typeof WorkspacesWorkspaceSettingsApiRoute
+  '/workspaces/$workspace/settings/appearance': typeof WorkspacesWorkspaceSettingsAppearanceRoute
+  '/workspaces/$workspace/settings/billing': typeof WorkspacesWorkspaceSettingsBillingRoute
+  '/workspaces/$workspace/settings/data': typeof WorkspacesWorkspaceSettingsDataRoute
+  '/workspaces/$workspace/settings/integrations': typeof WorkspacesWorkspaceSettingsIntegrationsRoute
+  '/workspaces/$workspace/settings/role': typeof WorkspacesWorkspaceSettingsRoleRoute
+  '/workspaces/$workspace/_core/': typeof WorkspacesWorkspaceCoreIndexRoute
+  '/workspaces/$workspace/settings/': typeof WorkspacesWorkspaceSettingsIndexRoute
+  '/workspaces/$workspace/_core/tables/$table': typeof WorkspacesWorkspaceCoreTablesTableRouteRouteWithChildren
+  '/workspaces/$workspace/settings/members/roles': typeof WorkspacesWorkspaceSettingsMembersRolesRouteRouteWithChildren
+  '/workspaces/$workspace/_core/tables/new': typeof WorkspacesWorkspaceCoreTablesNewRoute
+  '/workspaces/$workspace/_core/tables/trash': typeof WorkspacesWorkspaceCoreTablesTrashRoute
+  '/workspaces/$workspace/settings/members/$userId': typeof WorkspacesWorkspaceSettingsMembersUserIdRoute
+  '/workspaces/$workspace/_core/tables/': typeof WorkspacesWorkspaceCoreTablesIndexRoute
+  '/workspaces/$workspace/settings/members/': typeof WorkspacesWorkspaceSettingsMembersIndexRoute
+  '/workspaces/$workspace/_core/tables/$table/_viewer': typeof WorkspacesWorkspaceCoreTablesTableViewerRouteRouteWithChildren
+  '/workspaces/$workspace/_core/tables/$table/trash': typeof WorkspacesWorkspaceCoreTablesTableTrashRouteRouteWithChildren
+  '/workspaces/$workspace/_core/tables/$table/views': typeof WorkspacesWorkspaceCoreTablesTableViewsRouteRouteWithChildren
+  '/workspaces/$workspace/_core/tables/$table/definition': typeof WorkspacesWorkspaceCoreTablesTableDefinitionRoute
+  '/workspaces/$workspace/settings/members/roles/$roleId': typeof WorkspacesWorkspaceSettingsMembersRolesRoleIdRoute
+  '/workspaces/$workspace/settings/members/roles/': typeof WorkspacesWorkspaceSettingsMembersRolesIndexRoute
+  '/workspaces/$workspace/_core/tables/$table/_viewer/$record': typeof WorkspacesWorkspaceCoreTablesTableViewerRecordRoute
+  '/workspaces/$workspace/_core/tables/$table/_viewer/new': typeof WorkspacesWorkspaceCoreTablesTableViewerNewRoute
+  '/workspaces/$workspace/_core/tables/$table/trash/$entry': typeof WorkspacesWorkspaceCoreTablesTableTrashEntryRoute
+  '/workspaces/$workspace/_core/tables/$table/views/$view': typeof WorkspacesWorkspaceCoreTablesTableViewsViewRoute
+  '/workspaces/$workspace/_core/tables/$table/views/trash': typeof WorkspacesWorkspaceCoreTablesTableViewsTrashRoute
+  '/workspaces/$workspace/_core/tables/$table/_viewer/': typeof WorkspacesWorkspaceCoreTablesTableViewerIndexRoute
+  '/workspaces/$workspace/_core/tables/$table/views/': typeof WorkspacesWorkspaceCoreTablesTableViewsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -457,7 +466,7 @@ export interface FileRouteTypes {
     | '/'
     | '/account'
     | '/auth'
-    | '/w/$workspace'
+    | '/workspaces/$workspace'
     | '/account/devices'
     | '/account/profile'
     | '/account/security'
@@ -469,41 +478,41 @@ export interface FileRouteTypes {
     | '/auth/two-factor'
     | '/auth/verify-email'
     | '/account/'
-    | '/w/$workspace/settings'
-    | '/w/$workspace/tables'
-    | '/w/$workspace/settings/members'
-    | '/w/$workspace/settings/api'
-    | '/w/$workspace/settings/appearance'
-    | '/w/$workspace/settings/billing'
-    | '/w/$workspace/settings/data'
-    | '/w/$workspace/settings/integrations'
-    | '/w/$workspace/settings/role'
-    | '/w/$workspace/'
-    | '/w/$workspace/settings/'
-    | '/w/$workspace/tables/$table'
-    | '/w/$workspace/settings/members/roles'
-    | '/w/$workspace/tables/new'
-    | '/w/$workspace/tables/trash'
-    | '/w/$workspace/settings/members/$userId'
-    | '/w/$workspace/tables/'
-    | '/w/$workspace/settings/members/'
-    | '/w/$workspace/tables/$table/trash'
-    | '/w/$workspace/tables/$table/view'
-    | '/w/$workspace/tables/$table/definition'
-    | '/w/$workspace/settings/members/roles/$roleId'
-    | '/w/$workspace/settings/members/roles/'
-    | '/w/$workspace/tables/$table/$record'
-    | '/w/$workspace/tables/$table/new'
-    | '/w/$workspace/tables/$table/trash/$entry'
-    | '/w/$workspace/tables/$table/view/$view'
-    | '/w/$workspace/tables/$table/view/trash'
-    | '/w/$workspace/tables/$table/'
-    | '/w/$workspace/tables/$table/view/'
+    | '/workspaces/$workspace/settings'
+    | '/workspaces/$workspace/tables'
+    | '/workspaces/$workspace/settings/members'
+    | '/workspaces/$workspace/settings/api'
+    | '/workspaces/$workspace/settings/appearance'
+    | '/workspaces/$workspace/settings/billing'
+    | '/workspaces/$workspace/settings/data'
+    | '/workspaces/$workspace/settings/integrations'
+    | '/workspaces/$workspace/settings/role'
+    | '/workspaces/$workspace/'
+    | '/workspaces/$workspace/settings/'
+    | '/workspaces/$workspace/tables/$table'
+    | '/workspaces/$workspace/settings/members/roles'
+    | '/workspaces/$workspace/tables/new'
+    | '/workspaces/$workspace/tables/trash'
+    | '/workspaces/$workspace/settings/members/$userId'
+    | '/workspaces/$workspace/tables/'
+    | '/workspaces/$workspace/settings/members/'
+    | '/workspaces/$workspace/tables/$table/trash'
+    | '/workspaces/$workspace/tables/$table/views'
+    | '/workspaces/$workspace/tables/$table/definition'
+    | '/workspaces/$workspace/settings/members/roles/$roleId'
+    | '/workspaces/$workspace/settings/members/roles/'
+    | '/workspaces/$workspace/tables/$table/$record'
+    | '/workspaces/$workspace/tables/$table/new'
+    | '/workspaces/$workspace/tables/$table/trash/$entry'
+    | '/workspaces/$workspace/tables/$table/views/$view'
+    | '/workspaces/$workspace/tables/$table/views/trash'
+    | '/workspaces/$workspace/tables/$table/'
+    | '/workspaces/$workspace/tables/$table/views/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
-    | '/w/$workspace'
+    | '/workspaces/$workspace'
     | '/account/devices'
     | '/account/profile'
     | '/account/security'
@@ -515,35 +524,35 @@ export interface FileRouteTypes {
     | '/auth/two-factor'
     | '/auth/verify-email'
     | '/account'
-    | '/w/$workspace/settings/api'
-    | '/w/$workspace/settings/appearance'
-    | '/w/$workspace/settings/billing'
-    | '/w/$workspace/settings/data'
-    | '/w/$workspace/settings/integrations'
-    | '/w/$workspace/settings/role'
-    | '/w/$workspace/settings'
-    | '/w/$workspace/tables/$table'
-    | '/w/$workspace/tables/new'
-    | '/w/$workspace/tables/trash'
-    | '/w/$workspace/settings/members/$userId'
-    | '/w/$workspace/tables'
-    | '/w/$workspace/settings/members'
-    | '/w/$workspace/tables/$table/trash'
-    | '/w/$workspace/tables/$table/definition'
-    | '/w/$workspace/settings/members/roles/$roleId'
-    | '/w/$workspace/settings/members/roles'
-    | '/w/$workspace/tables/$table/$record'
-    | '/w/$workspace/tables/$table/new'
-    | '/w/$workspace/tables/$table/trash/$entry'
-    | '/w/$workspace/tables/$table/view/$view'
-    | '/w/$workspace/tables/$table/view/trash'
-    | '/w/$workspace/tables/$table/view'
+    | '/workspaces/$workspace/settings/api'
+    | '/workspaces/$workspace/settings/appearance'
+    | '/workspaces/$workspace/settings/billing'
+    | '/workspaces/$workspace/settings/data'
+    | '/workspaces/$workspace/settings/integrations'
+    | '/workspaces/$workspace/settings/role'
+    | '/workspaces/$workspace/settings'
+    | '/workspaces/$workspace/tables/$table'
+    | '/workspaces/$workspace/tables/new'
+    | '/workspaces/$workspace/tables/trash'
+    | '/workspaces/$workspace/settings/members/$userId'
+    | '/workspaces/$workspace/tables'
+    | '/workspaces/$workspace/settings/members'
+    | '/workspaces/$workspace/tables/$table/trash'
+    | '/workspaces/$workspace/tables/$table/definition'
+    | '/workspaces/$workspace/settings/members/roles/$roleId'
+    | '/workspaces/$workspace/settings/members/roles'
+    | '/workspaces/$workspace/tables/$table/$record'
+    | '/workspaces/$workspace/tables/$table/new'
+    | '/workspaces/$workspace/tables/$table/trash/$entry'
+    | '/workspaces/$workspace/tables/$table/views/$view'
+    | '/workspaces/$workspace/tables/$table/views/trash'
+    | '/workspaces/$workspace/tables/$table/views'
   id:
     | '__root__'
     | '/'
     | '/account'
     | '/auth'
-    | '/w/$workspace'
+    | '/workspaces/$workspace'
     | '/account/devices'
     | '/account/profile'
     | '/account/security'
@@ -555,45 +564,45 @@ export interface FileRouteTypes {
     | '/auth/two-factor'
     | '/auth/verify-email'
     | '/account/'
-    | '/w/$workspace/_core'
-    | '/w/$workspace/settings'
-    | '/w/$workspace/_core/tables'
-    | '/w/$workspace/settings/members'
-    | '/w/$workspace/settings/api'
-    | '/w/$workspace/settings/appearance'
-    | '/w/$workspace/settings/billing'
-    | '/w/$workspace/settings/data'
-    | '/w/$workspace/settings/integrations'
-    | '/w/$workspace/settings/role'
-    | '/w/$workspace/_core/'
-    | '/w/$workspace/settings/'
-    | '/w/$workspace/_core/tables/$table'
-    | '/w/$workspace/settings/members/roles'
-    | '/w/$workspace/_core/tables/new'
-    | '/w/$workspace/_core/tables/trash'
-    | '/w/$workspace/settings/members/$userId'
-    | '/w/$workspace/_core/tables/'
-    | '/w/$workspace/settings/members/'
-    | '/w/$workspace/_core/tables/$table/_viewer'
-    | '/w/$workspace/_core/tables/$table/trash'
-    | '/w/$workspace/_core/tables/$table/view'
-    | '/w/$workspace/_core/tables/$table/definition'
-    | '/w/$workspace/settings/members/roles/$roleId'
-    | '/w/$workspace/settings/members/roles/'
-    | '/w/$workspace/_core/tables/$table/_viewer/$record'
-    | '/w/$workspace/_core/tables/$table/_viewer/new'
-    | '/w/$workspace/_core/tables/$table/trash/$entry'
-    | '/w/$workspace/_core/tables/$table/view/$view'
-    | '/w/$workspace/_core/tables/$table/view/trash'
-    | '/w/$workspace/_core/tables/$table/_viewer/'
-    | '/w/$workspace/_core/tables/$table/view/'
+    | '/workspaces/$workspace/_core'
+    | '/workspaces/$workspace/settings'
+    | '/workspaces/$workspace/_core/tables'
+    | '/workspaces/$workspace/settings/members'
+    | '/workspaces/$workspace/settings/api'
+    | '/workspaces/$workspace/settings/appearance'
+    | '/workspaces/$workspace/settings/billing'
+    | '/workspaces/$workspace/settings/data'
+    | '/workspaces/$workspace/settings/integrations'
+    | '/workspaces/$workspace/settings/role'
+    | '/workspaces/$workspace/_core/'
+    | '/workspaces/$workspace/settings/'
+    | '/workspaces/$workspace/_core/tables/$table'
+    | '/workspaces/$workspace/settings/members/roles'
+    | '/workspaces/$workspace/_core/tables/new'
+    | '/workspaces/$workspace/_core/tables/trash'
+    | '/workspaces/$workspace/settings/members/$userId'
+    | '/workspaces/$workspace/_core/tables/'
+    | '/workspaces/$workspace/settings/members/'
+    | '/workspaces/$workspace/_core/tables/$table/_viewer'
+    | '/workspaces/$workspace/_core/tables/$table/trash'
+    | '/workspaces/$workspace/_core/tables/$table/views'
+    | '/workspaces/$workspace/_core/tables/$table/definition'
+    | '/workspaces/$workspace/settings/members/roles/$roleId'
+    | '/workspaces/$workspace/settings/members/roles/'
+    | '/workspaces/$workspace/_core/tables/$table/_viewer/$record'
+    | '/workspaces/$workspace/_core/tables/$table/_viewer/new'
+    | '/workspaces/$workspace/_core/tables/$table/trash/$entry'
+    | '/workspaces/$workspace/_core/tables/$table/views/$view'
+    | '/workspaces/$workspace/_core/tables/$table/views/trash'
+    | '/workspaces/$workspace/_core/tables/$table/_viewer/'
+    | '/workspaces/$workspace/_core/tables/$table/views/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AccountRouteRoute: typeof AccountRouteRouteWithChildren
   AuthRouteRoute: typeof AuthRouteRouteWithChildren
-  WWorkspaceRouteRoute: typeof WWorkspaceRouteRouteWithChildren
+  WorkspacesWorkspaceRouteRoute: typeof WorkspacesWorkspaceRouteRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -696,236 +705,236 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthVerifyEmailRouteImport
       parentRoute: typeof AuthRouteRoute
     }
-    '/w/$workspace': {
-      id: '/w/$workspace'
-      path: '/w/$workspace'
-      fullPath: '/w/$workspace'
-      preLoaderRoute: typeof WWorkspaceRouteRouteImport
+    '/workspaces/$workspace': {
+      id: '/workspaces/$workspace'
+      path: '/workspaces/$workspace'
+      fullPath: '/workspaces/$workspace'
+      preLoaderRoute: typeof WorkspacesWorkspaceRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/w/$workspace/_core': {
-      id: '/w/$workspace/_core'
+    '/workspaces/$workspace/_core': {
+      id: '/workspaces/$workspace/_core'
       path: ''
-      fullPath: '/w/$workspace'
-      preLoaderRoute: typeof WWorkspaceCoreRouteRouteImport
-      parentRoute: typeof WWorkspaceRouteRoute
+      fullPath: '/workspaces/$workspace'
+      preLoaderRoute: typeof WorkspacesWorkspaceCoreRouteRouteImport
+      parentRoute: typeof WorkspacesWorkspaceRouteRoute
     }
-    '/w/$workspace/settings': {
-      id: '/w/$workspace/settings'
+    '/workspaces/$workspace/settings': {
+      id: '/workspaces/$workspace/settings'
       path: '/settings'
-      fullPath: '/w/$workspace/settings'
-      preLoaderRoute: typeof WWorkspaceSettingsRouteRouteImport
-      parentRoute: typeof WWorkspaceRouteRoute
+      fullPath: '/workspaces/$workspace/settings'
+      preLoaderRoute: typeof WorkspacesWorkspaceSettingsRouteRouteImport
+      parentRoute: typeof WorkspacesWorkspaceRouteRoute
     }
-    '/w/$workspace/_core/': {
-      id: '/w/$workspace/_core/'
+    '/workspaces/$workspace/_core/': {
+      id: '/workspaces/$workspace/_core/'
       path: '/'
-      fullPath: '/w/$workspace/'
-      preLoaderRoute: typeof WWorkspaceCoreIndexRouteImport
-      parentRoute: typeof WWorkspaceCoreRouteRoute
+      fullPath: '/workspaces/$workspace/'
+      preLoaderRoute: typeof WorkspacesWorkspaceCoreIndexRouteImport
+      parentRoute: typeof WorkspacesWorkspaceCoreRouteRoute
     }
-    '/w/$workspace/_core/tables': {
-      id: '/w/$workspace/_core/tables'
+    '/workspaces/$workspace/_core/tables': {
+      id: '/workspaces/$workspace/_core/tables'
       path: '/tables'
-      fullPath: '/w/$workspace/tables'
-      preLoaderRoute: typeof WWorkspaceCoreTablesRouteRouteImport
-      parentRoute: typeof WWorkspaceCoreRouteRoute
+      fullPath: '/workspaces/$workspace/tables'
+      preLoaderRoute: typeof WorkspacesWorkspaceCoreTablesRouteRouteImport
+      parentRoute: typeof WorkspacesWorkspaceCoreRouteRoute
     }
-    '/w/$workspace/settings/': {
-      id: '/w/$workspace/settings/'
+    '/workspaces/$workspace/settings/': {
+      id: '/workspaces/$workspace/settings/'
       path: '/'
-      fullPath: '/w/$workspace/settings/'
-      preLoaderRoute: typeof WWorkspaceSettingsIndexRouteImport
-      parentRoute: typeof WWorkspaceSettingsRouteRoute
+      fullPath: '/workspaces/$workspace/settings/'
+      preLoaderRoute: typeof WorkspacesWorkspaceSettingsIndexRouteImport
+      parentRoute: typeof WorkspacesWorkspaceSettingsRouteRoute
     }
-    '/w/$workspace/settings/api': {
-      id: '/w/$workspace/settings/api'
+    '/workspaces/$workspace/settings/api': {
+      id: '/workspaces/$workspace/settings/api'
       path: '/api'
-      fullPath: '/w/$workspace/settings/api'
-      preLoaderRoute: typeof WWorkspaceSettingsApiRouteImport
-      parentRoute: typeof WWorkspaceSettingsRouteRoute
+      fullPath: '/workspaces/$workspace/settings/api'
+      preLoaderRoute: typeof WorkspacesWorkspaceSettingsApiRouteImport
+      parentRoute: typeof WorkspacesWorkspaceSettingsRouteRoute
     }
-    '/w/$workspace/settings/appearance': {
-      id: '/w/$workspace/settings/appearance'
+    '/workspaces/$workspace/settings/appearance': {
+      id: '/workspaces/$workspace/settings/appearance'
       path: '/appearance'
-      fullPath: '/w/$workspace/settings/appearance'
-      preLoaderRoute: typeof WWorkspaceSettingsAppearanceRouteImport
-      parentRoute: typeof WWorkspaceSettingsRouteRoute
+      fullPath: '/workspaces/$workspace/settings/appearance'
+      preLoaderRoute: typeof WorkspacesWorkspaceSettingsAppearanceRouteImport
+      parentRoute: typeof WorkspacesWorkspaceSettingsRouteRoute
     }
-    '/w/$workspace/settings/billing': {
-      id: '/w/$workspace/settings/billing'
+    '/workspaces/$workspace/settings/billing': {
+      id: '/workspaces/$workspace/settings/billing'
       path: '/billing'
-      fullPath: '/w/$workspace/settings/billing'
-      preLoaderRoute: typeof WWorkspaceSettingsBillingRouteImport
-      parentRoute: typeof WWorkspaceSettingsRouteRoute
+      fullPath: '/workspaces/$workspace/settings/billing'
+      preLoaderRoute: typeof WorkspacesWorkspaceSettingsBillingRouteImport
+      parentRoute: typeof WorkspacesWorkspaceSettingsRouteRoute
     }
-    '/w/$workspace/settings/data': {
-      id: '/w/$workspace/settings/data'
+    '/workspaces/$workspace/settings/data': {
+      id: '/workspaces/$workspace/settings/data'
       path: '/data'
-      fullPath: '/w/$workspace/settings/data'
-      preLoaderRoute: typeof WWorkspaceSettingsDataRouteImport
-      parentRoute: typeof WWorkspaceSettingsRouteRoute
+      fullPath: '/workspaces/$workspace/settings/data'
+      preLoaderRoute: typeof WorkspacesWorkspaceSettingsDataRouteImport
+      parentRoute: typeof WorkspacesWorkspaceSettingsRouteRoute
     }
-    '/w/$workspace/settings/integrations': {
-      id: '/w/$workspace/settings/integrations'
+    '/workspaces/$workspace/settings/integrations': {
+      id: '/workspaces/$workspace/settings/integrations'
       path: '/integrations'
-      fullPath: '/w/$workspace/settings/integrations'
-      preLoaderRoute: typeof WWorkspaceSettingsIntegrationsRouteImport
-      parentRoute: typeof WWorkspaceSettingsRouteRoute
+      fullPath: '/workspaces/$workspace/settings/integrations'
+      preLoaderRoute: typeof WorkspacesWorkspaceSettingsIntegrationsRouteImport
+      parentRoute: typeof WorkspacesWorkspaceSettingsRouteRoute
     }
-    '/w/$workspace/settings/members': {
-      id: '/w/$workspace/settings/members'
+    '/workspaces/$workspace/settings/members': {
+      id: '/workspaces/$workspace/settings/members'
       path: '/members'
-      fullPath: '/w/$workspace/settings/members'
-      preLoaderRoute: typeof WWorkspaceSettingsMembersRouteRouteImport
-      parentRoute: typeof WWorkspaceSettingsRouteRoute
+      fullPath: '/workspaces/$workspace/settings/members'
+      preLoaderRoute: typeof WorkspacesWorkspaceSettingsMembersRouteRouteImport
+      parentRoute: typeof WorkspacesWorkspaceSettingsRouteRoute
     }
-    '/w/$workspace/settings/role': {
-      id: '/w/$workspace/settings/role'
+    '/workspaces/$workspace/settings/role': {
+      id: '/workspaces/$workspace/settings/role'
       path: '/role'
-      fullPath: '/w/$workspace/settings/role'
-      preLoaderRoute: typeof WWorkspaceSettingsRoleRouteImport
-      parentRoute: typeof WWorkspaceSettingsRouteRoute
+      fullPath: '/workspaces/$workspace/settings/role'
+      preLoaderRoute: typeof WorkspacesWorkspaceSettingsRoleRouteImport
+      parentRoute: typeof WorkspacesWorkspaceSettingsRouteRoute
     }
-    '/w/$workspace/_core/tables/': {
-      id: '/w/$workspace/_core/tables/'
+    '/workspaces/$workspace/_core/tables/': {
+      id: '/workspaces/$workspace/_core/tables/'
       path: '/'
-      fullPath: '/w/$workspace/tables/'
-      preLoaderRoute: typeof WWorkspaceCoreTablesIndexRouteImport
-      parentRoute: typeof WWorkspaceCoreTablesRouteRoute
+      fullPath: '/workspaces/$workspace/tables/'
+      preLoaderRoute: typeof WorkspacesWorkspaceCoreTablesIndexRouteImport
+      parentRoute: typeof WorkspacesWorkspaceCoreTablesRouteRoute
     }
-    '/w/$workspace/_core/tables/$table': {
-      id: '/w/$workspace/_core/tables/$table'
+    '/workspaces/$workspace/_core/tables/$table': {
+      id: '/workspaces/$workspace/_core/tables/$table'
       path: '/$table'
-      fullPath: '/w/$workspace/tables/$table'
-      preLoaderRoute: typeof WWorkspaceCoreTablesTableRouteRouteImport
-      parentRoute: typeof WWorkspaceCoreTablesRouteRoute
+      fullPath: '/workspaces/$workspace/tables/$table'
+      preLoaderRoute: typeof WorkspacesWorkspaceCoreTablesTableRouteRouteImport
+      parentRoute: typeof WorkspacesWorkspaceCoreTablesRouteRoute
     }
-    '/w/$workspace/_core/tables/new': {
-      id: '/w/$workspace/_core/tables/new'
+    '/workspaces/$workspace/_core/tables/new': {
+      id: '/workspaces/$workspace/_core/tables/new'
       path: '/new'
-      fullPath: '/w/$workspace/tables/new'
-      preLoaderRoute: typeof WWorkspaceCoreTablesNewRouteImport
-      parentRoute: typeof WWorkspaceCoreTablesRouteRoute
+      fullPath: '/workspaces/$workspace/tables/new'
+      preLoaderRoute: typeof WorkspacesWorkspaceCoreTablesNewRouteImport
+      parentRoute: typeof WorkspacesWorkspaceCoreTablesRouteRoute
     }
-    '/w/$workspace/_core/tables/trash': {
-      id: '/w/$workspace/_core/tables/trash'
+    '/workspaces/$workspace/_core/tables/trash': {
+      id: '/workspaces/$workspace/_core/tables/trash'
       path: '/trash'
-      fullPath: '/w/$workspace/tables/trash'
-      preLoaderRoute: typeof WWorkspaceCoreTablesTrashRouteImport
-      parentRoute: typeof WWorkspaceCoreTablesRouteRoute
+      fullPath: '/workspaces/$workspace/tables/trash'
+      preLoaderRoute: typeof WorkspacesWorkspaceCoreTablesTrashRouteImport
+      parentRoute: typeof WorkspacesWorkspaceCoreTablesRouteRoute
     }
-    '/w/$workspace/settings/members/': {
-      id: '/w/$workspace/settings/members/'
+    '/workspaces/$workspace/settings/members/': {
+      id: '/workspaces/$workspace/settings/members/'
       path: '/'
-      fullPath: '/w/$workspace/settings/members/'
-      preLoaderRoute: typeof WWorkspaceSettingsMembersIndexRouteImport
-      parentRoute: typeof WWorkspaceSettingsMembersRouteRoute
+      fullPath: '/workspaces/$workspace/settings/members/'
+      preLoaderRoute: typeof WorkspacesWorkspaceSettingsMembersIndexRouteImport
+      parentRoute: typeof WorkspacesWorkspaceSettingsMembersRouteRoute
     }
-    '/w/$workspace/settings/members/$userId': {
-      id: '/w/$workspace/settings/members/$userId'
+    '/workspaces/$workspace/settings/members/$userId': {
+      id: '/workspaces/$workspace/settings/members/$userId'
       path: '/$userId'
-      fullPath: '/w/$workspace/settings/members/$userId'
-      preLoaderRoute: typeof WWorkspaceSettingsMembersUserIdRouteImport
-      parentRoute: typeof WWorkspaceSettingsMembersRouteRoute
+      fullPath: '/workspaces/$workspace/settings/members/$userId'
+      preLoaderRoute: typeof WorkspacesWorkspaceSettingsMembersUserIdRouteImport
+      parentRoute: typeof WorkspacesWorkspaceSettingsMembersRouteRoute
     }
-    '/w/$workspace/settings/members/roles': {
-      id: '/w/$workspace/settings/members/roles'
+    '/workspaces/$workspace/settings/members/roles': {
+      id: '/workspaces/$workspace/settings/members/roles'
       path: '/roles'
-      fullPath: '/w/$workspace/settings/members/roles'
-      preLoaderRoute: typeof WWorkspaceSettingsMembersRolesRouteRouteImport
-      parentRoute: typeof WWorkspaceSettingsMembersRouteRoute
+      fullPath: '/workspaces/$workspace/settings/members/roles'
+      preLoaderRoute: typeof WorkspacesWorkspaceSettingsMembersRolesRouteRouteImport
+      parentRoute: typeof WorkspacesWorkspaceSettingsMembersRouteRoute
     }
-    '/w/$workspace/_core/tables/$table/_viewer': {
-      id: '/w/$workspace/_core/tables/$table/_viewer'
+    '/workspaces/$workspace/_core/tables/$table/_viewer': {
+      id: '/workspaces/$workspace/_core/tables/$table/_viewer'
       path: ''
-      fullPath: '/w/$workspace/tables/$table'
-      preLoaderRoute: typeof WWorkspaceCoreTablesTableViewerRouteRouteImport
-      parentRoute: typeof WWorkspaceCoreTablesTableRouteRoute
+      fullPath: '/workspaces/$workspace/tables/$table'
+      preLoaderRoute: typeof WorkspacesWorkspaceCoreTablesTableViewerRouteRouteImport
+      parentRoute: typeof WorkspacesWorkspaceCoreTablesTableRouteRoute
     }
-    '/w/$workspace/_core/tables/$table/definition': {
-      id: '/w/$workspace/_core/tables/$table/definition'
+    '/workspaces/$workspace/_core/tables/$table/definition': {
+      id: '/workspaces/$workspace/_core/tables/$table/definition'
       path: '/definition'
-      fullPath: '/w/$workspace/tables/$table/definition'
-      preLoaderRoute: typeof WWorkspaceCoreTablesTableDefinitionRouteImport
-      parentRoute: typeof WWorkspaceCoreTablesTableRouteRoute
+      fullPath: '/workspaces/$workspace/tables/$table/definition'
+      preLoaderRoute: typeof WorkspacesWorkspaceCoreTablesTableDefinitionRouteImport
+      parentRoute: typeof WorkspacesWorkspaceCoreTablesTableRouteRoute
     }
-    '/w/$workspace/_core/tables/$table/trash': {
-      id: '/w/$workspace/_core/tables/$table/trash'
+    '/workspaces/$workspace/_core/tables/$table/trash': {
+      id: '/workspaces/$workspace/_core/tables/$table/trash'
       path: '/trash'
-      fullPath: '/w/$workspace/tables/$table/trash'
-      preLoaderRoute: typeof WWorkspaceCoreTablesTableTrashRouteRouteImport
-      parentRoute: typeof WWorkspaceCoreTablesTableRouteRoute
+      fullPath: '/workspaces/$workspace/tables/$table/trash'
+      preLoaderRoute: typeof WorkspacesWorkspaceCoreTablesTableTrashRouteRouteImport
+      parentRoute: typeof WorkspacesWorkspaceCoreTablesTableRouteRoute
     }
-    '/w/$workspace/_core/tables/$table/view': {
-      id: '/w/$workspace/_core/tables/$table/view'
-      path: '/view'
-      fullPath: '/w/$workspace/tables/$table/view'
-      preLoaderRoute: typeof WWorkspaceCoreTablesTableViewRouteRouteImport
-      parentRoute: typeof WWorkspaceCoreTablesTableRouteRoute
+    '/workspaces/$workspace/_core/tables/$table/views': {
+      id: '/workspaces/$workspace/_core/tables/$table/views'
+      path: '/views'
+      fullPath: '/workspaces/$workspace/tables/$table/views'
+      preLoaderRoute: typeof WorkspacesWorkspaceCoreTablesTableViewsRouteRouteImport
+      parentRoute: typeof WorkspacesWorkspaceCoreTablesTableRouteRoute
     }
-    '/w/$workspace/settings/members/roles/': {
-      id: '/w/$workspace/settings/members/roles/'
+    '/workspaces/$workspace/settings/members/roles/': {
+      id: '/workspaces/$workspace/settings/members/roles/'
       path: '/'
-      fullPath: '/w/$workspace/settings/members/roles/'
-      preLoaderRoute: typeof WWorkspaceSettingsMembersRolesIndexRouteImport
-      parentRoute: typeof WWorkspaceSettingsMembersRolesRouteRoute
+      fullPath: '/workspaces/$workspace/settings/members/roles/'
+      preLoaderRoute: typeof WorkspacesWorkspaceSettingsMembersRolesIndexRouteImport
+      parentRoute: typeof WorkspacesWorkspaceSettingsMembersRolesRouteRoute
     }
-    '/w/$workspace/settings/members/roles/$roleId': {
-      id: '/w/$workspace/settings/members/roles/$roleId'
+    '/workspaces/$workspace/settings/members/roles/$roleId': {
+      id: '/workspaces/$workspace/settings/members/roles/$roleId'
       path: '/$roleId'
-      fullPath: '/w/$workspace/settings/members/roles/$roleId'
-      preLoaderRoute: typeof WWorkspaceSettingsMembersRolesRoleIdRouteImport
-      parentRoute: typeof WWorkspaceSettingsMembersRolesRouteRoute
+      fullPath: '/workspaces/$workspace/settings/members/roles/$roleId'
+      preLoaderRoute: typeof WorkspacesWorkspaceSettingsMembersRolesRoleIdRouteImport
+      parentRoute: typeof WorkspacesWorkspaceSettingsMembersRolesRouteRoute
     }
-    '/w/$workspace/_core/tables/$table/_viewer/': {
-      id: '/w/$workspace/_core/tables/$table/_viewer/'
+    '/workspaces/$workspace/_core/tables/$table/_viewer/': {
+      id: '/workspaces/$workspace/_core/tables/$table/_viewer/'
       path: '/'
-      fullPath: '/w/$workspace/tables/$table/'
-      preLoaderRoute: typeof WWorkspaceCoreTablesTableViewerIndexRouteImport
-      parentRoute: typeof WWorkspaceCoreTablesTableViewerRouteRoute
+      fullPath: '/workspaces/$workspace/tables/$table/'
+      preLoaderRoute: typeof WorkspacesWorkspaceCoreTablesTableViewerIndexRouteImport
+      parentRoute: typeof WorkspacesWorkspaceCoreTablesTableViewerRouteRoute
     }
-    '/w/$workspace/_core/tables/$table/_viewer/$record': {
-      id: '/w/$workspace/_core/tables/$table/_viewer/$record'
+    '/workspaces/$workspace/_core/tables/$table/_viewer/$record': {
+      id: '/workspaces/$workspace/_core/tables/$table/_viewer/$record'
       path: '/$record'
-      fullPath: '/w/$workspace/tables/$table/$record'
-      preLoaderRoute: typeof WWorkspaceCoreTablesTableViewerRecordRouteImport
-      parentRoute: typeof WWorkspaceCoreTablesTableViewerRouteRoute
+      fullPath: '/workspaces/$workspace/tables/$table/$record'
+      preLoaderRoute: typeof WorkspacesWorkspaceCoreTablesTableViewerRecordRouteImport
+      parentRoute: typeof WorkspacesWorkspaceCoreTablesTableViewerRouteRoute
     }
-    '/w/$workspace/_core/tables/$table/_viewer/new': {
-      id: '/w/$workspace/_core/tables/$table/_viewer/new'
+    '/workspaces/$workspace/_core/tables/$table/_viewer/new': {
+      id: '/workspaces/$workspace/_core/tables/$table/_viewer/new'
       path: '/new'
-      fullPath: '/w/$workspace/tables/$table/new'
-      preLoaderRoute: typeof WWorkspaceCoreTablesTableViewerNewRouteImport
-      parentRoute: typeof WWorkspaceCoreTablesTableViewerRouteRoute
+      fullPath: '/workspaces/$workspace/tables/$table/new'
+      preLoaderRoute: typeof WorkspacesWorkspaceCoreTablesTableViewerNewRouteImport
+      parentRoute: typeof WorkspacesWorkspaceCoreTablesTableViewerRouteRoute
     }
-    '/w/$workspace/_core/tables/$table/trash/$entry': {
-      id: '/w/$workspace/_core/tables/$table/trash/$entry'
+    '/workspaces/$workspace/_core/tables/$table/trash/$entry': {
+      id: '/workspaces/$workspace/_core/tables/$table/trash/$entry'
       path: '/$entry'
-      fullPath: '/w/$workspace/tables/$table/trash/$entry'
-      preLoaderRoute: typeof WWorkspaceCoreTablesTableTrashEntryRouteImport
-      parentRoute: typeof WWorkspaceCoreTablesTableTrashRouteRoute
+      fullPath: '/workspaces/$workspace/tables/$table/trash/$entry'
+      preLoaderRoute: typeof WorkspacesWorkspaceCoreTablesTableTrashEntryRouteImport
+      parentRoute: typeof WorkspacesWorkspaceCoreTablesTableTrashRouteRoute
     }
-    '/w/$workspace/_core/tables/$table/view/': {
-      id: '/w/$workspace/_core/tables/$table/view/'
+    '/workspaces/$workspace/_core/tables/$table/views/': {
+      id: '/workspaces/$workspace/_core/tables/$table/views/'
       path: '/'
-      fullPath: '/w/$workspace/tables/$table/view/'
-      preLoaderRoute: typeof WWorkspaceCoreTablesTableViewIndexRouteImport
-      parentRoute: typeof WWorkspaceCoreTablesTableViewRouteRoute
+      fullPath: '/workspaces/$workspace/tables/$table/views/'
+      preLoaderRoute: typeof WorkspacesWorkspaceCoreTablesTableViewsIndexRouteImport
+      parentRoute: typeof WorkspacesWorkspaceCoreTablesTableViewsRouteRoute
     }
-    '/w/$workspace/_core/tables/$table/view/$view': {
-      id: '/w/$workspace/_core/tables/$table/view/$view'
+    '/workspaces/$workspace/_core/tables/$table/views/$view': {
+      id: '/workspaces/$workspace/_core/tables/$table/views/$view'
       path: '/$view'
-      fullPath: '/w/$workspace/tables/$table/view/$view'
-      preLoaderRoute: typeof WWorkspaceCoreTablesTableViewViewRouteImport
-      parentRoute: typeof WWorkspaceCoreTablesTableViewRouteRoute
+      fullPath: '/workspaces/$workspace/tables/$table/views/$view'
+      preLoaderRoute: typeof WorkspacesWorkspaceCoreTablesTableViewsViewRouteImport
+      parentRoute: typeof WorkspacesWorkspaceCoreTablesTableViewsRouteRoute
     }
-    '/w/$workspace/_core/tables/$table/view/trash': {
-      id: '/w/$workspace/_core/tables/$table/view/trash'
+    '/workspaces/$workspace/_core/tables/$table/views/trash': {
+      id: '/workspaces/$workspace/_core/tables/$table/views/trash'
       path: '/trash'
-      fullPath: '/w/$workspace/tables/$table/view/trash'
-      preLoaderRoute: typeof WWorkspaceCoreTablesTableViewTrashRouteImport
-      parentRoute: typeof WWorkspaceCoreTablesTableViewRouteRoute
+      fullPath: '/workspaces/$workspace/tables/$table/views/trash'
+      preLoaderRoute: typeof WorkspacesWorkspaceCoreTablesTableViewsTrashRouteImport
+      parentRoute: typeof WorkspacesWorkspaceCoreTablesTableViewsRouteRoute
     }
   }
 }
@@ -972,206 +981,223 @@ const AuthRouteRouteWithChildren = AuthRouteRoute._addFileChildren(
   AuthRouteRouteChildren,
 )
 
-interface WWorkspaceCoreTablesTableViewerRouteRouteChildren {
-  WWorkspaceCoreTablesTableViewerRecordRoute: typeof WWorkspaceCoreTablesTableViewerRecordRoute
-  WWorkspaceCoreTablesTableViewerNewRoute: typeof WWorkspaceCoreTablesTableViewerNewRoute
-  WWorkspaceCoreTablesTableViewerIndexRoute: typeof WWorkspaceCoreTablesTableViewerIndexRoute
+interface WorkspacesWorkspaceCoreTablesTableViewerRouteRouteChildren {
+  WorkspacesWorkspaceCoreTablesTableViewerRecordRoute: typeof WorkspacesWorkspaceCoreTablesTableViewerRecordRoute
+  WorkspacesWorkspaceCoreTablesTableViewerNewRoute: typeof WorkspacesWorkspaceCoreTablesTableViewerNewRoute
+  WorkspacesWorkspaceCoreTablesTableViewerIndexRoute: typeof WorkspacesWorkspaceCoreTablesTableViewerIndexRoute
 }
 
-const WWorkspaceCoreTablesTableViewerRouteRouteChildren: WWorkspaceCoreTablesTableViewerRouteRouteChildren =
+const WorkspacesWorkspaceCoreTablesTableViewerRouteRouteChildren: WorkspacesWorkspaceCoreTablesTableViewerRouteRouteChildren =
   {
-    WWorkspaceCoreTablesTableViewerRecordRoute:
-      WWorkspaceCoreTablesTableViewerRecordRoute,
-    WWorkspaceCoreTablesTableViewerNewRoute:
-      WWorkspaceCoreTablesTableViewerNewRoute,
-    WWorkspaceCoreTablesTableViewerIndexRoute:
-      WWorkspaceCoreTablesTableViewerIndexRoute,
+    WorkspacesWorkspaceCoreTablesTableViewerRecordRoute:
+      WorkspacesWorkspaceCoreTablesTableViewerRecordRoute,
+    WorkspacesWorkspaceCoreTablesTableViewerNewRoute:
+      WorkspacesWorkspaceCoreTablesTableViewerNewRoute,
+    WorkspacesWorkspaceCoreTablesTableViewerIndexRoute:
+      WorkspacesWorkspaceCoreTablesTableViewerIndexRoute,
   }
 
-const WWorkspaceCoreTablesTableViewerRouteRouteWithChildren =
-  WWorkspaceCoreTablesTableViewerRouteRoute._addFileChildren(
-    WWorkspaceCoreTablesTableViewerRouteRouteChildren,
+const WorkspacesWorkspaceCoreTablesTableViewerRouteRouteWithChildren =
+  WorkspacesWorkspaceCoreTablesTableViewerRouteRoute._addFileChildren(
+    WorkspacesWorkspaceCoreTablesTableViewerRouteRouteChildren,
   )
 
-interface WWorkspaceCoreTablesTableTrashRouteRouteChildren {
-  WWorkspaceCoreTablesTableTrashEntryRoute: typeof WWorkspaceCoreTablesTableTrashEntryRoute
+interface WorkspacesWorkspaceCoreTablesTableTrashRouteRouteChildren {
+  WorkspacesWorkspaceCoreTablesTableTrashEntryRoute: typeof WorkspacesWorkspaceCoreTablesTableTrashEntryRoute
 }
 
-const WWorkspaceCoreTablesTableTrashRouteRouteChildren: WWorkspaceCoreTablesTableTrashRouteRouteChildren =
+const WorkspacesWorkspaceCoreTablesTableTrashRouteRouteChildren: WorkspacesWorkspaceCoreTablesTableTrashRouteRouteChildren =
   {
-    WWorkspaceCoreTablesTableTrashEntryRoute:
-      WWorkspaceCoreTablesTableTrashEntryRoute,
+    WorkspacesWorkspaceCoreTablesTableTrashEntryRoute:
+      WorkspacesWorkspaceCoreTablesTableTrashEntryRoute,
   }
 
-const WWorkspaceCoreTablesTableTrashRouteRouteWithChildren =
-  WWorkspaceCoreTablesTableTrashRouteRoute._addFileChildren(
-    WWorkspaceCoreTablesTableTrashRouteRouteChildren,
+const WorkspacesWorkspaceCoreTablesTableTrashRouteRouteWithChildren =
+  WorkspacesWorkspaceCoreTablesTableTrashRouteRoute._addFileChildren(
+    WorkspacesWorkspaceCoreTablesTableTrashRouteRouteChildren,
   )
 
-interface WWorkspaceCoreTablesTableViewRouteRouteChildren {
-  WWorkspaceCoreTablesTableViewViewRoute: typeof WWorkspaceCoreTablesTableViewViewRoute
-  WWorkspaceCoreTablesTableViewTrashRoute: typeof WWorkspaceCoreTablesTableViewTrashRoute
-  WWorkspaceCoreTablesTableViewIndexRoute: typeof WWorkspaceCoreTablesTableViewIndexRoute
+interface WorkspacesWorkspaceCoreTablesTableViewsRouteRouteChildren {
+  WorkspacesWorkspaceCoreTablesTableViewsViewRoute: typeof WorkspacesWorkspaceCoreTablesTableViewsViewRoute
+  WorkspacesWorkspaceCoreTablesTableViewsTrashRoute: typeof WorkspacesWorkspaceCoreTablesTableViewsTrashRoute
+  WorkspacesWorkspaceCoreTablesTableViewsIndexRoute: typeof WorkspacesWorkspaceCoreTablesTableViewsIndexRoute
 }
 
-const WWorkspaceCoreTablesTableViewRouteRouteChildren: WWorkspaceCoreTablesTableViewRouteRouteChildren =
+const WorkspacesWorkspaceCoreTablesTableViewsRouteRouteChildren: WorkspacesWorkspaceCoreTablesTableViewsRouteRouteChildren =
   {
-    WWorkspaceCoreTablesTableViewViewRoute:
-      WWorkspaceCoreTablesTableViewViewRoute,
-    WWorkspaceCoreTablesTableViewTrashRoute:
-      WWorkspaceCoreTablesTableViewTrashRoute,
-    WWorkspaceCoreTablesTableViewIndexRoute:
-      WWorkspaceCoreTablesTableViewIndexRoute,
+    WorkspacesWorkspaceCoreTablesTableViewsViewRoute:
+      WorkspacesWorkspaceCoreTablesTableViewsViewRoute,
+    WorkspacesWorkspaceCoreTablesTableViewsTrashRoute:
+      WorkspacesWorkspaceCoreTablesTableViewsTrashRoute,
+    WorkspacesWorkspaceCoreTablesTableViewsIndexRoute:
+      WorkspacesWorkspaceCoreTablesTableViewsIndexRoute,
   }
 
-const WWorkspaceCoreTablesTableViewRouteRouteWithChildren =
-  WWorkspaceCoreTablesTableViewRouteRoute._addFileChildren(
-    WWorkspaceCoreTablesTableViewRouteRouteChildren,
+const WorkspacesWorkspaceCoreTablesTableViewsRouteRouteWithChildren =
+  WorkspacesWorkspaceCoreTablesTableViewsRouteRoute._addFileChildren(
+    WorkspacesWorkspaceCoreTablesTableViewsRouteRouteChildren,
   )
 
-interface WWorkspaceCoreTablesTableRouteRouteChildren {
-  WWorkspaceCoreTablesTableViewerRouteRoute: typeof WWorkspaceCoreTablesTableViewerRouteRouteWithChildren
-  WWorkspaceCoreTablesTableTrashRouteRoute: typeof WWorkspaceCoreTablesTableTrashRouteRouteWithChildren
-  WWorkspaceCoreTablesTableViewRouteRoute: typeof WWorkspaceCoreTablesTableViewRouteRouteWithChildren
-  WWorkspaceCoreTablesTableDefinitionRoute: typeof WWorkspaceCoreTablesTableDefinitionRoute
+interface WorkspacesWorkspaceCoreTablesTableRouteRouteChildren {
+  WorkspacesWorkspaceCoreTablesTableViewerRouteRoute: typeof WorkspacesWorkspaceCoreTablesTableViewerRouteRouteWithChildren
+  WorkspacesWorkspaceCoreTablesTableTrashRouteRoute: typeof WorkspacesWorkspaceCoreTablesTableTrashRouteRouteWithChildren
+  WorkspacesWorkspaceCoreTablesTableViewsRouteRoute: typeof WorkspacesWorkspaceCoreTablesTableViewsRouteRouteWithChildren
+  WorkspacesWorkspaceCoreTablesTableDefinitionRoute: typeof WorkspacesWorkspaceCoreTablesTableDefinitionRoute
 }
 
-const WWorkspaceCoreTablesTableRouteRouteChildren: WWorkspaceCoreTablesTableRouteRouteChildren =
+const WorkspacesWorkspaceCoreTablesTableRouteRouteChildren: WorkspacesWorkspaceCoreTablesTableRouteRouteChildren =
   {
-    WWorkspaceCoreTablesTableViewerRouteRoute:
-      WWorkspaceCoreTablesTableViewerRouteRouteWithChildren,
-    WWorkspaceCoreTablesTableTrashRouteRoute:
-      WWorkspaceCoreTablesTableTrashRouteRouteWithChildren,
-    WWorkspaceCoreTablesTableViewRouteRoute:
-      WWorkspaceCoreTablesTableViewRouteRouteWithChildren,
-    WWorkspaceCoreTablesTableDefinitionRoute:
-      WWorkspaceCoreTablesTableDefinitionRoute,
+    WorkspacesWorkspaceCoreTablesTableViewerRouteRoute:
+      WorkspacesWorkspaceCoreTablesTableViewerRouteRouteWithChildren,
+    WorkspacesWorkspaceCoreTablesTableTrashRouteRoute:
+      WorkspacesWorkspaceCoreTablesTableTrashRouteRouteWithChildren,
+    WorkspacesWorkspaceCoreTablesTableViewsRouteRoute:
+      WorkspacesWorkspaceCoreTablesTableViewsRouteRouteWithChildren,
+    WorkspacesWorkspaceCoreTablesTableDefinitionRoute:
+      WorkspacesWorkspaceCoreTablesTableDefinitionRoute,
   }
 
-const WWorkspaceCoreTablesTableRouteRouteWithChildren =
-  WWorkspaceCoreTablesTableRouteRoute._addFileChildren(
-    WWorkspaceCoreTablesTableRouteRouteChildren,
+const WorkspacesWorkspaceCoreTablesTableRouteRouteWithChildren =
+  WorkspacesWorkspaceCoreTablesTableRouteRoute._addFileChildren(
+    WorkspacesWorkspaceCoreTablesTableRouteRouteChildren,
   )
 
-interface WWorkspaceCoreTablesRouteRouteChildren {
-  WWorkspaceCoreTablesTableRouteRoute: typeof WWorkspaceCoreTablesTableRouteRouteWithChildren
-  WWorkspaceCoreTablesNewRoute: typeof WWorkspaceCoreTablesNewRoute
-  WWorkspaceCoreTablesTrashRoute: typeof WWorkspaceCoreTablesTrashRoute
-  WWorkspaceCoreTablesIndexRoute: typeof WWorkspaceCoreTablesIndexRoute
+interface WorkspacesWorkspaceCoreTablesRouteRouteChildren {
+  WorkspacesWorkspaceCoreTablesTableRouteRoute: typeof WorkspacesWorkspaceCoreTablesTableRouteRouteWithChildren
+  WorkspacesWorkspaceCoreTablesNewRoute: typeof WorkspacesWorkspaceCoreTablesNewRoute
+  WorkspacesWorkspaceCoreTablesTrashRoute: typeof WorkspacesWorkspaceCoreTablesTrashRoute
+  WorkspacesWorkspaceCoreTablesIndexRoute: typeof WorkspacesWorkspaceCoreTablesIndexRoute
 }
 
-const WWorkspaceCoreTablesRouteRouteChildren: WWorkspaceCoreTablesRouteRouteChildren =
+const WorkspacesWorkspaceCoreTablesRouteRouteChildren: WorkspacesWorkspaceCoreTablesRouteRouteChildren =
   {
-    WWorkspaceCoreTablesTableRouteRoute:
-      WWorkspaceCoreTablesTableRouteRouteWithChildren,
-    WWorkspaceCoreTablesNewRoute: WWorkspaceCoreTablesNewRoute,
-    WWorkspaceCoreTablesTrashRoute: WWorkspaceCoreTablesTrashRoute,
-    WWorkspaceCoreTablesIndexRoute: WWorkspaceCoreTablesIndexRoute,
+    WorkspacesWorkspaceCoreTablesTableRouteRoute:
+      WorkspacesWorkspaceCoreTablesTableRouteRouteWithChildren,
+    WorkspacesWorkspaceCoreTablesNewRoute:
+      WorkspacesWorkspaceCoreTablesNewRoute,
+    WorkspacesWorkspaceCoreTablesTrashRoute:
+      WorkspacesWorkspaceCoreTablesTrashRoute,
+    WorkspacesWorkspaceCoreTablesIndexRoute:
+      WorkspacesWorkspaceCoreTablesIndexRoute,
   }
 
-const WWorkspaceCoreTablesRouteRouteWithChildren =
-  WWorkspaceCoreTablesRouteRoute._addFileChildren(
-    WWorkspaceCoreTablesRouteRouteChildren,
+const WorkspacesWorkspaceCoreTablesRouteRouteWithChildren =
+  WorkspacesWorkspaceCoreTablesRouteRoute._addFileChildren(
+    WorkspacesWorkspaceCoreTablesRouteRouteChildren,
   )
 
-interface WWorkspaceCoreRouteRouteChildren {
-  WWorkspaceCoreTablesRouteRoute: typeof WWorkspaceCoreTablesRouteRouteWithChildren
-  WWorkspaceCoreIndexRoute: typeof WWorkspaceCoreIndexRoute
+interface WorkspacesWorkspaceCoreRouteRouteChildren {
+  WorkspacesWorkspaceCoreTablesRouteRoute: typeof WorkspacesWorkspaceCoreTablesRouteRouteWithChildren
+  WorkspacesWorkspaceCoreIndexRoute: typeof WorkspacesWorkspaceCoreIndexRoute
 }
 
-const WWorkspaceCoreRouteRouteChildren: WWorkspaceCoreRouteRouteChildren = {
-  WWorkspaceCoreTablesRouteRoute: WWorkspaceCoreTablesRouteRouteWithChildren,
-  WWorkspaceCoreIndexRoute: WWorkspaceCoreIndexRoute,
-}
-
-const WWorkspaceCoreRouteRouteWithChildren =
-  WWorkspaceCoreRouteRoute._addFileChildren(WWorkspaceCoreRouteRouteChildren)
-
-interface WWorkspaceSettingsMembersRolesRouteRouteChildren {
-  WWorkspaceSettingsMembersRolesRoleIdRoute: typeof WWorkspaceSettingsMembersRolesRoleIdRoute
-  WWorkspaceSettingsMembersRolesIndexRoute: typeof WWorkspaceSettingsMembersRolesIndexRoute
-}
-
-const WWorkspaceSettingsMembersRolesRouteRouteChildren: WWorkspaceSettingsMembersRolesRouteRouteChildren =
+const WorkspacesWorkspaceCoreRouteRouteChildren: WorkspacesWorkspaceCoreRouteRouteChildren =
   {
-    WWorkspaceSettingsMembersRolesRoleIdRoute:
-      WWorkspaceSettingsMembersRolesRoleIdRoute,
-    WWorkspaceSettingsMembersRolesIndexRoute:
-      WWorkspaceSettingsMembersRolesIndexRoute,
+    WorkspacesWorkspaceCoreTablesRouteRoute:
+      WorkspacesWorkspaceCoreTablesRouteRouteWithChildren,
+    WorkspacesWorkspaceCoreIndexRoute: WorkspacesWorkspaceCoreIndexRoute,
   }
 
-const WWorkspaceSettingsMembersRolesRouteRouteWithChildren =
-  WWorkspaceSettingsMembersRolesRouteRoute._addFileChildren(
-    WWorkspaceSettingsMembersRolesRouteRouteChildren,
+const WorkspacesWorkspaceCoreRouteRouteWithChildren =
+  WorkspacesWorkspaceCoreRouteRoute._addFileChildren(
+    WorkspacesWorkspaceCoreRouteRouteChildren,
   )
 
-interface WWorkspaceSettingsMembersRouteRouteChildren {
-  WWorkspaceSettingsMembersRolesRouteRoute: typeof WWorkspaceSettingsMembersRolesRouteRouteWithChildren
-  WWorkspaceSettingsMembersUserIdRoute: typeof WWorkspaceSettingsMembersUserIdRoute
-  WWorkspaceSettingsMembersIndexRoute: typeof WWorkspaceSettingsMembersIndexRoute
+interface WorkspacesWorkspaceSettingsMembersRolesRouteRouteChildren {
+  WorkspacesWorkspaceSettingsMembersRolesRoleIdRoute: typeof WorkspacesWorkspaceSettingsMembersRolesRoleIdRoute
+  WorkspacesWorkspaceSettingsMembersRolesIndexRoute: typeof WorkspacesWorkspaceSettingsMembersRolesIndexRoute
 }
 
-const WWorkspaceSettingsMembersRouteRouteChildren: WWorkspaceSettingsMembersRouteRouteChildren =
+const WorkspacesWorkspaceSettingsMembersRolesRouteRouteChildren: WorkspacesWorkspaceSettingsMembersRolesRouteRouteChildren =
   {
-    WWorkspaceSettingsMembersRolesRouteRoute:
-      WWorkspaceSettingsMembersRolesRouteRouteWithChildren,
-    WWorkspaceSettingsMembersUserIdRoute: WWorkspaceSettingsMembersUserIdRoute,
-    WWorkspaceSettingsMembersIndexRoute: WWorkspaceSettingsMembersIndexRoute,
+    WorkspacesWorkspaceSettingsMembersRolesRoleIdRoute:
+      WorkspacesWorkspaceSettingsMembersRolesRoleIdRoute,
+    WorkspacesWorkspaceSettingsMembersRolesIndexRoute:
+      WorkspacesWorkspaceSettingsMembersRolesIndexRoute,
   }
 
-const WWorkspaceSettingsMembersRouteRouteWithChildren =
-  WWorkspaceSettingsMembersRouteRoute._addFileChildren(
-    WWorkspaceSettingsMembersRouteRouteChildren,
+const WorkspacesWorkspaceSettingsMembersRolesRouteRouteWithChildren =
+  WorkspacesWorkspaceSettingsMembersRolesRouteRoute._addFileChildren(
+    WorkspacesWorkspaceSettingsMembersRolesRouteRouteChildren,
   )
 
-interface WWorkspaceSettingsRouteRouteChildren {
-  WWorkspaceSettingsMembersRouteRoute: typeof WWorkspaceSettingsMembersRouteRouteWithChildren
-  WWorkspaceSettingsApiRoute: typeof WWorkspaceSettingsApiRoute
-  WWorkspaceSettingsAppearanceRoute: typeof WWorkspaceSettingsAppearanceRoute
-  WWorkspaceSettingsBillingRoute: typeof WWorkspaceSettingsBillingRoute
-  WWorkspaceSettingsDataRoute: typeof WWorkspaceSettingsDataRoute
-  WWorkspaceSettingsIntegrationsRoute: typeof WWorkspaceSettingsIntegrationsRoute
-  WWorkspaceSettingsRoleRoute: typeof WWorkspaceSettingsRoleRoute
-  WWorkspaceSettingsIndexRoute: typeof WWorkspaceSettingsIndexRoute
+interface WorkspacesWorkspaceSettingsMembersRouteRouteChildren {
+  WorkspacesWorkspaceSettingsMembersRolesRouteRoute: typeof WorkspacesWorkspaceSettingsMembersRolesRouteRouteWithChildren
+  WorkspacesWorkspaceSettingsMembersUserIdRoute: typeof WorkspacesWorkspaceSettingsMembersUserIdRoute
+  WorkspacesWorkspaceSettingsMembersIndexRoute: typeof WorkspacesWorkspaceSettingsMembersIndexRoute
 }
 
-const WWorkspaceSettingsRouteRouteChildren: WWorkspaceSettingsRouteRouteChildren =
+const WorkspacesWorkspaceSettingsMembersRouteRouteChildren: WorkspacesWorkspaceSettingsMembersRouteRouteChildren =
   {
-    WWorkspaceSettingsMembersRouteRoute:
-      WWorkspaceSettingsMembersRouteRouteWithChildren,
-    WWorkspaceSettingsApiRoute: WWorkspaceSettingsApiRoute,
-    WWorkspaceSettingsAppearanceRoute: WWorkspaceSettingsAppearanceRoute,
-    WWorkspaceSettingsBillingRoute: WWorkspaceSettingsBillingRoute,
-    WWorkspaceSettingsDataRoute: WWorkspaceSettingsDataRoute,
-    WWorkspaceSettingsIntegrationsRoute: WWorkspaceSettingsIntegrationsRoute,
-    WWorkspaceSettingsRoleRoute: WWorkspaceSettingsRoleRoute,
-    WWorkspaceSettingsIndexRoute: WWorkspaceSettingsIndexRoute,
+    WorkspacesWorkspaceSettingsMembersRolesRouteRoute:
+      WorkspacesWorkspaceSettingsMembersRolesRouteRouteWithChildren,
+    WorkspacesWorkspaceSettingsMembersUserIdRoute:
+      WorkspacesWorkspaceSettingsMembersUserIdRoute,
+    WorkspacesWorkspaceSettingsMembersIndexRoute:
+      WorkspacesWorkspaceSettingsMembersIndexRoute,
   }
 
-const WWorkspaceSettingsRouteRouteWithChildren =
-  WWorkspaceSettingsRouteRoute._addFileChildren(
-    WWorkspaceSettingsRouteRouteChildren,
+const WorkspacesWorkspaceSettingsMembersRouteRouteWithChildren =
+  WorkspacesWorkspaceSettingsMembersRouteRoute._addFileChildren(
+    WorkspacesWorkspaceSettingsMembersRouteRouteChildren,
   )
 
-interface WWorkspaceRouteRouteChildren {
-  WWorkspaceCoreRouteRoute: typeof WWorkspaceCoreRouteRouteWithChildren
-  WWorkspaceSettingsRouteRoute: typeof WWorkspaceSettingsRouteRouteWithChildren
+interface WorkspacesWorkspaceSettingsRouteRouteChildren {
+  WorkspacesWorkspaceSettingsMembersRouteRoute: typeof WorkspacesWorkspaceSettingsMembersRouteRouteWithChildren
+  WorkspacesWorkspaceSettingsApiRoute: typeof WorkspacesWorkspaceSettingsApiRoute
+  WorkspacesWorkspaceSettingsAppearanceRoute: typeof WorkspacesWorkspaceSettingsAppearanceRoute
+  WorkspacesWorkspaceSettingsBillingRoute: typeof WorkspacesWorkspaceSettingsBillingRoute
+  WorkspacesWorkspaceSettingsDataRoute: typeof WorkspacesWorkspaceSettingsDataRoute
+  WorkspacesWorkspaceSettingsIntegrationsRoute: typeof WorkspacesWorkspaceSettingsIntegrationsRoute
+  WorkspacesWorkspaceSettingsRoleRoute: typeof WorkspacesWorkspaceSettingsRoleRoute
+  WorkspacesWorkspaceSettingsIndexRoute: typeof WorkspacesWorkspaceSettingsIndexRoute
 }
 
-const WWorkspaceRouteRouteChildren: WWorkspaceRouteRouteChildren = {
-  WWorkspaceCoreRouteRoute: WWorkspaceCoreRouteRouteWithChildren,
-  WWorkspaceSettingsRouteRoute: WWorkspaceSettingsRouteRouteWithChildren,
+const WorkspacesWorkspaceSettingsRouteRouteChildren: WorkspacesWorkspaceSettingsRouteRouteChildren =
+  {
+    WorkspacesWorkspaceSettingsMembersRouteRoute:
+      WorkspacesWorkspaceSettingsMembersRouteRouteWithChildren,
+    WorkspacesWorkspaceSettingsApiRoute: WorkspacesWorkspaceSettingsApiRoute,
+    WorkspacesWorkspaceSettingsAppearanceRoute:
+      WorkspacesWorkspaceSettingsAppearanceRoute,
+    WorkspacesWorkspaceSettingsBillingRoute:
+      WorkspacesWorkspaceSettingsBillingRoute,
+    WorkspacesWorkspaceSettingsDataRoute: WorkspacesWorkspaceSettingsDataRoute,
+    WorkspacesWorkspaceSettingsIntegrationsRoute:
+      WorkspacesWorkspaceSettingsIntegrationsRoute,
+    WorkspacesWorkspaceSettingsRoleRoute: WorkspacesWorkspaceSettingsRoleRoute,
+    WorkspacesWorkspaceSettingsIndexRoute:
+      WorkspacesWorkspaceSettingsIndexRoute,
+  }
+
+const WorkspacesWorkspaceSettingsRouteRouteWithChildren =
+  WorkspacesWorkspaceSettingsRouteRoute._addFileChildren(
+    WorkspacesWorkspaceSettingsRouteRouteChildren,
+  )
+
+interface WorkspacesWorkspaceRouteRouteChildren {
+  WorkspacesWorkspaceCoreRouteRoute: typeof WorkspacesWorkspaceCoreRouteRouteWithChildren
+  WorkspacesWorkspaceSettingsRouteRoute: typeof WorkspacesWorkspaceSettingsRouteRouteWithChildren
 }
 
-const WWorkspaceRouteRouteWithChildren = WWorkspaceRouteRoute._addFileChildren(
-  WWorkspaceRouteRouteChildren,
-)
+const WorkspacesWorkspaceRouteRouteChildren: WorkspacesWorkspaceRouteRouteChildren =
+  {
+    WorkspacesWorkspaceCoreRouteRoute:
+      WorkspacesWorkspaceCoreRouteRouteWithChildren,
+    WorkspacesWorkspaceSettingsRouteRoute:
+      WorkspacesWorkspaceSettingsRouteRouteWithChildren,
+  }
+
+const WorkspacesWorkspaceRouteRouteWithChildren =
+  WorkspacesWorkspaceRouteRoute._addFileChildren(
+    WorkspacesWorkspaceRouteRouteChildren,
+  )
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AccountRouteRoute: AccountRouteRouteWithChildren,
   AuthRouteRoute: AuthRouteRouteWithChildren,
-  WWorkspaceRouteRoute: WWorkspaceRouteRouteWithChildren,
+  WorkspacesWorkspaceRouteRoute: WorkspacesWorkspaceRouteRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

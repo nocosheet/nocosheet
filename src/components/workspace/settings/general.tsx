@@ -30,7 +30,7 @@ export function SettingsGeneral() {
           <span className="text-sm">{DEFAULT_WORKSPACE_NAME}</span>
         </SettingsRow>
         <SettingsRow title="Address" description="The workspace's URL segment.">
-          <code className="font-mono text-sm">/w/{DEFAULT_WORKSPACE}</code>
+          <code className="font-mono text-sm">/workspaces/{DEFAULT_WORKSPACE}</code>
         </SettingsRow>
         <SettingsRow title="Members" description="Accounts with access to this workspace.">
           <span className="text-sm">{members.length}</span>

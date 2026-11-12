@@ -17,7 +17,7 @@ function Stat({
   label: string;
   value: React.ReactNode;
   hint: string;
-  to: "/w/$workspace/tables" | "/w/$workspace/settings/members" | "/w/$workspace/settings/role";
+  to: "/workspaces/$workspace/tables" | "/workspaces/$workspace/settings/members" | "/workspaces/$workspace/settings/role";
   workspace: string;
 }) {
   return (
@@ -52,14 +52,14 @@ export function WorkspaceStats({ workspace }: { workspace: string }) {
         label="Tables"
         value={tables}
         hint={groups > 0 ? `${groups} ${groups === 1 ? "group" : "groups"}` : "No groups"}
-        to="/w/$workspace/tables"
+        to="/workspaces/$workspace/tables"
         workspace={workspace}
       />
       <Stat
         label="Members"
         value={members.length}
         hint={`${admins} ${admins === 1 ? "administrator" : "administrators"}`}
-        to="/w/$workspace/settings/members"
+        to="/workspaces/$workspace/settings/members"
         workspace={workspace}
       />
       <Stat
@@ -72,7 +72,7 @@ export function WorkspaceStats({ workspace }: { workspace: string }) {
               ? can.join(", ")
               : scopeLabel("read", "none")
         }
-        to="/w/$workspace/settings/role"
+        to="/workspaces/$workspace/settings/role"
         workspace={workspace}
       />
     </section>

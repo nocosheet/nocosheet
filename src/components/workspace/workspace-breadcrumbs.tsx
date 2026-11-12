@@ -44,7 +44,7 @@ export function WorkspaceBreadcrumbs({ workspace }: { workspace: string }) {
           ) : (
             <BreadcrumbLink
               aria-label="Home"
-              render={<Link to="/w/$workspace" params={{ workspace }} />}
+              render={<Link to="/workspaces/$workspace" params={{ workspace }} />}
             >
               <HomeIcon className="size-4" />
             </BreadcrumbLink>

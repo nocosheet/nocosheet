@@ -21,7 +21,7 @@ export function ImpersonationBanner() {
     onSuccess: async () => {
       await refreshSession({ signedOut: true });
       await navigate({
-        to: "/w/$workspace/settings/members",
+        to: "/workspaces/$workspace/settings/members",
         params: { workspace: DEFAULT_WORKSPACE },
       });
     },

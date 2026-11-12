@@ -26,27 +26,27 @@ const groups = [
     label: "Workspace",
     items: [
       {
-        to: "/w/$workspace/settings",
+        to: "/workspaces/$workspace/settings",
         label: "General",
         icon: SlidersHorizontalIcon,
         path: "",
         exact: true,
       },
-      { to: "/w/$workspace/settings/members", label: "Members", icon: UsersIcon, path: "/members" },
+      { to: "/workspaces/$workspace/settings/members", label: "Members", icon: UsersIcon, path: "/members" },
       {
-        to: "/w/$workspace/settings/role",
+        to: "/workspaces/$workspace/settings/role",
         label: "Role & Permissions",
         icon: ShieldCheckIcon,
         path: "/role",
       },
       {
-        to: "/w/$workspace/settings/billing",
+        to: "/workspaces/$workspace/settings/billing",
         label: "Billing",
         icon: CreditCardIcon,
         path: "/billing",
       },
       {
-        to: "/w/$workspace/settings/appearance",
+        to: "/workspaces/$workspace/settings/appearance",
         label: "Appearance",
         icon: PaletteIcon,
         path: "/appearance",
@@ -56,14 +56,14 @@ const groups = [
   {
     label: "Data & integrations",
     items: [
-      { to: "/w/$workspace/settings/data", label: "Data", icon: DatabaseBackupIcon, path: "/data" },
+      { to: "/workspaces/$workspace/settings/data", label: "Data", icon: DatabaseBackupIcon, path: "/data" },
       {
-        to: "/w/$workspace/settings/integrations",
+        to: "/workspaces/$workspace/settings/integrations",
         label: "Integrations",
         icon: PlugIcon,
         path: "/integrations",
       },
-      { to: "/w/$workspace/settings/api", label: "API", icon: KeyRoundIcon, path: "/api" },
+      { to: "/workspaces/$workspace/settings/api", label: "API", icon: KeyRoundIcon, path: "/api" },
     ],
   },
 ] as const;
@@ -83,7 +83,7 @@ export function NavSettings({ workspace }: { workspace: string }) {
                   <SidebarMenuButton
                     tooltip={item.label}
                     isActive={isActive(
-                      `/w/${workspace}/settings${item.path}`,
+                      `/workspaces/${workspace}/settings${item.path}`,
                       "exact" in item && item.exact,
                     )}
                     render={<Link to={item.to} params={{ workspace }} />}

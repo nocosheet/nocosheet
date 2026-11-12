@@ -10,7 +10,7 @@ declare module "void" {
 }
 
 export default defineMiddleware(async (c, next) => {
-  if (!c.req.path.startsWith("/api/w/")) return next();
+  if (!c.req.path.startsWith("/api/workspaces/")) return next();
 
   requireAuth(c);
 

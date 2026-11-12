@@ -9,7 +9,7 @@ export const Route = createFileRoute("/")({
   // Signed-in users have one workspace, so skip the landing page.
   beforeLoad: ({ context }) => {
     if (context.session) {
-      throw redirect({ to: "/w/$workspace", params: { workspace: DEFAULT_WORKSPACE } });
+      throw redirect({ to: "/workspaces/$workspace", params: { workspace: DEFAULT_WORKSPACE } });
     }
   },
   component: Home,

@@ -22,7 +22,7 @@ export function NavBack({ workspace }: { workspace: string }) {
               tooltip="Back to app"
               render={
                 <Link
-                  to="/w/$workspace"
+                  to="/workspaces/$workspace"
                   params={{ workspace }}
                   viewTransition={{ types: ["sidebar-back"] }}
                 />

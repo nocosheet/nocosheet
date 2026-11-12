@@ -17,7 +17,7 @@ type WorkspaceSidebarProps = {
   user: { name: string; email: string; image?: string | null };
 };
 
-/** Inset sidebar (shadcn sidebar-08) for the app pages under `/w/$workspace`. */
+/** Inset sidebar (shadcn sidebar-08) for the app pages under `/workspaces/$workspace`. */
 export function WorkspaceSidebar({ workspace, user }: WorkspaceSidebarProps) {
   return (
     <Sidebar variant="inset" collapsible="icon">

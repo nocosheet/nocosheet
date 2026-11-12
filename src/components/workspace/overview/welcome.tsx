@@ -31,7 +31,7 @@ export function Welcome({ workspace }: { workspace: string }) {
         <Button
           variant="outline"
           size="sm"
-          render={<Link to="/w/$workspace/settings/role" params={{ workspace }} />}
+          render={<Link to="/workspaces/$workspace/settings/role" params={{ workspace }} />}
         >
           <ShieldCheckIcon />
           Role & Permissions
@@ -40,7 +40,7 @@ export function Welcome({ workspace }: { workspace: string }) {
           <Button
             size="sm"
             render={
-              <Link to="/w/$workspace/tables/new" params={{ workspace }} search={{ step: 1 }} />
+              <Link to="/workspaces/$workspace/tables/new" params={{ workspace }} search={{ step: 1 }} />
             }
           >
             <PlusIcon />

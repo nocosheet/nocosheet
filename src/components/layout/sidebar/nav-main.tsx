@@ -43,8 +43,8 @@ export function NavMain({ workspace }: { workspace: string }) {
           <SidebarMenuItem>
             <SidebarMenuButton
               tooltip="Home"
-              isActive={isActive(`/w/${workspace}`, true)}
-              render={<Link to="/w/$workspace" params={{ workspace }} />}
+              isActive={isActive(`/workspaces/${workspace}`, true)}
+              render={<Link to="/workspaces/$workspace" params={{ workspace }} />}
             >
               <HomeIcon />
               <span>Home</span>
@@ -54,9 +54,9 @@ export function NavMain({ workspace }: { workspace: string }) {
             <SidebarMenuButton
               tooltip="All tables"
               isActive={
-                isActive(`/w/${workspace}/tables`, true) || isActive(`/w/${workspace}/tables/new`)
+                isActive(`/workspaces/${workspace}/tables`, true) || isActive(`/workspaces/${workspace}/tables/new`)
               }
-              render={<Link to="/w/$workspace/tables" params={{ workspace }} />}
+              render={<Link to="/workspaces/$workspace/tables" params={{ workspace }} />}
             >
               <TableIcon />
               <span>All tables</span>

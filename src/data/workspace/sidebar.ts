@@ -65,7 +65,7 @@ function buildSidebar(rows: SidebarRow[]): SidebarData {
 export const sidebarQueryOptions = (workspace: string) =>
   queryOptions({
     queryKey: workspaceKeys.sidebar(),
-    queryFn: () => unwrapFetch(fetch("/api/w/:workspace/sidebar", { params: { workspace } })),
+    queryFn: () => unwrapFetch(fetch("/api/workspaces/:workspace/sidebar", { params: { workspace } })),
     select: buildSidebar,
     staleTime: 30_000,
   });

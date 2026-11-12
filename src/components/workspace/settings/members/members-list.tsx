@@ -91,7 +91,7 @@ export function MembersList({ workspace }: { workspace: string }) {
             >
               {isAdmin ? (
                 <Link
-                  to="/w/$workspace/settings/members/$userId"
+                  to="/workspaces/$workspace/settings/members/$userId"
                   params={{ workspace, userId: member.id }}
                   className="min-w-0 after:absolute after:inset-0"
                 >

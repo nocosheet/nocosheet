@@ -12,8 +12,8 @@ export const trashQueryOptions = (workspace: string, tableId: number, query: Tra
     queryKey: workspaceKeys.trashList(tableId, query),
     queryFn: () =>
       unwrapFetch(
-        fetch("/api/w/:workspace/tables/:id/trash", {
-          params: { workspace, id: String(tableId) },
+        fetch("/api/workspaces/:workspace/tables/:table/trash", {
+          params: { workspace, table: String(tableId) },
           query: {
             page: query.page,
             pageSize: query.pageSize,
@@ -32,8 +32,8 @@ export const trashEntryQueryOptions = (workspace: string, tableId: number, entry
     queryKey: workspaceKeys.trashEntry(tableId, entryId),
     queryFn: () =>
       unwrapFetch(
-        fetch("/api/w/:workspace/tables/:id/trash/:entry", {
-          params: { workspace, id: String(tableId), entry: String(entryId) },
+        fetch("/api/workspaces/:workspace/tables/:table/trash/:entry", {
+          params: { workspace, table: String(tableId), entry: String(entryId) },
         }),
       ),
     staleTime: 15_000,
@@ -54,9 +54,9 @@ export const restoreRecord = ({
   values?: Record<string, unknown>;
 }) =>
   unwrapFetch(
-    fetch("/api/w/:workspace/tables/:id/trash/:entry/restore", {
+    fetch("/api/workspaces/:workspace/tables/:table/trash/:entry/restore", {
       method: "POST",
-      params: { workspace, id: String(tableId), entry: String(entryId) },
+      params: { workspace, table: String(tableId), entry: String(entryId) },
       body: values ? { values } : {},
     }),
   );
@@ -78,9 +78,9 @@ export const purgeTrashMutationOptions = mutationOptions({
     entryId: number;
   }) =>
     unwrapFetch(
-      fetch("/api/w/:workspace/tables/:id/trash/:entry", {
+      fetch("/api/workspaces/:workspace/tables/:table/trash/:entry", {
         method: "DELETE",
-        params: { workspace, id: String(tableId), entry: String(entryId) },
+        params: { workspace, table: String(tableId), entry: String(entryId) },
       }),
     ),
 });

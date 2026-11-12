@@ -35,7 +35,7 @@ export function NavTables({ workspace }: { workspace: string }) {
                 tooltip="New table"
                 className="text-sidebar-foreground/70"
                 render={
-                  <Link to="/w/$workspace/tables/new" params={{ workspace }} search={{ step: 1 }} />
+                  <Link to="/workspaces/$workspace/tables/new" params={{ workspace }} search={{ step: 1 }} />
                 }
               >
                 <PlusIcon />
@@ -57,10 +57,10 @@ export function NavTables({ workspace }: { workspace: string }) {
             <SidebarMenuItem key={table.id}>
               <SidebarMenuButton
                 tooltip={table.name}
-                isActive={isActive(`/w/${workspace}/tables/${table.id}`)}
+                isActive={isActive(`/workspaces/${workspace}/tables/${table.id}`)}
                 render={
                   <Link
-                    to="/w/$workspace/tables/$table"
+                    to="/workspaces/$workspace/tables/$table"
                     params={{ workspace, table: String(table.id) }}
                   />
                 }

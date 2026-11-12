@@ -10,7 +10,7 @@ import { workspaceKeys } from "./keys";
 export const rolesQueryOptions = (workspace: string) =>
   queryOptions({
     queryKey: workspaceKeys.roles(),
-    queryFn: () => unwrapFetch(fetch("/api/w/:workspace/roles", { params: { workspace } })),
+    queryFn: () => unwrapFetch(fetch("/api/workspaces/:workspace/roles", { params: { workspace } })),
     staleTime: 15_000,
     retry: false,
   });
@@ -19,7 +19,7 @@ export const roleAssignmentsQueryOptions = (workspace: string) =>
   queryOptions({
     queryKey: workspaceKeys.roleAssignments(),
     queryFn: () =>
-      unwrapFetch(fetch("/api/w/:workspace/roles/assignments", { params: { workspace } })),
+      unwrapFetch(fetch("/api/workspaces/:workspace/roles/assignments", { params: { workspace } })),
     staleTime: 15_000,
     retry: false,
   });
@@ -27,7 +27,7 @@ export const roleAssignmentsQueryOptions = (workspace: string) =>
 export const createRoleMutationOptions = mutationOptions({
   mutationKey: workspaceKeys.mutation("create-role"),
   mutationFn: ({ workspace, ...body }: { workspace: string } & RoleCreateInput) =>
-    unwrapFetch(fetch("/api/w/:workspace/roles", { method: "POST", params: { workspace }, body })),
+    unwrapFetch(fetch("/api/workspaces/:workspace/roles", { method: "POST", params: { workspace }, body })),
 });
 
 export const updateRoleMutationOptions = mutationOptions({
@@ -42,9 +42,9 @@ export const updateRoleMutationOptions = mutationOptions({
     values: RoleUpdateInput;
   }) =>
     unwrapFetch(
-      fetch("/api/w/:workspace/roles/:id", {
+      fetch("/api/workspaces/:workspace/roles/:role", {
         method: "PATCH",
-        params: { workspace, id: String(id) },
+        params: { workspace, role: String(id) },
         body: values,
       }),
     ),
@@ -54,9 +54,9 @@ export const deleteRoleMutationOptions = mutationOptions({
   mutationKey: workspaceKeys.mutation("delete-role"),
   mutationFn: ({ workspace, id }: { workspace: string; id: number }) =>
     unwrapFetch(
-      fetch("/api/w/:workspace/roles/:id", {
+      fetch("/api/workspaces/:workspace/roles/:role", {
         method: "DELETE",
-        params: { workspace, id: String(id) },
+        params: { workspace, role: String(id) },
       }),
     ),
 });
@@ -73,7 +73,7 @@ export const assignRoleMutationOptions = mutationOptions({
     roleId: number;
   }) =>
     unwrapFetch(
-      fetch("/api/w/:workspace/roles/assignments", {
+      fetch("/api/workspaces/:workspace/roles/assignments", {
         method: "PUT",
         params: { workspace },
         body: { userId, roleId },

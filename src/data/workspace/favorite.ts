@@ -9,9 +9,9 @@ export const setFavoriteMutationOptions = mutationOptions({
   mutationKey: workspaceKeys.mutation("set-favorite"),
   mutationFn: ({ workspace, id, favorite }: { workspace: string; id: number; favorite: boolean }) =>
     unwrapFetch(
-      fetch("/api/w/:workspace/tables/:id/favorite", {
+      fetch("/api/workspaces/:workspace/tables/:table/favorite", {
         method: favorite ? "PUT" : "DELETE",
-        params: { workspace, id: String(id) },
+        params: { workspace, table: String(id) },
       }),
     ),
 });
