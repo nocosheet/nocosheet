@@ -2,9 +2,9 @@ import { passkey } from "@better-auth/passkey";
 import { APIError } from "better-auth/api";
 import { admin, twoFactor } from "better-auth/plugins";
 import { defineAuth } from "void/auth";
-import { sendEmail } from "void/email";
 import { storage } from "void/storage";
 
+import { enqueueEmail } from "./src/lib/auth/mail";
 import { kvSecondaryStorage } from "./src/lib/auth/secondary-storage";
 import { avatarKey, isAvatarUrl } from "./src/lib/avatar";
 import { ac, ADMIN_ROLES, DEFAULT_ROLE, isAdmin, roles } from "./src/lib/auth/access";
@@ -30,7 +30,7 @@ export default defineAuth(({ defaults, env }) => ({
     },
     requireEmailVerification: true,
     sendResetPassword: async ({ user, url }) => {
-      await sendEmail({
+      await enqueueEmail({
         to: user.email,
         subject: "Reset your Nocosheet password",
         text: `Hi ${user.name},\n\nUse the link below to reset your password:\n${url}\n\nIf you did not request this, you can ignore this email.`,
@@ -71,7 +71,7 @@ export default defineAuth(({ defaults, env }) => ({
       enabled: true,
       // Approval link goes to the CURRENT address; the new address is verified after approval.
       sendChangeEmailConfirmation: async ({ user, newEmail, url }) => {
-        await sendEmail({
+        await enqueueEmail({
           to: user.email,
           subject: "Approve your Nocosheet email change",
           text: `Hi ${user.name},\n\nWe received a request to change your email to ${newEmail}. Approve it with the link below:\n${url}\n\nIf you did not request this, you can ignore this email and your address will stay the same.`,
@@ -85,7 +85,7 @@ export default defineAuth(({ defaults, env }) => ({
     sendOnSignIn: true,
     autoSignInAfterVerification: true,
     sendVerificationEmail: async ({ user, url }) => {
-      await sendEmail({
+      await enqueueEmail({
         to: user.email,
         subject: "Verify your Nocosheet email",
         text: `Hi ${user.name},\n\nConfirm your email address using the link below:\n${url}\n\nIf you did not create an account, you can ignore this email.`,

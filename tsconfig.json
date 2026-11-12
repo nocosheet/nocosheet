@@ -8,7 +8,8 @@
     "jsx": "react-jsx",
     "paths": {
       "@/*": ["./src/*"],
-      "@db/*": ["./db/*"]
+      "@db/*": ["./db/*"],
+      "void/queues": ["./.void/queues.d.ts"]
     },
     "esModuleInterop": true,
     "skipLibCheck": true,
