@@ -4,7 +4,7 @@ import { ImpersonationBanner } from "@/components/layout/impersonation-banner";
 import { SettingsSidebar } from "@/components/layout/settings-sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { useSession } from "@/hooks/use-session";
-import { readSidebarDefaultOpen } from "@/hooks/use-sidebar-default";
+import { readSidebarDefaultOpen } from "@/hooks/use-preferences";
 
 export const Route = createFileRoute("/w/$workspace/settings")({
   staticData: { crumb: "Settings" },

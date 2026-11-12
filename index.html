@@ -6,14 +6,16 @@
     <link rel="icon" type="image/svg+xml" href="/icons.svg" />
     <script>
       try {
-        var theme = localStorage.getItem("theme");
-        if (theme === "dark" || (theme !== "light" && matchMedia("(prefers-color-scheme: dark)").matches)) {
-          document.documentElement.classList.add("dark");
+        var p = JSON.parse(localStorage.getItem("preferences") || "{}");
+        var root = document.documentElement;
+        if (p.theme === "dark" || (p.theme !== "light" && matchMedia("(prefers-color-scheme: dark)").matches)) {
+          root.classList.add("dark");
         }
-        var accent = localStorage.getItem("accent");
-        if (accent && /^[a-z]+$/.test(accent)) {
-          document.documentElement.dataset.accent = accent;
+        if (typeof p.accent === "string" && /^[a-z]+$/.test(p.accent) && p.accent !== "default") {
+          root.dataset.accent = p.accent;
         }
+        if (p.font === "mono") root.dataset.font = "mono";
+        if (p.radius === "none") root.dataset.radius = "none";
       } catch (e) {}
     </script>
     <title>Nocosheet</title>

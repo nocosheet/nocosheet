@@ -239,9 +239,18 @@
     font-family: var(--font-mono);
     }
   html {
-    @apply font-sans font-mono;
+    @apply font-sans;
     }
 }
+html[data-font="mono"],
+html[data-font="mono"] * {
+  font-family: var(--font-mono) !important;
+}
+
+html[data-radius="none"] {
+  --radius: 0;
+}
+
 [data-slot="sidebar-container"] {
   view-transition-name: app-sidebar;
 }

@@ -2,10 +2,11 @@ import { MonitorIcon, MoonIcon, SunIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Menu, MenuPopup, MenuRadioGroup, MenuRadioItem, MenuTrigger } from "@/components/ui/menu";
-import { useTheme, type Theme } from "@/hooks/use-theme";
+import { usePreferences } from "@/hooks/use-preferences";
+import type { Theme } from "@/lib/preferences";
 
 export function ThemeToggle() {
-  const { theme, setTheme } = useTheme();
+  const { preferences, setPreference } = usePreferences();
 
   return (
     <Menu>
@@ -18,7 +19,8 @@ export function ThemeToggle() {
         <MoonIcon className="hidden dark:block" />
       </MenuTrigger>
       <MenuPopup align="end">
-        <MenuRadioGroup value={theme} onValueChange={(value) => setTheme(value as Theme)}>
+        <MenuRadioGroup value={preferences.theme}
+          onValueChange={(value) => setPreference("theme", value as Theme)}>
           <MenuRadioItem value="light">
             <SunIcon className="me-2 inline" />
             Light

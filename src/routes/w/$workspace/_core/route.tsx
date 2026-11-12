@@ -4,7 +4,7 @@ import { ImpersonationBanner } from "@/components/layout/impersonation-banner";
 import { WorkspaceSidebar } from "@/components/layout/workspace-sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { useSession } from "@/hooks/use-session";
-import { readSidebarDefaultOpen } from "@/hooks/use-sidebar-default";
+import { readSidebarDefaultOpen } from "@/hooks/use-preferences";
 
 export const Route = createFileRoute("/w/$workspace/_core")({
   component: AppLayout,
