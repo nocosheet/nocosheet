@@ -1,6 +1,6 @@
-import { randomKey } from "../tables/naming";
+import { newKey } from "../tables/naming";
 
-export const newViewName = randomKey;
+export const newViewName = () => newKey("v");
 
 export const physicalViewName = (workspace: string, viewName: string) =>
-  `${workspace}__v_${viewName}`;
+  `${workspace}__${viewName}`;

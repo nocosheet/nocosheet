@@ -10,15 +10,17 @@ export function toSlug(name: string) {
 const ALPHABET = "abcdefghijklmnopqrstuvwxyz0123456789";
 const KEY_LENGTH = 10;
 
-export function randomKey() {
+function randomKey() {
   const bytes = crypto.getRandomValues(new Uint8Array(KEY_LENGTH));
   return Array.from(bytes, (byte) => ALPHABET[byte % ALPHABET.length]).join("");
 }
 
-export const newTableName = () => randomKey();
-export const newColumnName = () => `c_${randomKey()}`;
+export const newKey = (prefix: "t" | "c" | "v") => `${prefix}_${randomKey()}`;
+
+export const newTableName = () => newKey("t");
+export const newColumnName = () => newKey("c");
 
 export const physicalTableName = (workspace: string, tableName: string) =>
-  `${workspace}__t_${tableName}`;
+  `${workspace}__${tableName}`;
 
 export const quoteIdent = (name: string) => `"${name.replaceAll('"', '""')}"`;
