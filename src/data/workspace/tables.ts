@@ -41,6 +41,18 @@ export const tableQueryOptions = (workspace: string, id: number) =>
     staleTime: 30_000,
   });
 
+export const columnExpressionsQueryOptions = (workspace: string, id: number) =>
+  queryOptions({
+    queryKey: workspaceKeys.expressions(id),
+    queryFn: () =>
+      unwrapFetch(
+        fetch("/api/w/:workspace/tables/:id/expressions", {
+          params: { workspace, id: String(id) },
+        }),
+      ),
+    staleTime: 30_000,
+  });
+
 export const createTableMutationOptions = mutationOptions({
   mutationKey: workspaceKeys.mutation("create-table"),
   mutationFn: ({ workspace, ...values }: { workspace: string } & TableInput) =>

@@ -129,9 +129,15 @@ export function TableDefinition({ workspace, tableId }: { workspace: string; tab
                         onChange={(event) => field.handleChange(event.target.value)}
                       />
                       <FieldDescription>
-                        Stored as <code>{table.tableName}</code>
-                        {toTableName(field.state.value) !== table.tableName &&
-                          ". Renaming only changes the display name."}
+                        Stored as{" "}
+                        <code>
+                          {field.state.value.trim() === table.name
+                            ? table.tableName
+                            : toTableName(field.state.value) || "…"}
+                        </code>
+                        {field.state.value.trim() !== table.name &&
+                          toTableName(field.state.value) !== table.tableName &&
+                          ". Saving renames the database table."}
                       </FieldDescription>
                       <FieldError match={field.state.meta.isTouched && !field.state.meta.isValid}>
                         {field.state.meta.errors.map((item) => item?.message).join(", ")}

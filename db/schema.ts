@@ -74,7 +74,6 @@ export const workspaceSchema = <W extends string = "default">(workspaceId: W = "
       titleColumnId: integer("title_column_id").references((): AnySQLiteColumn => columnTable.id, {
         onDelete: "set null",
       }),
-      isSingleton: integer("is_singleton", { mode: "boolean" }).notNull().default(false),
       idType: text("id_type", { enum: ["increment", "uuid"] })
         .notNull()
         .default("increment"),
@@ -114,8 +113,7 @@ export const workspaceSchema = <W extends string = "default">(workspaceId: W = "
       isSearchable: integer("is_searchable", { mode: "boolean" }).notNull().default(false),
       isUnique: integer("is_unique", { mode: "boolean" }).notNull().default(false),
       isHidden: integer("is_hidden", { mode: "boolean" }).notNull().default(false),
-      checkExpression: text("check_expression"),
-      generatedExpression: text("generated_expression"),
+      isGenerated: integer("is_generated", { mode: "boolean" }).notNull().default(false),
       defaultValue: text("default_value"),
       position: integer("position").notNull().default(0),
       description: text("description"),

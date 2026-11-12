@@ -1,6 +1,6 @@
 import { useOptimistic, useState, useTransition } from "react";
 
-import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 
 import { PlusIcon } from "lucide-react";
 
@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { toastManager } from "@/components/ui/toast";
 import { workspaceKeys } from "@/data/workspace/keys";
 import {
+  columnExpressionsQueryOptions,
   createColumnMutationOptions,
   deleteColumnMutationOptions,
   reorderColumnsMutationOptions,
@@ -38,6 +39,7 @@ type EditorColumn = ReturnType<typeof useTableData>["data"]["columns"][number];
 export function ColumnsEditor({ workspace, tableId }: { workspace: string; tableId: number }) {
   const queryClient = useQueryClient();
   const { data: table } = useTableData(workspace, tableId);
+  const { data: expressions } = useQuery(columnExpressionsQueryOptions(workspace, tableId));
   const [columns, setColumns] = useOptimistic(
     table.columns,
     (_current, next: EditorColumn[]) => next,
@@ -113,12 +115,10 @@ export function ColumnsEditor({ workspace, tableId }: { workspace: string; table
   };
 
   const others = columns.filter((column) => column.id !== dialog.column?.id);
-  const taken = dialog.column
-    ? others.map((column) => column.name.toLowerCase())
-    : [
-        ...others.map((column) => column.name.toLowerCase()),
-        ...others.map((column) => column.columnName),
-      ];
+  const taken = [
+    ...others.map((column) => column.name.toLowerCase()),
+    ...others.map((column) => column.columnName),
+  ];
 
   return (
     <div className="flex flex-col gap-4">
@@ -134,6 +134,7 @@ export function ColumnsEditor({ workspace, tableId }: { workspace: string; table
 
       <ColumnsList
         columns={columns}
+        expressions={expressions}
         titleColumnId={table.titleColumnId}
         empty="No columns yet. Add the columns that hold your data."
         onEdit={openDialog}
@@ -146,6 +147,7 @@ export function ColumnsEditor({ workspace, tableId }: { workspace: string; table
         open={dialog.open}
         onOpenChange={(open) => setDialog((current) => ({ ...current, open }))}
         initial={dialog.column ? columnToDraft(dialog.column) : null}
+        expression={dialog.column ? expressions?.[dialog.column.columnName] : undefined}
         storedName={dialog.column?.columnName}
         taken={taken}
         onSave={save}

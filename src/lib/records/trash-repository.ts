@@ -27,7 +27,7 @@ const chunks = <T>(items: T[], size: number) =>
   );
 
 export const isStorableColumn = (column: Column) =>
-  !column.generatedExpression && column.format !== "binary";
+  !column.isGenerated && column.format !== "binary";
 
 export async function findRows(workspace: string, table: Table, columns: Column[], ids: unknown[]) {
   const names = raw(

@@ -47,8 +47,6 @@ export const columnToDraft = (column: {
   isUnique: boolean;
   isHidden: boolean;
   defaultValue: string | null;
-  checkExpression: string | null;
-  generatedExpression: string | null;
 }): ColumnDraft => ({
   name: column.name,
   description: column.description ?? "",
@@ -62,6 +60,6 @@ export const columnToDraft = (column: {
   isUnique: column.isUnique,
   isHidden: column.isHidden,
   defaultValue: column.defaultValue ?? "",
-  checkExpression: column.checkExpression ?? "",
-  generatedExpression: column.generatedExpression ?? "",
+  checkExpression: "",
+  generatedExpression: "",
 });

@@ -113,20 +113,26 @@ export const indexKind = (flags: {
 }): IndexKind | null =>
   flags.isUnique ? "uq" : flags.isFilterable || flags.isSortable ? "idx" : null;
 
-const indexName = (physicalName: string, columnName: string, kind: IndexKind) =>
-  quoteIdent(`${physicalName}__${columnName}_${kind}`);
+export const indexName = (workspace: string, columnId: number, kind: IndexKind) =>
+  `${workspace}__ix_${columnId}_${kind}`;
 
-export const buildCreateIndex = (physicalName: string, columnName: string, kind: IndexKind) =>
-  `CREATE ${kind === "uq" ? "UNIQUE " : ""}INDEX ${indexName(physicalName, columnName, kind)} ON ${quoteIdent(physicalName)} (${quoteIdent(columnName)})`;
+export const buildCreateIndex = (
+  name: string,
+  physicalName: string,
+  columnName: string,
+  kind: IndexKind,
+) =>
+  `CREATE ${kind === "uq" ? "UNIQUE " : ""}INDEX ${quoteIdent(name)} ON ${quoteIdent(physicalName)} (${quoteIdent(columnName)})`;
 
-export const buildDropIndex = (physicalName: string, columnName: string, kind: IndexKind) =>
-  `DROP INDEX IF EXISTS ${indexName(physicalName, columnName, kind)}`;
+export const buildDropIndex = (name: string) => `DROP INDEX IF EXISTS ${quoteIdent(name)}`;
 
 export const buildDropColumn = (physicalName: string, columnName: string) =>
   `ALTER TABLE ${quoteIdent(physicalName)} DROP COLUMN ${quoteIdent(columnName)}`;
 
 export function buildAddColumn(
+  workspace: string,
   physicalName: string,
+  columnId: number,
   column: ColumnValues,
   targets: Map<number, RelationTarget>,
 ) {
@@ -135,9 +141,23 @@ export function buildAddColumn(
   ];
 
   const kind = indexKind(column);
-  if (kind) statements.push(buildCreateIndex(physicalName, toColumnName(column.name), kind));
+  if (kind)
+    statements.push(
+      buildCreateIndex(
+        indexName(workspace, columnId, kind),
+        physicalName,
+        toColumnName(column.name),
+        kind,
+      ),
+    );
 
   return statements;
 }
+
+export const buildRenameTable = (from: string, to: string) =>
+  `ALTER TABLE ${quoteIdent(from)} RENAME TO ${quoteIdent(to)}`;
+
+export const buildRenameColumn = (physicalName: string, from: string, to: string) =>
+  `ALTER TABLE ${quoteIdent(physicalName)} RENAME COLUMN ${quoteIdent(from)} TO ${quoteIdent(to)}`;
 
 export const buildDropTable = (physicalName: string) => `DROP TABLE ${quoteIdent(physicalName)}`;

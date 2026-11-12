@@ -61,6 +61,7 @@ export function ColumnDialog({
   formKey,
   initial,
   storedName,
+  expression,
   taken,
   onSave,
 }: {
@@ -69,6 +70,7 @@ export function ColumnDialog({
   onOpenChange: (open: boolean) => void;
   initial: ColumnDraft | null;
   storedName?: string;
+  expression?: { generated: string | null; check: string | null };
   taken: string[];
   onSave: (column: ColumnDraft) => Promise<unknown>;
 }) {
@@ -88,6 +90,7 @@ export function ColumnDialog({
           initial={initial ?? newColumnDraft()}
           locked={initial !== null}
           storedName={storedName}
+          expression={expression}
           taken={taken}
           onSave={async (column) => {
             await onSave(column);
@@ -103,12 +106,14 @@ function ColumnForm({
   initial,
   locked,
   storedName,
+  expression,
   taken,
   onSave,
 }: {
   initial: ColumnDraft;
   locked: boolean;
   storedName?: string;
+  expression?: { generated: string | null; check: string | null };
   taken: string[];
   onSave: (column: ColumnDraft) => Promise<unknown>;
 }) {
@@ -119,7 +124,7 @@ function ColumnForm({
       columnDraftSchema.superRefine((column, ctx) => {
         if (
           taken.includes(column.name.trim().toLowerCase()) ||
-          (!locked && taken.includes(toColumnName(column.name)))
+          taken.includes(toColumnName(column.name))
         )
           ctx.addIssue({
             code: "custom",
@@ -127,7 +132,7 @@ function ColumnForm({
             message: "A column with this name already exists",
           });
       }),
-    [taken, locked],
+    [taken],
   );
 
   const form = useForm({
@@ -186,7 +191,15 @@ function ColumnForm({
                   />
                   <FieldDescription>
                     Stored as{" "}
-                    <code>{locked ? storedName : toColumnName(field.state.value) || "…"}</code>
+                    <code>
+                      {locked && field.state.value.trim() === initial.name
+                        ? storedName
+                        : toColumnName(field.state.value) || "…"}
+                    </code>
+                    {locked &&
+                      field.state.value.trim() !== initial.name &&
+                      toColumnName(field.state.value) !== storedName &&
+                      ". Saving renames the database column."}
                   </FieldDescription>
                   <FieldError match={field.state.meta.isTouched && !field.state.meta.isValid}>
                     {field.state.meta.errors.map((item) => item?.message).join(", ")}
@@ -230,6 +243,26 @@ function ColumnForm({
               </Field>
             )}
           </form.Field>
+
+          {locked && (expression?.generated || expression?.check) && (
+            <div className="flex flex-col gap-2 rounded-lg border bg-muted/40 p-3 text-sm">
+              {expression.generated && (
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-muted-foreground text-xs">Computed value</span>
+                  <code className="break-all">{expression.generated}</code>
+                </div>
+              )}
+              {expression.check && (
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-muted-foreground text-xs">Check</span>
+                  <code className="break-all">{expression.check}</code>
+                </div>
+              )}
+              <p className="text-muted-foreground text-xs">
+                Read from the database. These can't be changed after the column is created.
+              </p>
+            </div>
+          )}
 
           {!locked && (
             <div className="flex flex-wrap items-start gap-4 empty:hidden">

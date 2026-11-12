@@ -4,7 +4,15 @@ import { z } from "zod";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { conflictOrBadRequest, httpError } from "@/lib/http";
 import { TITLE_FORMATS } from "@/lib/tables/formats";
-import { findColumnByName, findTable, listColumns, updateTable } from "@/lib/tables/repository";
+import { toTableName } from "@/lib/tables/naming";
+import {
+  findColumnByName,
+  findTable,
+  findTableByTableName,
+  listColumns,
+  renameTable,
+  updateTable,
+} from "@/lib/tables/repository";
 import { tableUpdateSchema } from "@/lib/tables/validation";
 
 const params = z.object({ workspace: z.string(), id: z.coerce.number().int().positive() });
@@ -31,8 +39,31 @@ export const PATCH = defineHandler(
       titleColumnId = match.id;
     }
 
+    const { name, ...rest } = fields;
+    const values = { ...rest, titleColumnId };
+
+    if (name !== undefined && name !== table.name) {
+      const tableName = toTableName(name);
+      if (tableName !== table.tableName) {
+        const clash = await findTableByTableName(tableName);
+        if (clash)
+          throw httpError(
+            409,
+            clash.deletedAt
+              ? `A deleted table named "${clash.name}" is still in the trash. Restore it or delete it forever from the trash first.`
+              : `A table named "${clash.name}" already exists.`,
+          );
+      }
+
+      try {
+        return await renameTable(c.get("workspaceId"), table, name, tableName, values);
+      } catch (error) {
+        conflictOrBadRequest(error, "A table with this name already exists.");
+      }
+    }
+
     try {
-      return await updateTable(table.id, { ...fields, titleColumnId });
+      return await updateTable(table.id, values);
     } catch (error) {
       conflictOrBadRequest(error, "A table with this name already exists.");
     }

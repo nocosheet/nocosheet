@@ -153,8 +153,6 @@ export async function seedTable(
 
   const columnIds = new Map<string, number>();
   for (const { column } of columns) {
-    for (const statement of buildAddColumn(physicalName, column, targets)) db.run(statement);
-
     const [created] = await db
       .insert(schema.columnTable)
       .values({
@@ -172,12 +170,13 @@ export async function seedTable(
         isSearchable: column.isSearchable,
         isUnique: column.isUnique,
         isHidden: column.isHidden,
+        isGenerated: Boolean(column.generatedExpression),
         defaultValue: column.defaultValue,
-        checkExpression: column.checkExpression,
-        generatedExpression: column.generatedExpression,
         position: column.position,
       })
       .returning({ id: schema.columnTable.id });
+    for (const statement of buildAddColumn(WORKSPACE, physicalName, created.id, column, targets))
+      db.run(statement);
     columnIds.set(column.name, created.id);
   }
 

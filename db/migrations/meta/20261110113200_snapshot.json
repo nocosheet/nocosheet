@@ -227,19 +227,13 @@
           "autoincrement": false,
           "default": false
         },
-        "check_expression": {
-          "name": "check_expression",
-          "type": "text",
+        "is_generated": {
+          "name": "is_generated",
+          "type": "integer",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "generated_expression": {
-          "name": "generated_expression",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
         },
         "default_value": {
           "name": "default_value",
@@ -823,14 +817,6 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
-        },
-        "is_singleton": {
-          "name": "is_singleton",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": false
         },
         "id_type": {
           "name": "id_type",

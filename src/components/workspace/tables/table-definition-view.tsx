@@ -1,4 +1,4 @@
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 
 import { SettingsRow } from "@/components/shared/settings-row";
 import {
@@ -9,7 +9,7 @@ import {
   CardFrameTitle,
   CardPanel,
 } from "@/components/ui/card";
-import { tableQueryOptions } from "@/data/workspace/tables";
+import { columnExpressionsQueryOptions, tableQueryOptions } from "@/data/workspace/tables";
 
 import { ColumnsList } from "./columns-list";
 import { NamedIcon } from "./named-icon";
@@ -24,6 +24,7 @@ export function TableDefinitionView({
   tableId: number;
 }) {
   const { data: table } = useSuspenseQuery(tableQueryOptions(workspace, tableId));
+  const { data: expressions } = useQuery(columnExpressionsQueryOptions(workspace, tableId));
 
   const titleColumn = table.columns.find((column) => column.id === table.titleColumnId);
 
@@ -72,6 +73,7 @@ export function TableDefinitionView({
           <CardPanel>
             <ColumnsList
               columns={table.columns}
+              expressions={expressions}
               titleColumnId={table.titleColumnId}
               empty="This table has no columns yet."
             />
