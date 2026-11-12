@@ -141,3 +141,11 @@ export function buildViewerColumns(table: TableDetail): ViewerColumn[] {
     system("updated_by", "Updated by", "user", UserIcon, 160, false),
   ];
 }
+
+export type ViewScope = { id: number; selectColumns: string[] };
+
+export const buildViewColumns = (table: TableDetail, selectColumns: string[]) =>
+  buildViewerColumns({
+    ...table,
+    columns: table.columns.filter((column) => selectColumns.includes(column.columnName)),
+  });

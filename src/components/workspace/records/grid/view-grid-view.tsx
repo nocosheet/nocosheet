@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 
 import { keepPreviousData, useQuery, useSuspenseQuery } from "@tanstack/react-query";
 
@@ -6,37 +6,43 @@ import { DataTablePagination } from "@/components/shared/data-table/data-table-p
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { tableQueryOptions } from "@/data/workspace/tables";
 import { viewRecordsQueryOptions } from "@/data/workspace/views";
+import { useAccess } from "@/hooks/use-access";
 import { cn } from "@/lib/utils";
 
-import { buildViewerColumns } from "../columns";
+import { buildViewColumns, type ViewScope } from "../columns";
 import { RecordsGrid, type ViewerRow } from "../records-grid";
+import { useUpdateCell } from "../use-update-cell";
 import { GridToolbar } from "./grid-toolbar";
+import { SelectionBar } from "./selection-bar";
 import { useGridTable } from "./use-grid-table";
 import { useGroupCollapse } from "./use-group-collapse";
 import { useRecordsQuery } from "./use-records-query";
+
+const ownerOf = (row: ViewerRow) => (row.created_by as { id?: string } | null | undefined)?.id;
 
 export function ViewGridView({
   workspace,
   tableId,
   view,
+  onOpenRecord,
 }: {
   workspace: string;
   tableId: number;
-  view: { id: number; selectColumns: string[] };
+  view: ViewScope;
+  onOpenRecord?: (id: string | number) => void;
 }) {
+  const access = useAccess();
   const { data: table } = useSuspenseQuery(tableQueryOptions(workspace, tableId));
   const columns = useMemo(
-    () =>
-      buildViewerColumns({
-        ...table,
-        columns: table.columns.filter((column) => view.selectColumns.includes(column.columnName)),
-      }),
+    () => buildViewColumns(table, view.selectColumns),
     [table, view.selectColumns],
   );
   const { query, setUrlQuery } = useRecordsQuery(columns);
 
+  const recordsOptions = viewRecordsQueryOptions(workspace, tableId, view.id, query);
+  const updateCell = useUpdateCell({ workspace, tableId, queryKey: recordsOptions.queryKey });
   const { data, isFetching, error } = useQuery({
-    ...viewRecordsQueryOptions(workspace, tableId, view.id, query),
+    ...recordsOptions,
     placeholderData: keepPreviousData,
   });
   const rows = (data?.rows ?? []) as ViewerRow[];
@@ -48,17 +54,39 @@ export function ViewGridView({
   const groupColumn = columns.find((column) => column.key === query.group) ?? null;
   const groups = data && "groups" in data && data.group === query.group ? data.groups : undefined;
 
+  const queryKey = JSON.stringify(query);
+  useEffect(() => {
+    grid.resetRowSelection();
+  }, [queryKey]);
+  const selectedRows = rows.filter((row) => grid.state.rowSelection[String(row.id)]);
+
   const filtered = query.q !== "" || query.filters.length > 0;
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <GridToolbar
-        grid={grid}
-        columns={columns}
-        query={query}
-        setQuery={setUrlQuery}
-        onGroupChange={reset}
-      />
+      {selectedRows.length > 0 ? (
+        <SelectionBar
+          workspace={workspace}
+          tableId={tableId}
+          select={{
+            canExport: false,
+            canDelete: (row) => access.canOn("delete", tableId, ownerOf(row)),
+          }}
+          grid={grid}
+          selected={selectedRows}
+          total={total}
+          query={query}
+          setQuery={setUrlQuery}
+        />
+      ) : (
+        <GridToolbar
+          grid={grid}
+          columns={columns}
+          query={query}
+          setQuery={setUrlQuery}
+          onGroupChange={reset}
+        />
+      )}
 
       {error && (
         <Alert variant="error" className="mx-4 mb-2 w-auto">
@@ -79,14 +107,15 @@ export function ViewGridView({
           page={query.page}
           pageSize={query.pageSize}
           workspace={workspace}
-          canEdit={false}
-          selectable={false}
-          canEditRow={() => false}
+          canEdit={access.can("update", tableId)}
+          selectable={access.can("delete", tableId)}
+          canEditRow={(row) => access.canOn("update", tableId, ownerOf(row))}
           groupBy={groupColumn}
           groups={groups}
           collapsed={collapsed}
           onToggleGroup={toggle}
-          onCellChange={() => undefined}
+          onOpenRecord={onOpenRecord}
+          onCellChange={(original, draft, column) => void updateCell(original, draft, column)}
           sort={query.sort}
           order={query.order}
           empty={

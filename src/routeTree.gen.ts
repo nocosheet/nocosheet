@@ -54,8 +54,12 @@ import { Route as WorkspacesWorkspaceCoreTablesTableViewerRecordRouteImport } fr
 import { Route as WorkspacesWorkspaceCoreTablesTableViewerNewRouteImport } from './routes/workspaces/$workspace/_core/tables/$table/_viewer/new'
 import { Route as WorkspacesWorkspaceCoreTablesTableTrashEntryRouteImport } from './routes/workspaces/$workspace/_core/tables/$table/trash/$entry'
 import { Route as WorkspacesWorkspaceCoreTablesTableViewsIndexRouteImport } from './routes/workspaces/$workspace/_core/tables/$table/views/index'
-import { Route as WorkspacesWorkspaceCoreTablesTableViewsViewRouteImport } from './routes/workspaces/$workspace/_core/tables/$table/views/$view'
+import { Route as WorkspacesWorkspaceCoreTablesTableViewsViewRouteRouteImport } from './routes/workspaces/$workspace/_core/tables/$table/views/$view/route'
 import { Route as WorkspacesWorkspaceCoreTablesTableViewsTrashRouteImport } from './routes/workspaces/$workspace/_core/tables/$table/views/trash'
+import { Route as WorkspacesWorkspaceCoreTablesTableViewsViewViewerRouteRouteImport } from './routes/workspaces/$workspace/_core/tables/$table/views/$view/_viewer/route'
+import { Route as WorkspacesWorkspaceCoreTablesTableViewsViewViewerIndexRouteImport } from './routes/workspaces/$workspace/_core/tables/$table/views/$view/_viewer/index'
+import { Route as WorkspacesWorkspaceCoreTablesTableViewsViewViewerRecordRouteImport } from './routes/workspaces/$workspace/_core/tables/$table/views/$view/_viewer/$record'
+import { Route as WorkspacesWorkspaceCoreTablesTableViewsViewViewerNewRouteImport } from './routes/workspaces/$workspace/_core/tables/$table/views/$view/_viewer/new'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -311,8 +315,8 @@ const WorkspacesWorkspaceCoreTablesTableViewsIndexRoute =
     path: '/',
     getParentRoute: () => WorkspacesWorkspaceCoreTablesTableViewsRouteRoute,
   } as any)
-const WorkspacesWorkspaceCoreTablesTableViewsViewRoute =
-  WorkspacesWorkspaceCoreTablesTableViewsViewRouteImport.update({
+const WorkspacesWorkspaceCoreTablesTableViewsViewRouteRoute =
+  WorkspacesWorkspaceCoreTablesTableViewsViewRouteRouteImport.update({
     id: '/$view',
     path: '/$view',
     getParentRoute: () => WorkspacesWorkspaceCoreTablesTableViewsRouteRoute,
@@ -322,6 +326,32 @@ const WorkspacesWorkspaceCoreTablesTableViewsTrashRoute =
     id: '/trash',
     path: '/trash',
     getParentRoute: () => WorkspacesWorkspaceCoreTablesTableViewsRouteRoute,
+  } as any)
+const WorkspacesWorkspaceCoreTablesTableViewsViewViewerRouteRoute =
+  WorkspacesWorkspaceCoreTablesTableViewsViewViewerRouteRouteImport.update({
+    id: '/_viewer',
+    getParentRoute: () => WorkspacesWorkspaceCoreTablesTableViewsViewRouteRoute,
+  } as any)
+const WorkspacesWorkspaceCoreTablesTableViewsViewViewerIndexRoute =
+  WorkspacesWorkspaceCoreTablesTableViewsViewViewerIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () =>
+      WorkspacesWorkspaceCoreTablesTableViewsViewViewerRouteRoute,
+  } as any)
+const WorkspacesWorkspaceCoreTablesTableViewsViewViewerRecordRoute =
+  WorkspacesWorkspaceCoreTablesTableViewsViewViewerRecordRouteImport.update({
+    id: '/$record',
+    path: '/$record',
+    getParentRoute: () =>
+      WorkspacesWorkspaceCoreTablesTableViewsViewViewerRouteRoute,
+  } as any)
+const WorkspacesWorkspaceCoreTablesTableViewsViewViewerNewRoute =
+  WorkspacesWorkspaceCoreTablesTableViewsViewViewerNewRouteImport.update({
+    id: '/new',
+    path: '/new',
+    getParentRoute: () =>
+      WorkspacesWorkspaceCoreTablesTableViewsViewViewerRouteRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -363,13 +393,16 @@ export interface FileRoutesByFullPath {
   '/workspaces/$workspace/tables/$table/definition': typeof WorkspacesWorkspaceCoreTablesTableDefinitionRoute
   '/workspaces/$workspace/settings/members/roles/$roleId': typeof WorkspacesWorkspaceSettingsMembersRolesRoleIdRoute
   '/workspaces/$workspace/settings/members/roles/': typeof WorkspacesWorkspaceSettingsMembersRolesIndexRoute
+  '/workspaces/$workspace/tables/$table/views/$view': typeof WorkspacesWorkspaceCoreTablesTableViewsViewRouteRouteWithChildren
   '/workspaces/$workspace/tables/$table/$record': typeof WorkspacesWorkspaceCoreTablesTableViewerRecordRoute
   '/workspaces/$workspace/tables/$table/new': typeof WorkspacesWorkspaceCoreTablesTableViewerNewRoute
   '/workspaces/$workspace/tables/$table/trash/$entry': typeof WorkspacesWorkspaceCoreTablesTableTrashEntryRoute
-  '/workspaces/$workspace/tables/$table/views/$view': typeof WorkspacesWorkspaceCoreTablesTableViewsViewRoute
   '/workspaces/$workspace/tables/$table/views/trash': typeof WorkspacesWorkspaceCoreTablesTableViewsTrashRoute
   '/workspaces/$workspace/tables/$table/': typeof WorkspacesWorkspaceCoreTablesTableViewerIndexRoute
   '/workspaces/$workspace/tables/$table/views/': typeof WorkspacesWorkspaceCoreTablesTableViewsIndexRoute
+  '/workspaces/$workspace/tables/$table/views/$view/$record': typeof WorkspacesWorkspaceCoreTablesTableViewsViewViewerRecordRoute
+  '/workspaces/$workspace/tables/$table/views/$view/new': typeof WorkspacesWorkspaceCoreTablesTableViewsViewViewerNewRoute
+  '/workspaces/$workspace/tables/$table/views/$view/': typeof WorkspacesWorkspaceCoreTablesTableViewsViewViewerIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -403,12 +436,14 @@ export interface FileRoutesByTo {
   '/workspaces/$workspace/tables/$table/definition': typeof WorkspacesWorkspaceCoreTablesTableDefinitionRoute
   '/workspaces/$workspace/settings/members/roles/$roleId': typeof WorkspacesWorkspaceSettingsMembersRolesRoleIdRoute
   '/workspaces/$workspace/settings/members/roles': typeof WorkspacesWorkspaceSettingsMembersRolesIndexRoute
+  '/workspaces/$workspace/tables/$table/views/$view': typeof WorkspacesWorkspaceCoreTablesTableViewsViewViewerIndexRoute
   '/workspaces/$workspace/tables/$table/$record': typeof WorkspacesWorkspaceCoreTablesTableViewerRecordRoute
   '/workspaces/$workspace/tables/$table/new': typeof WorkspacesWorkspaceCoreTablesTableViewerNewRoute
   '/workspaces/$workspace/tables/$table/trash/$entry': typeof WorkspacesWorkspaceCoreTablesTableTrashEntryRoute
-  '/workspaces/$workspace/tables/$table/views/$view': typeof WorkspacesWorkspaceCoreTablesTableViewsViewRoute
   '/workspaces/$workspace/tables/$table/views/trash': typeof WorkspacesWorkspaceCoreTablesTableViewsTrashRoute
   '/workspaces/$workspace/tables/$table/views': typeof WorkspacesWorkspaceCoreTablesTableViewsIndexRoute
+  '/workspaces/$workspace/tables/$table/views/$view/$record': typeof WorkspacesWorkspaceCoreTablesTableViewsViewViewerRecordRoute
+  '/workspaces/$workspace/tables/$table/views/$view/new': typeof WorkspacesWorkspaceCoreTablesTableViewsViewViewerNewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -452,13 +487,17 @@ export interface FileRoutesById {
   '/workspaces/$workspace/_core/tables/$table/definition': typeof WorkspacesWorkspaceCoreTablesTableDefinitionRoute
   '/workspaces/$workspace/settings/members/roles/$roleId': typeof WorkspacesWorkspaceSettingsMembersRolesRoleIdRoute
   '/workspaces/$workspace/settings/members/roles/': typeof WorkspacesWorkspaceSettingsMembersRolesIndexRoute
+  '/workspaces/$workspace/_core/tables/$table/views/$view': typeof WorkspacesWorkspaceCoreTablesTableViewsViewRouteRouteWithChildren
   '/workspaces/$workspace/_core/tables/$table/_viewer/$record': typeof WorkspacesWorkspaceCoreTablesTableViewerRecordRoute
   '/workspaces/$workspace/_core/tables/$table/_viewer/new': typeof WorkspacesWorkspaceCoreTablesTableViewerNewRoute
   '/workspaces/$workspace/_core/tables/$table/trash/$entry': typeof WorkspacesWorkspaceCoreTablesTableTrashEntryRoute
-  '/workspaces/$workspace/_core/tables/$table/views/$view': typeof WorkspacesWorkspaceCoreTablesTableViewsViewRoute
   '/workspaces/$workspace/_core/tables/$table/views/trash': typeof WorkspacesWorkspaceCoreTablesTableViewsTrashRoute
   '/workspaces/$workspace/_core/tables/$table/_viewer/': typeof WorkspacesWorkspaceCoreTablesTableViewerIndexRoute
   '/workspaces/$workspace/_core/tables/$table/views/': typeof WorkspacesWorkspaceCoreTablesTableViewsIndexRoute
+  '/workspaces/$workspace/_core/tables/$table/views/$view/_viewer': typeof WorkspacesWorkspaceCoreTablesTableViewsViewViewerRouteRouteWithChildren
+  '/workspaces/$workspace/_core/tables/$table/views/$view/_viewer/$record': typeof WorkspacesWorkspaceCoreTablesTableViewsViewViewerRecordRoute
+  '/workspaces/$workspace/_core/tables/$table/views/$view/_viewer/new': typeof WorkspacesWorkspaceCoreTablesTableViewsViewViewerNewRoute
+  '/workspaces/$workspace/_core/tables/$table/views/$view/_viewer/': typeof WorkspacesWorkspaceCoreTablesTableViewsViewViewerIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -501,13 +540,16 @@ export interface FileRouteTypes {
     | '/workspaces/$workspace/tables/$table/definition'
     | '/workspaces/$workspace/settings/members/roles/$roleId'
     | '/workspaces/$workspace/settings/members/roles/'
+    | '/workspaces/$workspace/tables/$table/views/$view'
     | '/workspaces/$workspace/tables/$table/$record'
     | '/workspaces/$workspace/tables/$table/new'
     | '/workspaces/$workspace/tables/$table/trash/$entry'
-    | '/workspaces/$workspace/tables/$table/views/$view'
     | '/workspaces/$workspace/tables/$table/views/trash'
     | '/workspaces/$workspace/tables/$table/'
     | '/workspaces/$workspace/tables/$table/views/'
+    | '/workspaces/$workspace/tables/$table/views/$view/$record'
+    | '/workspaces/$workspace/tables/$table/views/$view/new'
+    | '/workspaces/$workspace/tables/$table/views/$view/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -541,12 +583,14 @@ export interface FileRouteTypes {
     | '/workspaces/$workspace/tables/$table/definition'
     | '/workspaces/$workspace/settings/members/roles/$roleId'
     | '/workspaces/$workspace/settings/members/roles'
+    | '/workspaces/$workspace/tables/$table/views/$view'
     | '/workspaces/$workspace/tables/$table/$record'
     | '/workspaces/$workspace/tables/$table/new'
     | '/workspaces/$workspace/tables/$table/trash/$entry'
-    | '/workspaces/$workspace/tables/$table/views/$view'
     | '/workspaces/$workspace/tables/$table/views/trash'
     | '/workspaces/$workspace/tables/$table/views'
+    | '/workspaces/$workspace/tables/$table/views/$view/$record'
+    | '/workspaces/$workspace/tables/$table/views/$view/new'
   id:
     | '__root__'
     | '/'
@@ -589,13 +633,17 @@ export interface FileRouteTypes {
     | '/workspaces/$workspace/_core/tables/$table/definition'
     | '/workspaces/$workspace/settings/members/roles/$roleId'
     | '/workspaces/$workspace/settings/members/roles/'
+    | '/workspaces/$workspace/_core/tables/$table/views/$view'
     | '/workspaces/$workspace/_core/tables/$table/_viewer/$record'
     | '/workspaces/$workspace/_core/tables/$table/_viewer/new'
     | '/workspaces/$workspace/_core/tables/$table/trash/$entry'
-    | '/workspaces/$workspace/_core/tables/$table/views/$view'
     | '/workspaces/$workspace/_core/tables/$table/views/trash'
     | '/workspaces/$workspace/_core/tables/$table/_viewer/'
     | '/workspaces/$workspace/_core/tables/$table/views/'
+    | '/workspaces/$workspace/_core/tables/$table/views/$view/_viewer'
+    | '/workspaces/$workspace/_core/tables/$table/views/$view/_viewer/$record'
+    | '/workspaces/$workspace/_core/tables/$table/views/$view/_viewer/new'
+    | '/workspaces/$workspace/_core/tables/$table/views/$view/_viewer/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -926,7 +974,7 @@ declare module '@tanstack/react-router' {
       id: '/workspaces/$workspace/_core/tables/$table/views/$view'
       path: '/$view'
       fullPath: '/workspaces/$workspace/tables/$table/views/$view'
-      preLoaderRoute: typeof WorkspacesWorkspaceCoreTablesTableViewsViewRouteImport
+      preLoaderRoute: typeof WorkspacesWorkspaceCoreTablesTableViewsViewRouteRouteImport
       parentRoute: typeof WorkspacesWorkspaceCoreTablesTableViewsRouteRoute
     }
     '/workspaces/$workspace/_core/tables/$table/views/trash': {
@@ -935,6 +983,34 @@ declare module '@tanstack/react-router' {
       fullPath: '/workspaces/$workspace/tables/$table/views/trash'
       preLoaderRoute: typeof WorkspacesWorkspaceCoreTablesTableViewsTrashRouteImport
       parentRoute: typeof WorkspacesWorkspaceCoreTablesTableViewsRouteRoute
+    }
+    '/workspaces/$workspace/_core/tables/$table/views/$view/_viewer': {
+      id: '/workspaces/$workspace/_core/tables/$table/views/$view/_viewer'
+      path: ''
+      fullPath: '/workspaces/$workspace/tables/$table/views/$view'
+      preLoaderRoute: typeof WorkspacesWorkspaceCoreTablesTableViewsViewViewerRouteRouteImport
+      parentRoute: typeof WorkspacesWorkspaceCoreTablesTableViewsViewRouteRoute
+    }
+    '/workspaces/$workspace/_core/tables/$table/views/$view/_viewer/': {
+      id: '/workspaces/$workspace/_core/tables/$table/views/$view/_viewer/'
+      path: '/'
+      fullPath: '/workspaces/$workspace/tables/$table/views/$view/'
+      preLoaderRoute: typeof WorkspacesWorkspaceCoreTablesTableViewsViewViewerIndexRouteImport
+      parentRoute: typeof WorkspacesWorkspaceCoreTablesTableViewsViewViewerRouteRoute
+    }
+    '/workspaces/$workspace/_core/tables/$table/views/$view/_viewer/$record': {
+      id: '/workspaces/$workspace/_core/tables/$table/views/$view/_viewer/$record'
+      path: '/$record'
+      fullPath: '/workspaces/$workspace/tables/$table/views/$view/$record'
+      preLoaderRoute: typeof WorkspacesWorkspaceCoreTablesTableViewsViewViewerRecordRouteImport
+      parentRoute: typeof WorkspacesWorkspaceCoreTablesTableViewsViewViewerRouteRoute
+    }
+    '/workspaces/$workspace/_core/tables/$table/views/$view/_viewer/new': {
+      id: '/workspaces/$workspace/_core/tables/$table/views/$view/_viewer/new'
+      path: '/new'
+      fullPath: '/workspaces/$workspace/tables/$table/views/$view/new'
+      preLoaderRoute: typeof WorkspacesWorkspaceCoreTablesTableViewsViewViewerNewRouteImport
+      parentRoute: typeof WorkspacesWorkspaceCoreTablesTableViewsViewViewerRouteRoute
     }
   }
 }
@@ -1017,16 +1093,52 @@ const WorkspacesWorkspaceCoreTablesTableTrashRouteRouteWithChildren =
     WorkspacesWorkspaceCoreTablesTableTrashRouteRouteChildren,
   )
 
+interface WorkspacesWorkspaceCoreTablesTableViewsViewViewerRouteRouteChildren {
+  WorkspacesWorkspaceCoreTablesTableViewsViewViewerRecordRoute: typeof WorkspacesWorkspaceCoreTablesTableViewsViewViewerRecordRoute
+  WorkspacesWorkspaceCoreTablesTableViewsViewViewerNewRoute: typeof WorkspacesWorkspaceCoreTablesTableViewsViewViewerNewRoute
+  WorkspacesWorkspaceCoreTablesTableViewsViewViewerIndexRoute: typeof WorkspacesWorkspaceCoreTablesTableViewsViewViewerIndexRoute
+}
+
+const WorkspacesWorkspaceCoreTablesTableViewsViewViewerRouteRouteChildren: WorkspacesWorkspaceCoreTablesTableViewsViewViewerRouteRouteChildren =
+  {
+    WorkspacesWorkspaceCoreTablesTableViewsViewViewerRecordRoute:
+      WorkspacesWorkspaceCoreTablesTableViewsViewViewerRecordRoute,
+    WorkspacesWorkspaceCoreTablesTableViewsViewViewerNewRoute:
+      WorkspacesWorkspaceCoreTablesTableViewsViewViewerNewRoute,
+    WorkspacesWorkspaceCoreTablesTableViewsViewViewerIndexRoute:
+      WorkspacesWorkspaceCoreTablesTableViewsViewViewerIndexRoute,
+  }
+
+const WorkspacesWorkspaceCoreTablesTableViewsViewViewerRouteRouteWithChildren =
+  WorkspacesWorkspaceCoreTablesTableViewsViewViewerRouteRoute._addFileChildren(
+    WorkspacesWorkspaceCoreTablesTableViewsViewViewerRouteRouteChildren,
+  )
+
+interface WorkspacesWorkspaceCoreTablesTableViewsViewRouteRouteChildren {
+  WorkspacesWorkspaceCoreTablesTableViewsViewViewerRouteRoute: typeof WorkspacesWorkspaceCoreTablesTableViewsViewViewerRouteRouteWithChildren
+}
+
+const WorkspacesWorkspaceCoreTablesTableViewsViewRouteRouteChildren: WorkspacesWorkspaceCoreTablesTableViewsViewRouteRouteChildren =
+  {
+    WorkspacesWorkspaceCoreTablesTableViewsViewViewerRouteRoute:
+      WorkspacesWorkspaceCoreTablesTableViewsViewViewerRouteRouteWithChildren,
+  }
+
+const WorkspacesWorkspaceCoreTablesTableViewsViewRouteRouteWithChildren =
+  WorkspacesWorkspaceCoreTablesTableViewsViewRouteRoute._addFileChildren(
+    WorkspacesWorkspaceCoreTablesTableViewsViewRouteRouteChildren,
+  )
+
 interface WorkspacesWorkspaceCoreTablesTableViewsRouteRouteChildren {
-  WorkspacesWorkspaceCoreTablesTableViewsViewRoute: typeof WorkspacesWorkspaceCoreTablesTableViewsViewRoute
+  WorkspacesWorkspaceCoreTablesTableViewsViewRouteRoute: typeof WorkspacesWorkspaceCoreTablesTableViewsViewRouteRouteWithChildren
   WorkspacesWorkspaceCoreTablesTableViewsTrashRoute: typeof WorkspacesWorkspaceCoreTablesTableViewsTrashRoute
   WorkspacesWorkspaceCoreTablesTableViewsIndexRoute: typeof WorkspacesWorkspaceCoreTablesTableViewsIndexRoute
 }
 
 const WorkspacesWorkspaceCoreTablesTableViewsRouteRouteChildren: WorkspacesWorkspaceCoreTablesTableViewsRouteRouteChildren =
   {
-    WorkspacesWorkspaceCoreTablesTableViewsViewRoute:
-      WorkspacesWorkspaceCoreTablesTableViewsViewRoute,
+    WorkspacesWorkspaceCoreTablesTableViewsViewRouteRoute:
+      WorkspacesWorkspaceCoreTablesTableViewsViewRouteRouteWithChildren,
     WorkspacesWorkspaceCoreTablesTableViewsTrashRoute:
       WorkspacesWorkspaceCoreTablesTableViewsTrashRoute,
     WorkspacesWorkspaceCoreTablesTableViewsIndexRoute:

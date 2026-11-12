@@ -7,7 +7,7 @@ import { recordQueryOptions } from "@/data/workspace/records";
 import { tableQueryOptions } from "@/data/workspace/tables";
 import { toFormValues } from "@/lib/records/form";
 
-import { buildViewerColumns, type ViewerColumn } from "../columns";
+import { buildViewColumns, buildViewerColumns, type ViewerColumn, type ViewScope } from "../columns";
 import { RecordForm } from "./record-form";
 import { RecordSheetSkeleton } from "./skeleton";
 import { useRecordForm } from "./use-record-form";
@@ -48,11 +48,13 @@ export function DetailRecordSheet({
   workspace,
   tableId,
   recordId,
+  view,
   onClose,
 }: {
   workspace: string;
   tableId: number;
   recordId: string;
+  view?: ViewScope;
   onClose: () => void;
 }) {
   const [open, setOpen] = useState(true);
@@ -76,7 +78,7 @@ export function DetailRecordSheet({
             tableName={table.name}
             recordId={recordId}
             record={record}
-            columns={buildViewerColumns(table)}
+            columns={view ? buildViewColumns(table, view.selectColumns) : buildViewerColumns(table)}
           />
         ) : (
           <RecordSheetSkeleton title={`Record ${recordId}`} tableName={table.name} error={error} />

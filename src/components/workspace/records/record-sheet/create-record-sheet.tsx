@@ -10,7 +10,7 @@ import { createRecordMutationOptions } from "@/data/workspace/records";
 import { tableQueryOptions } from "@/data/workspace/tables";
 import { buildCreate, toDefaultFormValues } from "@/lib/records/form";
 
-import { buildViewerColumns, type ViewerColumn } from "../columns";
+import { buildViewColumns, buildViewerColumns, type ViewerColumn, type ViewScope } from "../columns";
 import { RecordForm } from "./record-form";
 import { useRecordForm } from "./use-record-form";
 
@@ -67,10 +67,12 @@ function CreateForm({
 export function CreateRecordSheet({
   workspace,
   tableId,
+  view,
   onClose,
 }: {
   workspace: string;
   tableId: number;
+  view?: ViewScope;
   onClose: () => void;
 }) {
   const [open, setOpen] = useState(true);
@@ -89,7 +91,7 @@ export function CreateRecordSheet({
           workspace={workspace}
           tableId={tableId}
           tableName={table.name}
-          columns={buildViewerColumns(table)}
+          columns={view ? buildViewColumns(table, view.selectColumns) : buildViewerColumns(table)}
           onCreated={() => setOpen(false)}
         />
       </SheetPopup>

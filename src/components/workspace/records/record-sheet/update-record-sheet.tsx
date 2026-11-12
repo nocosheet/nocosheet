@@ -10,7 +10,7 @@ import { recordQueryOptions, updateRecordMutationOptions } from "@/data/workspac
 import { tableQueryOptions } from "@/data/workspace/tables";
 import { buildPatch, toFormValues, type FormValues } from "@/lib/records/form";
 
-import { buildViewerColumns, type ViewerColumn } from "../columns";
+import { buildViewColumns, buildViewerColumns, type ViewerColumn, type ViewScope } from "../columns";
 import { DeleteRecordsDialog } from "../delete-records-dialog";
 import { RecordForm } from "./record-form";
 import { RecordSheetSkeleton } from "./skeleton";
@@ -99,12 +99,14 @@ export function UpdateRecordSheet({
   workspace,
   tableId,
   recordId,
+  view,
   canDelete = true,
   onClose,
 }: {
   workspace: string;
   tableId: number;
   recordId: string;
+  view?: ViewScope;
   canDelete?: boolean;
   onClose: () => void;
 }) {
@@ -129,7 +131,7 @@ export function UpdateRecordSheet({
             tableName={table.name}
             recordId={recordId}
             record={record}
-            columns={buildViewerColumns(table)}
+            columns={view ? buildViewColumns(table, view.selectColumns) : buildViewerColumns(table)}
             canDelete={canDelete}
             onDeleted={() => setOpen(false)}
           />
