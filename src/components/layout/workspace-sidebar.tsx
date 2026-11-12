@@ -1,4 +1,10 @@
-import { Sidebar, SidebarContent, SidebarHeader, SidebarRail } from "@/components/ui/sidebar";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarHeader,
+  SidebarRail,
+} from "@/components/ui/sidebar";
 
 import { NavFavorites } from "./sidebar/nav-favorites";
 import { NavMain } from "./sidebar/nav-main";
@@ -22,8 +28,10 @@ export function WorkspaceSidebar({ workspace, user }: WorkspaceSidebarProps) {
         <NavMain workspace={workspace} />
         <NavFavorites workspace={workspace} />
         <NavTables workspace={workspace} />
-        <NavSecondary workspace={workspace} />
       </SidebarContent>
+      <SidebarFooter>
+        <NavSecondary workspace={workspace} />
+      </SidebarFooter>
       <SidebarRail />
     </Sidebar>
   );

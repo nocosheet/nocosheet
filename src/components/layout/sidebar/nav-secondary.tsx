@@ -13,7 +13,7 @@ import {
 /** Pinned to the bottom of the sidebar, above the user menu. */
 export function NavSecondary({ workspace }: { workspace: string }) {
   return (
-    <SidebarGroup className="mt-auto">
+    <SidebarGroup>
       <SidebarGroupContent>
         <SidebarMenu>
           <SidebarMenuItem>
