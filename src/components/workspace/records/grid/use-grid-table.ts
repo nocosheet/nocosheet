@@ -4,6 +4,7 @@ import {
   type ColumnDef,
   functionalUpdate,
   type PaginationState,
+  type SortingState,
   useTable,
 } from "@tanstack/react-table";
 
@@ -66,7 +67,10 @@ export function useGridTable({
   const filtersKey = JSON.stringify(query.filters);
   const columnFilters = useMemo(() => toColumnFilters(query.filters), [filtersKey]);
 
-  const sorting = query.sort ? [{ id: query.sort, desc: query.order === "desc" }] : [];
+  const sorting = useMemo<SortingState>(
+    () => (query.sort ? [{ id: query.sort, desc: query.order === "desc" }] : []),
+    [query.sort, query.order],
+  );
 
   return useTable(
     {
@@ -99,7 +103,10 @@ export function useGridTable({
       },
       onSortingChange: (updater) => {
         const [next] = functionalUpdate(updater, sorting);
-        void setQuery({ sort: next?.id ?? null, order: next?.desc ? "desc" : "asc" });
+        const sort = next?.id ?? null;
+        const order = next?.desc ? "desc" : "asc";
+        if (sort === query.sort && (sort === null || order === query.order)) return;
+        void setQuery({ sort, order });
       },
       onColumnFiltersChange: (updater) => {
         const next = fromColumnFilters(functionalUpdate(updater, columnFilters), targets);
@@ -110,7 +117,8 @@ export function useGridTable({
         });
       },
       onGlobalFilterChange: (updater) => {
-        const next = functionalUpdate(updater, query.q) as string;
+        const next = String(functionalUpdate(updater, query.q) ?? "");
+        if (next === query.q) return;
         void setQuery({ q: next });
       },
     },

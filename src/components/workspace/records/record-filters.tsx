@@ -7,15 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverPopup, PopoverTrigger } from "@/components/ui/popover";
 import type { FilterCondition } from "@/lib/records/filters";
 
-import type { ViewerColumn } from "./columns";
-import { FilterBuilder, filterErrors } from "./filter-builder";
+import { FilterBuilder, type FilterField, filterErrors } from "./filter-builder";
 
 export function RecordFilters({
   columns,
   value,
   onApply,
 }: {
-  columns: ViewerColumn[];
+  columns: FilterField[];
   value: FilterCondition[];
   onApply: (filters: FilterCondition[]) => void;
 }) {

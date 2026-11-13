@@ -23,6 +23,8 @@ import { cn } from "@/lib/utils";
 
 import type { ViewerColumn } from "./columns";
 
+export type FilterField = Pick<ViewerColumn, "key" | "name" | "format" | "filterable" | "options">;
+
 const BOOLEANS = [
   { value: "true", label: "Yes" },
   { value: "false", label: "No" },
@@ -106,7 +108,7 @@ function ValueInput({
   condition,
   onChange,
 }: {
-  column: ViewerColumn;
+  column: FilterField;
   kind: FilterKind;
   condition: FilterCondition;
   onChange: (value: FilterCondition["value"]) => void;
@@ -178,7 +180,7 @@ function ValueInput({
   }
 }
 
-const blankCondition = (column: ViewerColumn): FilterCondition => {
+const blankCondition = (column: FilterField): FilterCondition => {
   const kind = filterKind(column.format) as FilterKind;
   const op = operatorsFor(kind)[0].value;
   return { column: column.key, op, ...(kind === "checkbox" ? { value: true } : {}) };
@@ -186,7 +188,7 @@ const blankCondition = (column: ViewerColumn): FilterCondition => {
 
 export const MAX_FILTERS = 10;
 
-export function filterErrors(columns: ViewerColumn[], value: FilterCondition[]) {
+export function filterErrors(columns: FilterField[], value: FilterCondition[]) {
   const byKey = new Map(columns.filter((column) => column.filterable).map((c) => [c.key, c]));
   return value.map((condition) => {
     const column = byKey.get(condition.column);
@@ -201,7 +203,7 @@ export function FilterBuilder({
   onChange,
   footer,
 }: {
-  columns: ViewerColumn[];
+  columns: FilterField[];
   value: FilterCondition[];
   onChange: (value: FilterCondition[]) => void;
   footer?: React.ReactNode;
