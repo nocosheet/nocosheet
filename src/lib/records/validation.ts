@@ -1,7 +1,7 @@
 import { decodeCursor } from "./cursor";
 import { conditionError, filterKind, isSortableFormat } from "./filters";
 import { isGroupableColumn, isGroupableSystemKey } from "./grouping";
-import type { ResolvedRecordsQuery } from "./query";
+import type { TypedRecordsQuery } from "./query";
 
 type QueryColumn = {
   columnName: string;
@@ -13,7 +13,7 @@ type QueryColumn = {
 
 const SYSTEM_SORTS = ["id", "created_at", "updated_at"];
 
-export function checkRecordsQuery(columns: QueryColumn[], query: ResolvedRecordsQuery) {
+export function checkRecordsQuery(columns: QueryColumn[], query: TypedRecordsQuery) {
   const byName = new Map(columns.map((column) => [column.columnName, column]));
 
   for (const condition of query.filters) {

@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import { useQueryStates } from "nuqs";
 
+import { parseFilters, serializeFilters, targetsOfColumns } from "@/lib/records/filter-param";
 import { recordsSearchParams, resolveRecordsQuery } from "@/lib/records/query";
 
 import type { ViewerColumn } from "../columns";
@@ -11,14 +12,24 @@ export function useRecordsQuery(columns: ViewerColumn[]) {
 
   const resolved = resolveRecordsQuery(urlQuery);
   const sortable = new Set(columns.filter((column) => column.sortable).map((c) => c.key));
-  const filterable = new Set(columns.filter((column) => column.filterable).map((c) => c.key));
   const groupable = new Set(columns.filter((column) => column.groupable).map((c) => c.key));
+
+  const nameByKey = new Map(columns.map((column) => [column.key, column.name]));
+  const { filters } = parseFilters(
+    resolved.filter,
+    targetsOfColumns(
+      columns
+        .filter((column) => column.filterable)
+        .map((column) => ({ columnName: column.key, name: column.name, format: column.format })),
+    ),
+  );
 
   const query = {
     ...resolved,
+    filters,
+    filter: serializeFilters(filters, (key) => nameByKey.get(key) ?? key),
     group: resolved.group && groupable.has(resolved.group) ? resolved.group : null,
     sort: resolved.sort && sortable.has(resolved.sort) ? resolved.sort : null,
-    filters: resolved.filters.filter((filter) => filterable.has(filter.column)),
   };
 
   const signature = JSON.stringify(query);

@@ -4,6 +4,7 @@ import { SearchIcon } from "lucide-react";
 
 import { DataTableViewOptions } from "@/components/shared/data-table/data-table-view-options";
 import { Input } from "@/components/ui/input";
+import { toColumnFilters } from "@/lib/records/column-filters";
 
 import type { ViewerColumn } from "../columns";
 import { RecordFilters } from "../record-filters";
@@ -51,7 +52,7 @@ export function GridToolbar({
       <RecordFilters
         columns={columns}
         value={query.filters}
-        onApply={(filters) => void setQuery({ filters: filters.length ? filters : null })}
+        onApply={(filters) => grid.setColumnFilters(toColumnFilters(filters))}
       />
       <RecordGroup
         columns={columns}

@@ -8,6 +8,8 @@ import {
 } from "@tanstack/react-table";
 
 import { dataTableFeatures } from "@/components/shared/data-table/features";
+import { fromColumnFilters, toColumnFilters } from "@/lib/records/column-filters";
+import { serializeFilters, targetsOfColumns } from "@/lib/records/filter-param";
 
 import type { ViewerColumn } from "../columns";
 import type { ViewerRow } from "../records-grid";
@@ -38,6 +40,7 @@ export function useGridTable({
         header: column.name,
         meta: { label: column.name },
         enableSorting: column.sortable,
+        enableColumnFilter: column.filterable,
         enableHiding: !column.title,
       })),
     [columns],
@@ -51,6 +54,18 @@ export function useGridTable({
     () => ({ pageIndex: paging.pageIndex, pageSize: query.pageSize }),
     [paging.pageIndex, query.pageSize],
   );
+  const targets = useMemo(
+    () =>
+      targetsOfColumns(
+        columns
+          .filter((column) => column.filterable)
+          .map((column) => ({ columnName: column.key, name: column.name, format: column.format })),
+      ),
+    [columns],
+  );
+  const filtersKey = JSON.stringify(query.filters);
+  const columnFilters = useMemo(() => toColumnFilters(query.filters), [filtersKey]);
+
   const sorting = query.sort ? [{ id: query.sort, desc: query.order === "desc" }] : [];
 
   return useTable(
@@ -70,6 +85,7 @@ export function useGridTable({
       state: {
         pagination,
         sorting,
+        columnFilters,
         globalFilter: query.q,
       },
       onPaginationChange: (updater) => {
@@ -85,6 +101,14 @@ export function useGridTable({
         const [next] = functionalUpdate(updater, sorting);
         void setQuery({ sort: next?.id ?? null, order: next?.desc ? "desc" : "asc" });
       },
+      onColumnFiltersChange: (updater) => {
+        const next = fromColumnFilters(functionalUpdate(updater, columnFilters), targets);
+        if (JSON.stringify(next) === filtersKey) return;
+        const names = new Map(columns.map((column) => [column.key, column.name]));
+        void setQuery({
+          filter: next.length ? serializeFilters(next, (key) => names.get(key) ?? key) : null,
+        });
+      },
       onGlobalFilterChange: (updater) => {
         const next = functionalUpdate(updater, query.q) as string;
         void setQuery({ q: next });
@@ -94,6 +118,7 @@ export function useGridTable({
       columnVisibility: state.columnVisibility,
       rowSelection: state.rowSelection,
       pagination: state.pagination,
+      columnFilters: state.columnFilters,
     }),
   );
 }

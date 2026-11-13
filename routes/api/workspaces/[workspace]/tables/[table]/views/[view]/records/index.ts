@@ -3,7 +3,8 @@ import { requireAuth } from "void/auth";
 import { z } from "zod";
 
 import { httpError } from "@/lib/http";
-import { recordsApiSchema, resolveRecordsQuery } from "@/lib/records/query";
+import { targetsOfColumns, parseFilters } from "@/lib/records/filter-param";
+import { recordsApiSchema, resolveRecordsQuery, withFilters } from "@/lib/records/query";
 import { findRecords } from "@/lib/records/repository";
 import { checkRecordsQuery } from "@/lib/records/validation";
 import { authorize } from "@/lib/roles/guard";
@@ -29,7 +30,9 @@ export const GET = defineHandler.withValidator({ params, query: recordsApiSchema
 
   const all = await listColumns(table.id);
   const shown = all.filter((column) => row.selectColumns.includes(column.columnName));
-  const resolved = resolveRecordsQuery(query);
+  const parsed = parseFilters(resolveRecordsQuery(query).filter, targetsOfColumns(shown));
+  if (parsed.errors.length) throw httpError(400, parsed.errors[0]);
+  const resolved = withFilters(resolveRecordsQuery(query), parsed.filters);
 
   const problem = checkRecordsQuery(shown, resolved);
   if (problem) throw httpError(400, problem);

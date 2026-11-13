@@ -4,8 +4,14 @@ import { z } from "zod";
 
 import { httpError, writeFailure } from "@/lib/http";
 import { deleteRecords } from "@/lib/records/deletion";
+import { targetsOfColumns, parseFilters } from "@/lib/records/filter-param";
 import { checkLinks } from "@/lib/records/links";
-import { recordsApiSchema, recordsDeleteSchema, resolveRecordsQuery } from "@/lib/records/query";
+import {
+  recordsApiSchema,
+  recordsDeleteSchema,
+  resolveRecordsQuery,
+  withFilters,
+} from "@/lib/records/query";
 import { countOwnedRecords, createRecordRow, findRecords } from "@/lib/records/repository";
 import { checkRecordsQuery } from "@/lib/records/validation";
 import { findMissingRequired, parseRecordValues, recordPatchSchema } from "@/lib/records/values";
@@ -22,7 +28,9 @@ export const GET = defineHandler.withValidator({ params, query: recordsApiSchema
   const table = await findTable(params.table);
   if (!table) throw httpError(404, "Table not found.");
   const columns = await listColumns(table.id);
-  const resolved = resolveRecordsQuery(query);
+  const parsed = parseFilters(resolveRecordsQuery(query).filter, targetsOfColumns(columns));
+  if (parsed.errors.length) throw httpError(400, parsed.errors[0]);
+  const resolved = withFilters(resolveRecordsQuery(query), parsed.filters);
 
   const problem = checkRecordsQuery(columns, resolved);
   if (problem) throw httpError(400, problem);

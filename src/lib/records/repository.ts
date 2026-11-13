@@ -9,7 +9,7 @@ import { conditionText } from "./condition";
 import { decodeCursor, encodeCursor, type RecordCursor } from "./cursor";
 import { type FilterCondition, filterKind } from "./filters";
 import { groupKeyOf, isGroupableSystemKey } from "./grouping";
-import type { ResolvedRecordsQuery } from "./query";
+import type { TypedRecordsQuery } from "./query";
 import { shapeRecord } from "./shape";
 import type { ParsedValue } from "./values";
 
@@ -95,7 +95,7 @@ function conditionsWhere(columns: Column[], filters: FilterCondition[]) {
   );
 }
 
-function filterWhere(columns: Column[], query: ResolvedRecordsQuery, ownerId?: string) {
+function filterWhere(columns: Column[], query: TypedRecordsQuery, ownerId?: string) {
   const where: Fragment[] = ownerId ? [sql`t."created_by" = ${ownerId}`] : [];
 
   const filtered = conditionsWhere(columns, query.filters);
@@ -121,7 +121,7 @@ function filterWhere(columns: Column[], query: ResolvedRecordsQuery, ownerId?: s
 
 type SortSpec = { name: string; nocase: boolean; direction: "asc" | "desc" };
 
-function sortSpec(columns: Column[], query: ResolvedRecordsQuery): SortSpec {
+function sortSpec(columns: Column[], query: TypedRecordsQuery): SortSpec {
   const fallback: SortSpec = { name: "id", nocase: false, direction: "asc" };
   if (!query.sort) return fallback;
   const direction = query.order === "desc" ? "desc" : "asc";
@@ -244,7 +244,7 @@ export async function findRecords(
   workspace: string,
   table: Table,
   columns: Column[],
-  query: ResolvedRecordsQuery,
+  query: TypedRecordsQuery,
   ownerId?: string,
   source?: string,
 ) {

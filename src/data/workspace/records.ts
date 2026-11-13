@@ -2,7 +2,7 @@ import { mutationOptions, queryOptions } from "@tanstack/react-query";
 
 import { fetch } from "void/client";
 
-import type { ResolvedRecordsQuery } from "@/lib/records/query";
+import { type ResolvedRecordsQuery, recordsKeyOf } from "@/lib/records/query";
 
 import { unwrapFetch } from "./api-error";
 import { workspaceKeys } from "./keys";
@@ -13,7 +13,7 @@ export const recordsQueryOptions = (
   query: ResolvedRecordsQuery,
 ) =>
   queryOptions({
-    queryKey: workspaceKeys.records(tableId, query),
+    queryKey: workspaceKeys.records(tableId, recordsKeyOf(query)),
     queryFn: () =>
       unwrapFetch(
         fetch("/api/workspaces/:workspace/tables/:table/records", {
@@ -24,7 +24,7 @@ export const recordsQueryOptions = (
             ...(query.sort ? { sort: query.sort, order: query.order } : {}),
             ...(query.q ? { q: query.q } : {}),
             ...(query.group ? { group: query.group } : {}),
-            ...(query.filters.length ? { filters: JSON.stringify(query.filters) } : {}),
+            ...(query.filter ? { filter: query.filter } : {}),
           },
         }),
       ),

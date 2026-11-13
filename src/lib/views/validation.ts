@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { filtersSchema } from "../records/filters";
-import { resolveRecordsQuery } from "../records/query";
+import { resolveRecordsQuery, withFilters } from "../records/query";
 import { checkRecordsQuery } from "../records/validation";
 import { iconName } from "../tables/validation";
 
@@ -39,5 +39,5 @@ export function checkViewDefinition(columns: DefinitionColumn[], view: ViewValue
   const known = new Set(columns.map((column) => column.columnName));
   const missing = view.selectColumns.find((name) => !known.has(name));
   if (missing) return `"${missing}" isn't a column of this table.`;
-  return checkRecordsQuery(columns, resolveRecordsQuery({ filters: view.filters }));
+  return checkRecordsQuery(columns, withFilters(resolveRecordsQuery({}), view.filters));
 }
