@@ -92,7 +92,11 @@ export function conditionText(
       return `(${target} is null or ${target} != ${bind(text)})`;
     case "is_any_of":
       return `${target} in (${items()})`;
+    case "is_none_of":
+      return `(${target} is null or ${target} not in (${items()}))`;
     case "has_any_of":
       return `exists (select 1 from json_each(${target}) where value in (${items()}))`;
+    case "has_none_of":
+      return `not exists (select 1 from json_each(${target}) where value in (${items()}))`;
   }
 }

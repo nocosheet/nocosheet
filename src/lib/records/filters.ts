@@ -66,9 +66,14 @@ export const OPERATORS = {
     { value: "is", label: "is", input: "choice" },
     { value: "is_not", label: "is not", input: "choice" },
     { value: "is_any_of", label: "is any of", input: "choices" },
+    { value: "is_none_of", label: "is none of", input: "choices" },
     ...EMPTY,
   ],
-  multi_select: [{ value: "has_any_of", label: "has any of", input: "choices" }, ...EMPTY],
+  multi_select: [
+    { value: "has_any_of", label: "has any of", input: "choices" },
+    { value: "has_none_of", label: "has none of", input: "choices" },
+    ...EMPTY,
+  ],
   date: [
     { value: "eq", label: "is", input: "date" },
     { value: "before", label: "is before", input: "date" },
