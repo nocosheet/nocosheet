@@ -69,7 +69,7 @@ async function recordSource(workspace: string, table: Table, columns: Column[], 
   };
 }
 
-function conditionsWhere(columns: Column[], filters: FilterCondition[], join: "and" | "or") {
+function conditionsWhere(columns: Column[], filters: FilterCondition[]) {
   const byName = new Map(columns.map((column) => [column.columnName, column]));
   const params: (string | number)[] = [];
   const bind = (value: string | number) => {
@@ -85,7 +85,7 @@ function conditionsWhere(columns: Column[], filters: FilterCondition[], join: "a
   }
   if (!conditions.length) return undefined;
 
-  const parts = `(${conditions.join(join === "or" ? " or " : " and ")})`.split("?");
+  const parts = `(${conditions.join(" and ")})`.split("?");
   return sql.join(
     parts.flatMap((part, index) =>
       index < params.length ? [raw(part), sql`${params[index]}`] : [raw(part)],
@@ -97,7 +97,7 @@ function conditionsWhere(columns: Column[], filters: FilterCondition[], join: "a
 function filterWhere(columns: Column[], query: ResolvedRecordsQuery, ownerId?: string) {
   const where: Fragment[] = ownerId ? [sql`t."created_by" = ${ownerId}`] : [];
 
-  const filtered = conditionsWhere(columns, query.filters, query.join);
+  const filtered = conditionsWhere(columns, query.filters);
   if (filtered) where.push(filtered);
 
   if (query.q) {

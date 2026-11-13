@@ -24,9 +24,7 @@ export const recordsQueryOptions = (
             ...(query.sort ? { sort: query.sort, order: query.order } : {}),
             ...(query.q ? { q: query.q } : {}),
             ...(query.group ? { group: query.group } : {}),
-            ...(query.filters.length
-              ? { filters: JSON.stringify(query.filters), join: query.join }
-              : {}),
+            ...(query.filters.length ? { filters: JSON.stringify(query.filters) } : {}),
           },
         }),
       ),

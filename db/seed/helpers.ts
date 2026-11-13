@@ -73,7 +73,6 @@ export type SeedView = {
     op: FilterCondition["op"];
     value?: string | number | boolean | string[];
   }[];
-  join?: "and" | "or";
 };
 
 export type SeedTable = {
@@ -285,7 +284,6 @@ export async function seedTable(
       description: view.description,
       icon: view.icon,
       selectColumns: view.columns.map((name) => column(name).columnName),
-      join: view.join ?? "and",
       filters: (view.where ?? []).map((condition) => ({
         column: column(condition.column).columnName,
         op: condition.op,
@@ -304,7 +302,7 @@ export async function seedTable(
     const selected = allColumns
       .filter((item) => input.selectColumns.includes(item.columnName))
       .map((item) => item.columnName);
-    const where = buildViewWhere(allColumns, input.filters, input.join);
+    const where = buildViewWhere(allColumns, input.filters);
     const viewName = newViewName();
 
     const [viewResource] = await db

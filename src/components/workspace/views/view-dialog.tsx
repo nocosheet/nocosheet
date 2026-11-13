@@ -44,7 +44,7 @@ import { formSchema } from "@/lib/tables/form";
 import { viewInputSchema, viewPatchSchema, type ViewInput } from "@/lib/views/validation";
 
 import { buildViewerColumns } from "../records/columns";
-import { FilterBuilder, filterErrors, type FilterJoin } from "../records/filter-builder";
+import { FilterBuilder, filterErrors } from "../records/filter-builder";
 
 export type ViewSummary = {
   id: number;
@@ -59,7 +59,6 @@ type ViewDraft = {
   description: string;
   selectColumns: string[];
   filters: FilterCondition[];
-  join: FilterJoin;
 };
 
 const draftOf = (view?: ViewSummary): ViewDraft => ({
@@ -68,7 +67,6 @@ const draftOf = (view?: ViewSummary): ViewDraft => ({
   description: view?.description ?? "",
   selectColumns: [],
   filters: [],
-  join: "and",
 });
 
 export function ViewDialog({
@@ -301,29 +299,21 @@ function ViewForm({
                 )}
               </form.Field>
 
-              <form.Subscribe selector={(state) => state.values.join}>
-                {(join) => (
-                  <form.Field name="filters">
-                    {(field) => (
-                      <Field name={field.name}>
-                        <FieldLabel>Filters</FieldLabel>
-                        <FilterBuilder
-                          columns={userColumns}
-                          value={field.state.value}
-                          join={join}
-                          onChange={(next, nextJoin) => {
-                            field.handleChange(next);
-                            form.setFieldValue("join", nextJoin);
-                          }}
-                        />
-                        <FieldDescription>
-                          Only records matching these conditions belong to the view.
-                        </FieldDescription>
-                      </Field>
-                    )}
-                  </form.Field>
+              <form.Field name="filters">
+                {(field) => (
+                  <Field name={field.name}>
+                    <FieldLabel>Filters</FieldLabel>
+                    <FilterBuilder
+                      columns={userColumns}
+                      value={field.state.value}
+                      onChange={field.handleChange}
+                    />
+                    <FieldDescription>
+                      Only records matching these conditions belong to the view.
+                    </FieldDescription>
+                  </Field>
                 )}
-              </form.Subscribe>
+              </form.Field>
             </>
           )}
         </Form>

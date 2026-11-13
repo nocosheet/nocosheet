@@ -136,7 +136,7 @@ export async function createView(
   const selected = columns
     .filter((column) => body.selectColumns.includes(column.columnName))
     .map((column) => column.columnName);
-  const where = buildViewWhere(columns, body.filters, body.join);
+  const where = buildViewWhere(columns, body.filters);
 
   const [, , inserted] = await db.batch([
     db.run(

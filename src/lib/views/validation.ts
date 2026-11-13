@@ -20,7 +20,6 @@ export const viewInputSchema = z.object({
     .max(200)
     .transform((value) => [...new Set(value)]),
   filters: filtersSchema.default([]),
-  join: z.enum(["and", "or"]).default("and"),
 });
 
 export const viewsDeleteSchema = z.object({
@@ -40,8 +39,5 @@ export function checkViewDefinition(columns: DefinitionColumn[], view: ViewValue
   const known = new Set(columns.map((column) => column.columnName));
   const missing = view.selectColumns.find((name) => !known.has(name));
   if (missing) return `"${missing}" isn't a column of this table.`;
-  return checkRecordsQuery(
-    columns,
-    resolveRecordsQuery({ filters: view.filters, join: view.join }),
-  );
+  return checkRecordsQuery(columns, resolveRecordsQuery({ filters: view.filters }));
 }

@@ -43,7 +43,6 @@ export const recordsSearchParams = {
   order: parseAsStringLiteral(["asc", "desc"] as const).withDefault("asc"),
   q: parseAsString.withDefault(""),
   filters: filtersParser,
-  join: parseAsStringLiteral(["and", "or"] as const).withDefault("and"),
   group: parseAsString,
 };
 
@@ -56,7 +55,6 @@ export const resolveRecordsQuery = (search: Partial<RecordsQuery>) => ({
   order: search.order ?? recordsSearchParams.order.defaultValue,
   q: search.q ?? recordsSearchParams.q.defaultValue,
   filters: (search.filters ?? []) as FilterCondition[],
-  join: search.join ?? recordsSearchParams.join.defaultValue,
   group: search.group ?? null,
 });
 
@@ -88,7 +86,6 @@ export const recordsApiSchema = z.object({
   sort: z.string().max(64).optional(),
   order: z.enum(["asc", "desc"]).optional(),
   q: z.string().max(100).optional(),
-  join: z.enum(["and", "or"]).optional(),
   group: z.string().max(64).optional(),
   filters: z
     .string()

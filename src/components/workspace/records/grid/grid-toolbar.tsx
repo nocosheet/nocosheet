@@ -51,10 +51,7 @@ export function GridToolbar({
       <RecordFilters
         columns={columns}
         value={query.filters}
-        join={query.join}
-        onApply={(filters, join) =>
-          void setQuery({ filters: filters.length ? filters : null, join, page: 1 })
-        }
+        onApply={(filters) => void setQuery({ filters: filters.length ? filters : null, page: 1 })}
       />
       <RecordGroup
         columns={columns}

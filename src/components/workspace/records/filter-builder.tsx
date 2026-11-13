@@ -184,13 +184,6 @@ const blankCondition = (column: ViewerColumn): FilterCondition => {
   return { column: column.key, op, ...(kind === "checkbox" ? { value: true } : {}) };
 };
 
-const JOINS = [
-  { value: "and", label: "And" },
-  { value: "or", label: "Or" },
-];
-
-export type FilterJoin = "and" | "or";
-
 export const MAX_FILTERS = 10;
 
 export function filterErrors(columns: ViewerColumn[], value: FilterCondition[]) {
@@ -205,24 +198,19 @@ export function filterErrors(columns: ViewerColumn[], value: FilterCondition[]) 
 export function FilterBuilder({
   columns,
   value,
-  join,
   onChange,
   footer,
 }: {
   columns: ViewerColumn[];
   value: FilterCondition[];
-  join: FilterJoin;
-  onChange: (value: FilterCondition[], join: FilterJoin) => void;
+  onChange: (value: FilterCondition[]) => void;
   footer?: React.ReactNode;
 }) {
   const filterable = columns.filter((column) => column.filterable);
   const byKey = new Map(filterable.map((column) => [column.key, column]));
 
   const update = (index: number, next: FilterCondition) =>
-    onChange(
-      value.map((item, i) => (i === index ? next : item)),
-      join,
-    );
+    onChange(value.map((item, i) => (i === index ? next : item)));
 
   return (
     <div className="flex w-full flex-col gap-3">
@@ -234,39 +222,18 @@ export function FilterBuilder({
             return (
               <div
                 key={index}
-                className="grid grid-cols-[2rem_4.5rem_8rem_8rem_1fr] items-center gap-2 max-sm:grid-cols-[2rem_1fr] max-sm:rounded-lg max-sm:border max-sm:p-2"
+                className="grid grid-cols-[2rem_7rem_7rem_10rem] items-center gap-2 max-sm:grid-cols-[2rem_1fr] max-sm:rounded-lg max-sm:border max-sm:p-2"
               >
                 <Button
                   variant="ghost"
                   size="icon-sm"
                   aria-label="Remove filter"
-                  onClick={() =>
-                    onChange(
-                      value.filter((_, i) => i !== index),
-                      join,
-                    )
-                  }
+                  onClick={() => onChange(value.filter((_, i) => i !== index))}
                 >
                   <XIcon />
                 </Button>
-                {index === 0 ? (
-                  <span className="px-2 text-muted-foreground text-sm">Where</span>
-                ) : index === 1 ? (
-                  <SimpleSelect
-                    label="Join"
-                    value={join}
-                    items={JOINS}
-                    className="max-sm:w-24"
-                    onValueChange={(next) => onChange(value, next as FilterJoin)}
-                  />
-                ) : (
-                  <span className="px-2 text-muted-foreground text-sm">
-                    {join === "or" ? "Or" : "And"}
-                  </span>
-                )}
                 <SimpleSelect
                   label="Column"
-                  className="max-sm:col-span-full"
                   value={column.key}
                   items={filterable.map((item) => ({ value: item.key, label: item.name }))}
                   onValueChange={(key) => update(index, blankCondition(byKey.get(key) ?? column))}
@@ -305,7 +272,7 @@ export function FilterBuilder({
           variant="outline"
           size="sm"
           disabled={value.length >= MAX_FILTERS || filterable.length === 0}
-          onClick={() => onChange([...value, blankCondition(filterable[0])], join)}
+          onClick={() => onChange([...value, blankCondition(filterable[0])])}
         >
           <PlusIcon />
           Add filter
