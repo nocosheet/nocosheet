@@ -199,3 +199,36 @@ export const deleteColumnMutationOptions = mutationOptions({
       }),
     ),
 });
+
+export const deletedColumnsQueryOptions = (workspace: string, id: number) =>
+  queryOptions({
+    queryKey: workspaceKeys.columnsTrash(id),
+    queryFn: () =>
+      unwrapFetch(
+        fetch("/api/workspaces/:workspace/tables/:table/columns/trash", {
+          params: { workspace, table: String(id) },
+        }),
+      ),
+  });
+
+export const restoreColumnMutationOptions = mutationOptions({
+  mutationKey: workspaceKeys.mutation("restore-column"),
+  mutationFn: ({ workspace, id, columnId }: { workspace: string; id: number; columnId: number }) =>
+    unwrapFetch(
+      fetch("/api/workspaces/:workspace/tables/:table/columns/trash/:column/restore", {
+        method: "POST",
+        params: { workspace, table: String(id), column: String(columnId) },
+      }),
+    ),
+});
+
+export const purgeColumnMutationOptions = mutationOptions({
+  mutationKey: workspaceKeys.mutation("purge-column"),
+  mutationFn: ({ workspace, id, columnId }: { workspace: string; id: number; columnId: number }) =>
+    unwrapFetch(
+      fetch("/api/workspaces/:workspace/tables/:table/columns/trash/:column", {
+        method: "DELETE",
+        params: { workspace, table: String(id), column: String(columnId) },
+      }),
+    ),
+});

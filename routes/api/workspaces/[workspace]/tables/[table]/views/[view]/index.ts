@@ -6,7 +6,6 @@ import { requireAdmin } from "@/lib/auth/require-admin";
 import { conflictOrBadRequest, httpError } from "@/lib/http";
 import { findTable } from "@/lib/tables/repository";
 import {
-  findTrashedViewByName,
   findView,
   softDeleteView,
   updateView,
@@ -26,15 +25,6 @@ export const PATCH = defineHandler(
     if (!table) throw httpError(404, "Table not found.");
     const view = await findView(table.id, params.view);
     if (!view) throw httpError(404, "View not found.");
-
-    if (body.name !== view.name) {
-      const trashed = await findTrashedViewByName(table.id, body.name);
-      if (trashed)
-        throw httpError(
-          409,
-          `A deleted view named "${trashed.name}" is still in the trash. Restore it or delete it forever from the trash first.`,
-        );
-    }
 
     try {
       return await updateView(params.view, body);

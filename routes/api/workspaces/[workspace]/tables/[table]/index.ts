@@ -7,7 +7,6 @@ import { TITLE_FORMATS } from "@/lib/tables/formats";
 import {
   findColumnByName,
   findTable,
-  findTrashedTableByName,
   listColumns,
   updateTable,
 } from "@/lib/tables/repository";
@@ -35,15 +34,6 @@ export const PATCH = defineHandler(
       if (!match || !TITLE_FORMATS.includes(match.format as never))
         throw httpError(400, "Pick a column that can be used as the title.");
       titleColumnId = match.id;
-    }
-
-    if (fields.name !== undefined && fields.name !== table.name) {
-      const trashed = await findTrashedTableByName(fields.name);
-      if (trashed)
-        throw httpError(
-          409,
-          `A deleted table named "${trashed.name}" is still in the trash. Restore it or delete it forever from the trash first.`,
-        );
     }
 
     try {

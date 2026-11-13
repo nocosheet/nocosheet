@@ -102,21 +102,6 @@ export async function findDeletedView(tableId: number, id: number) {
   return row;
 }
 
-export async function findTrashedViewByName(tableId: number, name: string) {
-  const [row] = await db
-    .select({ name: viewTable.name })
-    .from(viewTable)
-    .where(
-      and(
-        eq(viewTable.tableId, tableId),
-        sql`lower(${viewTable.name}) = lower(${name})`,
-        isNotNull(viewTable.deletedAt),
-      ),
-    )
-    .limit(1);
-  return row;
-}
-
 export async function findViewsUsingColumn(tableId: number, columnName: string) {
   const views = await db.select().from(viewTable).where(eq(viewTable.tableId, tableId));
   return views.filter(

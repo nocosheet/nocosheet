@@ -9,7 +9,6 @@ import {
   dropTables,
   findLinkingColumns,
   findTables,
-  findTrashedTableByName,
   listTables,
   softDeleteTables,
 } from "@/lib/tables/repository";
@@ -23,13 +22,6 @@ export const POST = defineHandler(
   requireAdmin,
   defineHandler.withValidator({ body: tableInputSchema })(async (c, { body }) => {
     const user = requireAuth(c);
-
-    const trashed = await findTrashedTableByName(body.name);
-    if (trashed)
-      throw httpError(
-        409,
-        `A deleted table named "${trashed.name}" is still in the trash. Restore it or delete it forever from the trash first.`,
-      );
 
     try {
       return await createTable(c.get("workspaceId"), body, user.id);

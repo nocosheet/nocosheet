@@ -8,7 +8,6 @@ import { authorize } from "@/lib/roles/guard";
 import { findTable, listColumns } from "@/lib/tables/repository";
 import {
   createView,
-  findTrashedViewByName,
   findViews,
   listViewsPage,
   softDeleteViews,
@@ -38,13 +37,6 @@ export const POST = defineHandler(
     const columns = await listColumns(table.id);
     const problem = checkViewDefinition(columns, body);
     if (problem) throw httpError(400, problem);
-
-    const trashed = await findTrashedViewByName(table.id, body.name);
-    if (trashed)
-      throw httpError(
-        409,
-        `A deleted view named "${trashed.name}" is still in the trash. Restore it or delete it forever from the trash first.`,
-      );
 
     try {
       return await createView(c.get("workspaceId"), table, columns, body, requireAuth(c).id);

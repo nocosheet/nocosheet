@@ -1,14 +1,15 @@
 import { defineHandler } from "void";
+import { requireAuth } from "void/auth";
 import { z } from "zod";
 
 import { requireAdmin } from "@/lib/auth/require-admin";
-import { classifyDbError } from "@/lib/db-errors";
 import { conflictOrBadRequest, httpError } from "@/lib/http";
 import { SEARCHABLE_FORMATS } from "@/lib/tables/formats";
 import {
-  dropColumn,
   findColumn,
+  findColumnsUsing,
   findTable,
+  softDeleteColumn,
   updateColumn,
 } from "@/lib/tables/repository";
 import { columnPatchSchema } from "@/lib/tables/validation";
@@ -54,17 +55,14 @@ export const DELETE = defineHandler(
         `"${column.name}" is used by ${views.map((view) => (view.deletedAt ? `the deleted view "${view.name}"` : `the view "${view.name}"`)).join(", ")}, so it can't be deleted.`,
       );
 
-    try {
-      await dropColumn(c.get("workspaceId"), table, column);
-    } catch (error) {
-      const failure = classifyDbError(error);
+    const dependents = await findColumnsUsing(table.id, column.columnName);
+    if (dependents.length > 0)
       throw httpError(
         409,
-        failure.kind === "dependency"
-          ? `"${column.name}" is used by another column's computed value or check, so it can't be deleted.`
-          : failure.message,
+        `"${column.name}" is used by the computed value or check of ${dependents.map((item) => `"${item.name}"`).join(", ")}, so it can't be deleted.`,
       );
-    }
+
+    await softDeleteColumn(c.get("workspaceId"), table, column, requireAuth(c).id);
     return { ok: true };
   }),
 );

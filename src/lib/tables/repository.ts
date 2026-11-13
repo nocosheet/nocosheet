@@ -92,6 +92,69 @@ export async function findColumnByName(tableId: number, columnName: string) {
   return row as Column | undefined;
 }
 
+export async function findLiveColumnNamed(tableId: number, name: string) {
+  const [row] = await db
+    .select({ name: columnTable.name })
+    .from(columnTable)
+    .where(
+      and(
+        eq(columnTable.tableId, tableId),
+        sql`lower(${columnTable.name}) = lower(${name})`,
+        isNull(columnTable.deletedAt),
+      ),
+    )
+    .limit(1);
+  return row;
+}
+
+export async function findDeletedColumn(tableId: number, columnId: number) {
+  const [row] = await db
+    .select()
+    .from(columnTable)
+    .where(
+      and(
+        eq(columnTable.id, columnId),
+        eq(columnTable.tableId, tableId),
+        isNotNull(columnTable.deletedAt),
+      ),
+    )
+    .limit(1);
+  return row as Column | undefined;
+}
+
+export async function listDeletedColumns(tableId: number) {
+  const rows = await db
+    .select({
+      id: columnTable.id,
+      name: columnTable.name,
+      icon: columnTable.icon,
+      format: columnTable.format,
+      deletedAt: columnTable.deletedAt,
+      deletedBy: columnTable.deletedBy,
+      deletedByName: sql<
+        string | null
+      >`(select u."name" from "user" u where u."id" = ${columnTable.deletedBy})`,
+    })
+    .from(columnTable)
+    .where(and(eq(columnTable.tableId, tableId), isNotNull(columnTable.deletedAt)))
+    .orderBy(desc(columnTable.deletedAt), asc(columnTable.id));
+
+  return rows.map(({ deletedBy, deletedByName, ...row }) => ({
+    ...row,
+    deletedAt: row.deletedAt?.getTime() ?? 0,
+    deletedBy: deletedBy ? { id: deletedBy, label: deletedByName } : null,
+  }));
+}
+
+export async function findColumnsUsing(tableId: number, columnName: string) {
+  const reference = `{${columnName}}`;
+  return (await listColumns(tableId)).filter(
+    (item) =>
+      item.columnName !== columnName &&
+      (item.generatedExpression?.includes(reference) || item.checkExpression?.includes(reference)),
+  );
+}
+
 export async function listColumns(tableId: number) {
   return db
     .select()
@@ -175,15 +238,6 @@ export async function removeFavorite(userId: string, tableId: number) {
   await db
     .delete(favoriteTable)
     .where(and(eq(favoriteTable.userId, userId), eq(favoriteTable.tableId, tableId)));
-}
-
-export async function findTrashedTableByName(name: string) {
-  const [row] = await db
-    .select({ name: tableTable.name })
-    .from(tableTable)
-    .where(and(sql`lower(${tableTable.name}) = lower(${name})`, isNotNull(tableTable.deletedAt)))
-    .limit(1);
-  return row;
 }
 
 export async function createTable(workspace: string, body: TableValues, userId: string) {
@@ -349,6 +403,80 @@ export async function reorderColumns(tableId: number, ids: number[]) {
   ] as never);
 }
 
+export async function softDeleteColumn(
+  workspace: string,
+  table: Table,
+  column: Column,
+  userId: string,
+) {
+  const kind = indexKind(column);
+
+  await db.batch([
+    db.run(
+      sql.raw(kind ? buildDropIndex(indexName(workspace, column.columnName, kind)) : "select 1"),
+    ),
+    db
+      .update(columnTable)
+      .set({ deletedAt: new Date(), deletedBy: userId })
+      .where(eq(columnTable.id, column.id)),
+    db
+      .update(tableTable)
+      .set({
+        updatedAt: new Date(),
+        ...(table.titleColumnId === column.id ? { titleColumnId: null } : {}),
+      })
+      .where(eq(tableTable.id, table.id)),
+  ]);
+}
+
+export async function restoreColumn(workspace: string, table: Table, column: Column) {
+  const physicalName = physicalTableName(workspace, table.tableName);
+  const kind = indexKind(column);
+  const [last] = await db
+    .select({ position: columnTable.position })
+    .from(columnTable)
+    .where(and(eq(columnTable.tableId, table.id), isNull(columnTable.deletedAt)))
+    .orderBy(desc(columnTable.position))
+    .limit(1);
+
+  await db.batch([
+    db.update(columnTable).set({ deletedAt: null, deletedBy: null, position: (last?.position ?? -1) + 1 }).where(eq(columnTable.id, column.id)),
+    db.run(
+      sql.raw(
+        kind
+          ? buildCreateIndex(
+              indexName(workspace, column.columnName, kind),
+              physicalName,
+              column.columnName,
+              kind,
+              column.format as ColumnFormat,
+            )
+          : "select 1",
+      ),
+    ),
+    db.update(tableTable).set({ updatedAt: new Date() }).where(eq(tableTable.id, table.id)),
+  ]);
+}
+
+export async function purgeExpiredColumns(workspace: string, cutoff: Date) {
+  const expired = await db
+    .select({ column: columnTable, table: tableTable })
+    .from(columnTable)
+    .innerJoin(tableTable, eq(columnTable.tableId, tableTable.id))
+    .where(and(isNotNull(columnTable.deletedAt), lt(columnTable.deletedAt, cutoff)));
+
+  let purged = 0;
+  for (const { column, table } of expired) {
+    try {
+      await dropColumn(workspace, table, column);
+      purged++;
+    } catch {
+      continue;
+    }
+  }
+  return purged;
+}
+
 export async function dropColumn(workspace: string, table: Table, column: Column) {
   const physicalName = physicalTableName(workspace, table.tableName);
   const kind = indexKind(column);
@@ -371,7 +499,6 @@ export async function findLinkingColumns(ids: number[], options: { liveOnly: boo
     .where(
       and(
         eq(columnTable.format, "relation"),
-        isNull(columnTable.deletedAt),
         options.liveOnly ? isNull(tableTable.deletedAt) : undefined,
         notInArray(columnTable.tableId, ids),
         inArray(linkTarget, ids),
@@ -508,7 +635,6 @@ async function findLinkTargetsFromOutside(ids: number[]) {
     .where(
       and(
         eq(columnTable.format, "relation"),
-        isNull(columnTable.deletedAt),
         notInArray(columnTable.tableId, ids),
         inArray(linkTarget, ids),
       ),

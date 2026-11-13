@@ -4,7 +4,11 @@ import { z } from "zod";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { conflictOrBadRequest, httpError } from "@/lib/http";
 import { DdlError, type RelationTarget } from "@/lib/tables/ddl";
-import { createColumn, findRelationTarget, findTable } from "@/lib/tables/repository";
+import {
+  createColumn,
+  findRelationTarget,
+  findTable,
+} from "@/lib/tables/repository";
 import { columnInputSchema } from "@/lib/tables/validation";
 
 const params = z.object({ workspace: z.string(), table: z.coerce.number().int().positive() });
