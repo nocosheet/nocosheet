@@ -1,25 +1,34 @@
 import { useMemo } from "react";
 
-import { type ColumnDef, functionalUpdate, useTable } from "@tanstack/react-table";
+import {
+  type ColumnDef,
+  functionalUpdate,
+  type PaginationState,
+  useTable,
+} from "@tanstack/react-table";
 
 import { dataTableFeatures } from "@/components/shared/data-table/features";
 
 import type { ViewerColumn } from "../columns";
 import type { ViewerRow } from "../records-grid";
-import type { RecordsQuery, SetRecordsQuery } from "./use-records-query";
+import type { RecordsPaging, RecordsQuery, SetRecordsQuery } from "./use-records-query";
 
 export function useGridTable({
   columns,
   rows,
-  total,
   query,
   setQuery,
+  paging,
+  hasMore,
+  nextCursor,
 }: {
   columns: ViewerColumn[];
   rows: ViewerRow[];
-  total: number;
   query: RecordsQuery;
   setQuery: SetRecordsQuery;
+  paging: RecordsPaging;
+  hasMore: boolean;
+  nextCursor: string | null;
 }) {
   const columnDefs = useMemo<ColumnDef<typeof dataTableFeatures, ViewerRow>[]>(
     () =>
@@ -38,6 +47,10 @@ export function useGridTable({
     [columns],
   );
 
+  const pagination = useMemo<PaginationState>(
+    () => ({ pageIndex: paging.pageIndex, pageSize: query.pageSize }),
+    [paging.pageIndex, query.pageSize],
+  );
   const sorting = query.sort ? [{ id: query.sort, desc: query.order === "desc" }] : [];
 
   return useTable(
@@ -49,32 +62,39 @@ export function useGridTable({
       manualPagination: true,
       manualSorting: true,
       manualFiltering: true,
+      autoResetPageIndex: false,
       enableMultiSort: false,
       enableRowSelection: true,
-      rowCount: total,
+      pageCount: paging.pageIndex + (hasMore ? 2 : 1),
       initialState: { columnVisibility: initialVisibility },
       state: {
-        pagination: { pageIndex: query.page - 1, pageSize: query.pageSize },
+        pagination,
         sorting,
         globalFilter: query.q,
       },
       onPaginationChange: (updater) => {
-        const next = functionalUpdate(updater, {
-          pageIndex: query.page - 1,
-          pageSize: query.pageSize,
-        });
-        void setQuery({ page: next.pageIndex + 1 });
+        const next = functionalUpdate(updater, pagination);
+        if (next.pageSize !== pagination.pageSize) {
+          void setQuery({ pageSize: next.pageSize as RecordsQuery["pageSize"] });
+          return;
+        }
+        if (next.pageIndex < pagination.pageIndex) paging.goTo(next.pageIndex);
+        else if (next.pageIndex === pagination.pageIndex + 1 && nextCursor) paging.next(nextCursor);
       },
       onSortingChange: (updater) => {
         const [next] = functionalUpdate(updater, sorting);
-        void setQuery({ sort: next?.id ?? null, order: next?.desc ? "desc" : "asc", page: 1 });
+        void setQuery({ sort: next?.id ?? null, order: next?.desc ? "desc" : "asc" });
       },
       onGlobalFilterChange: (updater) => {
         const next = functionalUpdate(updater, query.q) as string;
-        void setQuery({ q: next, page: 1 });
+        void setQuery({ q: next });
       },
     },
-    (state) => ({ columnVisibility: state.columnVisibility, rowSelection: state.rowSelection }),
+    (state) => ({
+      columnVisibility: state.columnVisibility,
+      rowSelection: state.rowSelection,
+      pagination: state.pagination,
+    }),
   );
 }
 

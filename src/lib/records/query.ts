@@ -1,7 +1,6 @@
 import {
   type inferParserType,
   createParser,
-  parseAsInteger,
   parseAsNumberLiteral,
   parseAsString,
   parseAsStringLiteral,
@@ -12,13 +11,13 @@ import { type FilterCondition, filtersSchema } from "./filters";
 
 export const RECORD_PAGE_SIZES = [10, 25, 50, 100] as const;
 
-const toBase64Url = (text: string) => {
+export const toBase64Url = (text: string) => {
   let binary = "";
   for (const byte of new TextEncoder().encode(text)) binary += String.fromCharCode(byte);
   return btoa(binary).replaceAll("+", "-").replaceAll("/", "_").replace(/=+$/, "");
 };
 
-const fromBase64Url = (value: string) => {
+export const fromBase64Url = (value: string) => {
   const binary = atob(value.replaceAll("-", "+").replaceAll("_", "/"));
   return new TextDecoder().decode(Uint8Array.from(binary, (char) => char.charCodeAt(0)));
 };
@@ -37,7 +36,6 @@ const filtersParser = createParser<FilterCondition[]>({
 });
 
 export const recordsSearchParams = {
-  page: parseAsInteger.withDefault(1),
   pageSize: parseAsNumberLiteral(RECORD_PAGE_SIZES).withDefault(25),
   sort: parseAsString,
   order: parseAsStringLiteral(["asc", "desc"] as const).withDefault("asc"),
@@ -48,8 +46,10 @@ export const recordsSearchParams = {
 
 export type RecordsQuery = inferParserType<typeof recordsSearchParams>;
 
-export const resolveRecordsQuery = (search: Partial<RecordsQuery>) => ({
-  page: Math.max(1, search.page ?? recordsSearchParams.page.defaultValue),
+export const resolveRecordsQuery = (
+  search: Partial<RecordsQuery> & { cursor?: string | null },
+) => ({
+  cursor: search.cursor ?? null,
   pageSize: search.pageSize ?? recordsSearchParams.pageSize.defaultValue,
   sort: search.sort ?? null,
   order: search.order ?? recordsSearchParams.order.defaultValue,
@@ -78,7 +78,7 @@ export const validateRecordsSearch = (search: Record<string, unknown>): Partial<
 };
 
 export const recordsApiSchema = z.object({
-  page: z.coerce.number().int().min(1).optional(),
+  cursor: z.string().max(1024).optional(),
   pageSize: z.coerce
     .number()
     .pipe(z.union([z.literal(10), z.literal(25), z.literal(50), z.literal(100)]))

@@ -51,14 +51,14 @@ export function GridToolbar({
       <RecordFilters
         columns={columns}
         value={query.filters}
-        onApply={(filters) => void setQuery({ filters: filters.length ? filters : null, page: 1 })}
+        onApply={(filters) => void setQuery({ filters: filters.length ? filters : null })}
       />
       <RecordGroup
         columns={columns}
         value={query.group}
         onChange={(group) => {
           onGroupChange();
-          void setQuery({ group, page: 1 });
+          void setQuery({ group });
         }}
       />
       <div className="ms-auto flex items-center gap-2">

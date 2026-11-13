@@ -6,6 +6,7 @@ import { NOCASE_FORMATS, SEARCHABLE_FORMATS, type SelectChoice } from "../tables
 import { physicalTableName, quoteIdent } from "../tables/naming";
 import type { Column, Table } from "../tables/repository";
 import { conditionText } from "./condition";
+import { decodeCursor, encodeCursor, type RecordCursor } from "./cursor";
 import { type FilterCondition, filterKind } from "./filters";
 import { groupKeyOf, isGroupableSystemKey } from "./grouping";
 import type { ResolvedRecordsQuery } from "./query";
@@ -118,20 +119,79 @@ function filterWhere(columns: Column[], query: ResolvedRecordsQuery, ownerId?: s
   return where.length ? sql`${sql.join(where, sql` and `)}` : sql`1 = 1`;
 }
 
-function recordsOrder(columns: Column[], query: ResolvedRecordsQuery) {
-  if (!query.sort) return sql`t."id" asc`;
-  const direction = raw(query.order === "desc" ? "desc" : "asc");
+type SortSpec = { name: string; nocase: boolean; direction: "asc" | "desc" };
 
-  if (SYSTEM_SORTS.includes(query.sort))
-    return sql`${raw(`t.${quoteIdent(query.sort)}`)} ${direction}, t."id" ${direction}`;
+function sortSpec(columns: Column[], query: ResolvedRecordsQuery): SortSpec {
+  const fallback: SortSpec = { name: "id", nocase: false, direction: "asc" };
+  if (!query.sort) return fallback;
+  const direction = query.order === "desc" ? "desc" : "asc";
+
+  if (SYSTEM_SORTS.includes(query.sort)) return { name: query.sort, nocase: false, direction };
 
   const column = columns.find((item) => item.columnName === query.sort);
-  if (!column) return sql`t."id" asc`;
-  const collate = raw(NOCASE_FORMATS.includes(column.format as never) ? " collate nocase" : "");
-  return sql`${col(column.columnName)}${collate} ${direction}, t."id" ${direction}`;
+  if (!column) return fallback;
+  return {
+    name: column.columnName,
+    nocase: NOCASE_FORMATS.includes(column.format as never),
+    direction,
+  };
 }
 
-type GroupSpec = { column: string; format: string; key: Fragment; order: Fragment };
+const sortTarget = (spec: SortSpec) =>
+  raw(`t.${quoteIdent(spec.name)}${spec.nocase ? " collate nocase" : ""}`);
+
+type Key = { expr: Fragment; desc: boolean };
+
+function sortKeys(spec: SortSpec): Key[] {
+  const desc = spec.direction === "desc";
+  const id = { expr: sql`t."id"`, desc };
+  return spec.name === "id" ? [id] : [{ expr: sortTarget(spec), desc }, id];
+}
+
+const orderOf = (keys: Key[]) =>
+  sql.join(
+    keys.map((key) => sql`${key.expr} ${raw(key.desc ? "desc" : "asc")}`),
+    sql`, `,
+  );
+
+function keysAfter(keys: Key[], cursor: RecordCursor) {
+  const terms = keys.map((key, index) => {
+    const value = cursor[index];
+    const earlier = keys.slice(0, index).map((item, at) => sql`${item.expr} is ${cursor[at]}`);
+    const later =
+      value === null
+        ? key.desc
+          ? sql`0`
+          : sql`${key.expr} is not null`
+        : key.desc
+          ? sql`(${key.expr} < ${value} or ${key.expr} is null)`
+          : sql`${key.expr} > ${value}`;
+    return sql`(${sql.join([...earlier, later], sql` and `)})`;
+  });
+  return sql`(${sql.join(terms, sql` or `)})`;
+}
+
+function seekSegments(spec: SortSpec, cursor: RecordCursor): Fragment[] {
+  const ascending = spec.direction === "asc";
+  const idOp = raw(ascending ? ">" : "<");
+  if (spec.name === "id") return [sql`t."id" ${idOp} ${cursor[0]}`];
+
+  const [value, id] = cursor;
+  const bare = col(spec.name);
+
+  if (value === null)
+    return ascending
+      ? [sql`${bare} is null and t."id" > ${id}`, sql`${bare} is not null`]
+      : [sql`${bare} is null and t."id" < ${id}`];
+
+  const target = sortTarget(spec);
+  const inclusive = raw(ascending ? ">=" : "<=");
+  const strict = raw(ascending ? ">" : "<");
+  const after = sql`${target} ${inclusive} ${value} and (${target} ${strict} ${value} or (${target} = ${value} and t."id" ${idOp} ${id}))`;
+  return ascending ? [after] : [after, sql`${bare} is null`];
+}
+
+type GroupSpec = { column: string; format: string; key: Fragment; orders: Fragment[] };
 
 function groupSpec(columns: Column[], name: string, labelled: Set<string>): GroupSpec | undefined {
   const target = col(name);
@@ -142,7 +202,7 @@ function groupSpec(columns: Column[], name: string, labelled: Set<string>): Grou
       column: name,
       format: "user",
       key: target,
-      order: sql`${label} is null, ${label} collate nocase, ${target}`,
+      orders: [sql`${label} is null`, sql`${label} collate nocase`, target],
     };
   }
 
@@ -158,11 +218,11 @@ function groupSpec(columns: Column[], name: string, labelled: Set<string>): Grou
             sql` `,
           )} else ${choices.length} end`
         : sql`0`;
-      return { column: name, format: column.format, key: target, order: sql`${rank}, ${target}` };
+      return { column: name, format: column.format, key: target, orders: [rank, target] };
     }
     case "checkbox": {
       const key = sql`coalesce(${target}, 0)`;
-      return { column: name, format: column.format, key, order: key };
+      return { column: name, format: column.format, key, orders: [key] };
     }
     case "relation": {
       const label = raw(quoteIdent(`${name}__label`));
@@ -170,9 +230,9 @@ function groupSpec(columns: Column[], name: string, labelled: Set<string>): Grou
         column: name,
         format: column.format,
         key: target,
-        order: labelled.has(name)
-          ? sql`${target} is null, ${label} is null, ${label} collate nocase, ${target}`
-          : sql`${target} is null, ${target}`,
+        orders: labelled.has(name)
+          ? [sql`${target} is null`, sql`${label} is null`, sql`${label} collate nocase`, target]
+          : [sql`${target} is null`, target],
       };
     }
     default:
@@ -191,27 +251,71 @@ export async function findRecords(
   const { select, from, labelled } = await recordSource(workspace, table, columns, source);
   const condition = filterWhere(columns, query, ownerId);
   const grouping = query.group ? groupSpec(columns, query.group, labelled) : undefined;
-  const order = recordsOrder(columns, query);
-  const orderBy = grouping ? sql`${grouping.order}, ${order}` : order;
-  const columnsSql = grouping
-    ? sql`${select}, count(*) over (partition by ${grouping.key}) as "__group_count"`
-    : select;
+  const spec = sortSpec(columns, query);
+  const cursor = query.cursor ? decodeCursor(query.cursor) : null;
+  const limit = query.pageSize + 1;
 
-  const [rows, [{ n: total }]] = await Promise.all([
-    db.all<Record<string, unknown>>(
-      sql`select ${columnsSql} from ${from} where ${condition} order by ${orderBy} limit ${query.pageSize} offset ${(query.page - 1) * query.pageSize}`,
-    ),
-    db.all<{ n: number }>(sql`select count(*) as n from ${from} where ${condition}`),
-  ]);
+  if (!grouping) {
+    const keys = sortKeys(spec);
+    if (cursor && cursor.length !== keys.length) throw new Error("The page cursor is invalid.");
+    const order = orderOf(keys);
+    const segments = cursor ? seekSegments(spec, cursor) : [sql`1 = 1`];
+
+    const found: Record<string, unknown>[] = [];
+    for (const segment of segments) {
+      found.push(
+        ...(await db.all<Record<string, unknown>>(
+          sql`select ${select} from ${from} where ${condition} and ${segment} order by ${order} limit ${limit - found.length}`,
+        )),
+      );
+      if (found.length >= limit) break;
+    }
+
+    const rows = found.slice(0, query.pageSize);
+    const last = rows.at(-1);
+    const hasMore = found.length > query.pageSize;
+    const nextCursor =
+      hasMore && last
+        ? encodeCursor(
+            spec.name === "id"
+              ? [last.id as string | number]
+              : [(last[spec.name] as string | number | null) ?? null, last.id as string | number],
+          )
+        : null;
+
+    return { hasMore, nextCursor, rows: rows.map((row) => shapeRecord(row, columns)) };
+  }
+
+  const keys: Key[] = [
+    ...grouping.orders.map((expr) => ({ expr: sql`(${expr})`, desc: false })),
+    ...sortKeys(spec),
+  ];
+  if (cursor && cursor.length !== keys.length) throw new Error("The page cursor is invalid.");
+
+  const marks = sql.join(
+    keys.map((key, index) => sql`${key.expr} as ${raw(quoteIdent(`__k${index}`))}`),
+    sql`, `,
+  );
+  const after = cursor ? keysAfter(keys, cursor) : sql`1 = 1`;
+
+  const found = await db.all<Record<string, unknown>>(
+    sql`select t.*, ${marks} from (select ${select}, count(*) over (partition by ${grouping.key}) as "__group_count" from ${from} where ${condition}) t where ${after} order by ${orderOf(keys)} limit ${limit}`,
+  );
+
+  const rows = found.slice(0, query.pageSize);
+  const last = rows.at(-1);
+  const hasMore = found.length > query.pageSize;
+  const nextCursor =
+    hasMore && last
+      ? encodeCursor(keys.map((_, index) => last[`__k${index}`] as string | number | null))
+      : null;
 
   const shaped = rows.map((row) => shapeRecord(row, columns));
-  if (!grouping) return { total: Number(total), rows: shaped };
-
   const groups: Record<string, number> = {};
   rows.forEach((row, index) => {
     groups[groupKeyOf(grouping.format, shaped[index][grouping.column])] = Number(row.__group_count);
   });
-  return { total: Number(total), rows: shaped, group: grouping.column, groups };
+  return { hasMore, nextCursor, rows: shaped, group: grouping.column, groups };
 }
 
 export async function findRecord(

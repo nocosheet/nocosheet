@@ -6,7 +6,7 @@ import { DeleteRecordsDialog } from "../delete-records-dialog";
 import { RecordExport } from "../record-export";
 import type { ViewerRow } from "../records-grid";
 import type { GridTable } from "./use-grid-table";
-import type { RecordsQuery, SetRecordsQuery } from "./use-records-query";
+import type { RecordsPaging } from "./use-records-query";
 
 export function SelectionBar({
   workspace,
@@ -14,18 +14,16 @@ export function SelectionBar({
   select,
   grid,
   selected,
-  total,
-  query,
-  setQuery,
+  pageRows,
+  paging,
 }: {
   workspace: string;
   tableId: number;
   select: { canExport: boolean; canDelete: (row: ViewerRow) => boolean };
   grid: GridTable;
   selected: ViewerRow[];
-  total: number;
-  query: RecordsQuery;
-  setQuery: SetRecordsQuery;
+  pageRows: number;
+  paging: RecordsPaging;
 }) {
   return (
     <div className="flex flex-wrap items-center gap-2 border-t px-4 py-2">
@@ -44,8 +42,7 @@ export function SelectionBar({
             ids={selected.map((row) => row.id)}
             onDeleted={(deleted) => {
               grid.resetRowSelection();
-              const lastPage = Math.max(1, Math.ceil((total - deleted) / query.pageSize));
-              if (query.page > lastPage) void setQuery({ page: lastPage });
+              if (deleted >= pageRows && paging.canPrevious) paging.previous();
             }}
           />
         )}

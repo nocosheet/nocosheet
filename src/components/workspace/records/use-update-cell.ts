@@ -6,7 +6,7 @@ import { recordQueryOptions, updateRecordMutationOptions } from "@/data/workspac
 import type { ViewerColumn } from "./columns";
 import type { ViewerRow } from "./records-grid";
 
-type Page = { rows: ViewerRow[]; total: number };
+type Page = { rows: ViewerRow[] };
 
 const payloadOf = (column: ViewerColumn, value: unknown) => {
   if (value === undefined || value === "") return null;

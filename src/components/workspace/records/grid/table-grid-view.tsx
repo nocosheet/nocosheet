@@ -2,11 +2,12 @@ import { useEffect, useMemo } from "react";
 
 import { keepPreviousData, useQuery, useSuspenseQuery } from "@tanstack/react-query";
 
-import { DataTablePagination } from "@/components/shared/data-table/data-table-pagination";
+import { CursorPagination } from "@/components/shared/data-table/cursor-pagination";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { recordsQueryOptions } from "@/data/workspace/records";
 import { tableQueryOptions } from "@/data/workspace/tables";
 import { useAccess } from "@/hooks/use-access";
+import { RECORD_PAGE_SIZES } from "@/lib/records/query";
 import { cn } from "@/lib/utils";
 
 import { buildViewerColumns } from "../columns";
@@ -32,7 +33,7 @@ export function TableGridView({
   const access = useAccess();
   const { data: table } = useSuspenseQuery(tableQueryOptions(workspace, tableId));
   const columns = useMemo(() => buildViewerColumns(table), [table]);
-  const { query, setUrlQuery } = useRecordsQuery(columns);
+  const { query, setUrlQuery, paging } = useRecordsQuery(columns);
 
   const recordsOptions = recordsQueryOptions(workspace, tableId, query);
   const updateCell = useUpdateCell({ workspace, tableId, queryKey: recordsOptions.queryKey });
@@ -41,9 +42,16 @@ export function TableGridView({
     placeholderData: keepPreviousData,
   });
   const rows = (data?.rows ?? []) as ViewerRow[];
-  const total = data?.total ?? 0;
 
-  const grid = useGridTable({ columns, rows, total, query, setQuery: setUrlQuery });
+  const grid = useGridTable({
+    columns,
+    rows,
+    query,
+    setQuery: setUrlQuery,
+    paging,
+    hasMore: data?.hasMore ?? false,
+    nextCursor: data?.nextCursor ?? null,
+  });
   const { collapsed, toggle, reset } = useGroupCollapse();
 
   const groupColumn = columns.find((column) => column.key === query.group) ?? null;
@@ -69,9 +77,8 @@ export function TableGridView({
           }}
           grid={grid}
           selected={selectedRows}
-          total={total}
-          query={query}
-          setQuery={setUrlQuery}
+          pageRows={rows.length}
+          paging={paging}
         />
       ) : (
         <GridToolbar
@@ -99,8 +106,7 @@ export function TableGridView({
           table={grid}
           columns={columns}
           rows={rows}
-          page={query.page}
-          pageSize={query.pageSize}
+          rowOffset={paging.rowOffset}
           workspace={workspace}
           canEdit={access.can("update", tableId)}
           canEditRow={(row) => access.canOn("update", tableId, ownerOf(row))}
@@ -122,12 +128,7 @@ export function TableGridView({
         />
       </div>
       <div className="border-t px-4 py-2">
-        <DataTablePagination
-          page={query.page}
-          pageSize={query.pageSize}
-          total={total}
-          onPageChange={(page) => grid.setPageIndex(page - 1)}
-        />
+        <CursorPagination table={grid} count={rows.length} pageSizes={RECORD_PAGE_SIZES} />
       </div>
     </div>
   );

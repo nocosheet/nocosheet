@@ -56,8 +56,8 @@ export const viewRecordsQueryOptions = (
         fetch("/api/workspaces/:workspace/tables/:table/views/:view/records", {
           params: { workspace, table: String(tableId), view: String(viewId) },
           query: {
-            page: query.page,
             pageSize: query.pageSize,
+            ...(query.cursor ? { cursor: query.cursor } : {}),
             ...(query.sort ? { sort: query.sort, order: query.order } : {}),
             ...(query.q ? { q: query.q } : {}),
             ...(query.group ? { group: query.group } : {}),

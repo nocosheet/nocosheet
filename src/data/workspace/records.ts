@@ -19,8 +19,8 @@ export const recordsQueryOptions = (
         fetch("/api/workspaces/:workspace/tables/:table/records", {
           params: { workspace, table: String(tableId) },
           query: {
-            page: query.page,
             pageSize: query.pageSize,
+            ...(query.cursor ? { cursor: query.cursor } : {}),
             ...(query.sort ? { sort: query.sort, order: query.order } : {}),
             ...(query.q ? { q: query.q } : {}),
             ...(query.group ? { group: query.group } : {}),

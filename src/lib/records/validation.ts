@@ -1,3 +1,4 @@
+import { decodeCursor } from "./cursor";
 import { conditionError, filterKind, isSortableFormat } from "./filters";
 import { isGroupableColumn, isGroupableSystemKey } from "./grouping";
 import type { ResolvedRecordsQuery } from "./query";
@@ -33,6 +34,8 @@ export function checkRecordsQuery(columns: QueryColumn[], query: ResolvedRecords
     const column = byName.get(query.group);
     if (!column || !isGroupableColumn(column)) return `"${query.group}" can't be grouped.`;
   }
+
+  if (query.cursor && !decodeCursor(query.cursor)) return "The page cursor is invalid.";
 
   return undefined;
 }

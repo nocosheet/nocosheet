@@ -27,8 +27,7 @@ export function RecordsGrid<TSelected extends { rowSelection: Record<string, boo
   table,
   columns,
   rows,
-  page,
-  pageSize,
+  rowOffset,
   sort,
   order,
   empty,
@@ -46,8 +45,7 @@ export function RecordsGrid<TSelected extends { rowSelection: Record<string, boo
   table: ReactTable<typeof dataTableFeatures, ViewerRow, TSelected>;
   columns: ViewerColumn[];
   rows: ViewerRow[];
-  page: number;
-  pageSize: number;
+  rowOffset: number;
   sort: string | null;
   order: "asc" | "desc";
   empty: string;
@@ -92,7 +90,7 @@ export function RecordsGrid<TSelected extends { rowSelection: Record<string, boo
     table,
     byKey,
     dataIndex,
-    rowOffset: (page - 1) * pageSize,
+    rowOffset,
     workspace,
     canEdit,
     canEditRow,
