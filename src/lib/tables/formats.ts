@@ -185,6 +185,15 @@ export const formatsByGroup = FORMAT_GROUPS.map((group) => ({
 
 export const SEARCHABLE_FORMATS: ColumnFormat[] = ["text", "long_text"];
 
+export const NOCASE_FORMATS: ColumnFormat[] = [
+  "text",
+  "long_text",
+  "email",
+  "url",
+  "phone",
+  "color",
+];
+
 export const TITLE_FORMATS: ColumnFormat[] = [
   "text",
   "long_text",

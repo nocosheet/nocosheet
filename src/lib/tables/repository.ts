@@ -31,6 +31,7 @@ import {
   indexName,
   type RelationTarget,
 } from "./ddl";
+import type { ColumnFormat } from "./formats";
 import { newColumnName, newTableName, physicalTableName } from "./naming";
 import type { TablesQuery } from "./query";
 import type { ColumnValues, TableValues } from "./validation";
@@ -320,6 +321,7 @@ export async function updateColumn(
               physicalName,
               column.columnName,
               after,
+              column.format as ColumnFormat,
             ),
           ),
         ),
@@ -517,7 +519,7 @@ async function findLinkTargetsFromOutside(ids: number[]) {
 export async function purgeExpiredTables(workspace: string, cutoff: Date) {
   let doomed = await listExpiredTables(cutoff);
 
-  for (let blocked = true; blocked && doomed.length > 0; ) {
+  for (let blocked = true; blocked && doomed.length > 0;) {
     const stuck = new Set(await findLinkTargetsFromOutside(doomed.map((row) => row.id)));
     blocked = stuck.size > 0;
     doomed = doomed.filter((row) => !stuck.has(row.id));

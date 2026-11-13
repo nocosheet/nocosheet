@@ -48,12 +48,8 @@ const EMPTY = [
 
 export const OPERATORS = {
   text: [
-    { value: "contains", label: "contains", input: "text" },
-    { value: "not_contains", label: "does not contain", input: "text" },
     { value: "equals", label: "is", input: "text" },
     { value: "not_equals", label: "is not", input: "text" },
-    { value: "starts_with", label: "starts with", input: "text" },
-    { value: "ends_with", label: "ends with", input: "text" },
     ...EMPTY,
   ],
   number: [

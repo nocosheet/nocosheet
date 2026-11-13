@@ -1,5 +1,11 @@
-import { FORMATS, type SelectChoice, type SqliteType } from "./formats";
 import { compileExpression, ExpressionError } from "./expression";
+import {
+  FORMATS,
+  NOCASE_FORMATS,
+  type ColumnFormat,
+  type SelectChoice,
+  type SqliteType,
+} from "./formats";
 import { quoteIdent } from "./naming";
 import type { ColumnValues } from "./validation";
 
@@ -80,7 +86,9 @@ export function compileExpressions(
     const generated = column.generatedExpression
       ? compileExpression(column.generatedExpression, columns)
       : null;
-    const check = column.checkExpression ? compileExpression(column.checkExpression, columns) : null;
+    const check = column.checkExpression
+      ? compileExpression(column.checkExpression, columns)
+      : null;
     return { generated, check };
   } catch (error) {
     if (error instanceof ExpressionError) throw new DdlError(error.message);
@@ -105,8 +113,7 @@ function columnDefinition(
     if (literal !== null) parts.push(`DEFAULT ${literal}`);
   }
 
-  if (column.format === "checkbox")
-    parts.push(`CHECK (${quoteIdent(columnName)} IN (0, 1))`);
+  if (column.format === "checkbox") parts.push(`CHECK (${quoteIdent(columnName)} IN (0, 1))`);
   if (check) parts.push(`CHECK (${check.sql})`);
   if (column.format === "relation") parts.push(relationClause(column, targets));
 
@@ -146,8 +153,14 @@ export const buildCreateIndex = (
   physicalName: string,
   columnName: string,
   kind: IndexKind,
-) =>
-  `CREATE ${kind === "uq" ? "UNIQUE " : ""}INDEX ${quoteIdent(name)} ON ${quoteIdent(physicalName)} (${quoteIdent(columnName)})`;
+  format: ColumnFormat,
+) => {
+  const target = quoteIdent(columnName);
+  if (kind === "uq")
+    return `CREATE UNIQUE INDEX ${quoteIdent(name)} ON ${quoteIdent(physicalName)} (${target})`;
+  const collate = NOCASE_FORMATS.includes(format) ? " COLLATE NOCASE" : "";
+  return `CREATE INDEX ${quoteIdent(name)} ON ${quoteIdent(physicalName)} (${target}${collate}, "id")`;
+};
 
 export const buildDropIndex = (name: string) => `DROP INDEX IF EXISTS ${quoteIdent(name)}`;
 
@@ -169,7 +182,13 @@ export function buildAddColumn(
   const kind = indexKind(column);
   if (kind)
     statements.push(
-      buildCreateIndex(indexName(workspace, columnName, kind), physicalName, columnName, kind),
+      buildCreateIndex(
+        indexName(workspace, columnName, kind),
+        physicalName,
+        columnName,
+        kind,
+        column.format,
+      ),
     );
 
   return statements;

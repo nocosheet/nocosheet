@@ -2,7 +2,7 @@ import { columnTable, tableTable } from "@db/schema";
 import { and, db, eq, inArray, isNull, sql } from "void/db";
 import { sqliteTable, text } from "void/schema-d1";
 
-import { SEARCHABLE_FORMATS, type SelectChoice } from "../tables/formats";
+import { NOCASE_FORMATS, SEARCHABLE_FORMATS, type SelectChoice } from "../tables/formats";
 import { physicalTableName, quoteIdent } from "../tables/naming";
 import type { Column, Table } from "../tables/repository";
 import { conditionText } from "./condition";
@@ -13,8 +13,6 @@ import { shapeRecord } from "./shape";
 import type { ParsedValue } from "./values";
 
 type Fragment = ReturnType<typeof sql>;
-
-const TEXT_SORT_FORMATS = ["text", "long_text", "email", "url", "phone", "color", "single_select"];
 
 const SYSTEM_SORTS = ["id", "created_at", "updated_at"];
 
@@ -125,12 +123,12 @@ function recordsOrder(columns: Column[], query: ResolvedRecordsQuery) {
   const direction = raw(query.order === "desc" ? "desc" : "asc");
 
   if (SYSTEM_SORTS.includes(query.sort))
-    return sql`${raw(`t.${quoteIdent(query.sort)}`)} ${direction}, t."id" asc`;
+    return sql`${raw(`t.${quoteIdent(query.sort)}`)} ${direction}, t."id" ${direction}`;
 
   const column = columns.find((item) => item.columnName === query.sort);
   if (!column) return sql`t."id" asc`;
-  const collate = raw(TEXT_SORT_FORMATS.includes(column.format) ? " collate nocase" : "");
-  return sql`${col(column.columnName)} is null, ${col(column.columnName)}${collate} ${direction}, t."id" asc`;
+  const collate = raw(NOCASE_FORMATS.includes(column.format as never) ? " collate nocase" : "");
+  return sql`${col(column.columnName)}${collate} ${direction}, t."id" ${direction}`;
 }
 
 type GroupSpec = { column: string; format: string; key: Fragment; order: Fragment };

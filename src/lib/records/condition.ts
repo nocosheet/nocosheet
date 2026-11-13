@@ -5,13 +5,36 @@ import type { FilterCondition, FilterKind } from "./filters";
 export type Bind = (value: string | number) => string;
 
 const ref = (name: string) => `t.${quoteIdent(name)}`;
-const like = (value: string) => `%${value.replaceAll(/[\\%_]/g, "\\$&")}%`;
+
+const DAY_MS = 86_400_000;
 
 function dateText(column: Column) {
   const target = ref(column.columnName);
-  if (column.format === "datetime") return `date(${target} / 1000, 'unixepoch')`;
   if (column.format === "datetime_tz") return `date(${target})`;
   return target;
+}
+
+function dateCondition(column: Column, op: string, text: string, bind: Bind) {
+  if (column.format !== "datetime") {
+    const target = dateText(column);
+    const symbol = { eq: "=", before: "<", after: ">", on_or_before: "<=", on_or_after: ">=" }[op];
+    return `${target} ${symbol} ${bind(text)}`;
+  }
+
+  const target = ref(column.columnName);
+  const start = Date.parse(`${text}T00:00:00Z`);
+  switch (op) {
+    case "eq":
+      return `(${target} >= ${bind(start)} and ${target} < ${bind(start + DAY_MS)})`;
+    case "before":
+      return `${target} < ${bind(start)}`;
+    case "after":
+      return `${target} >= ${bind(start + DAY_MS)}`;
+    case "on_or_before":
+      return `${target} < ${bind(start + DAY_MS)}`;
+    default:
+      return `${target} >= ${bind(start)}`;
+  }
 }
 
 export function conditionText(
@@ -39,21 +62,13 @@ export function conditionText(
         : kind === "text" || kind === "single_select"
           ? `(${target} is not null and ${target} != '')`
           : `${target} is not null`;
-    case "contains":
-      return `${target} like ${bind(like(text))} escape '\\'`;
-    case "not_contains":
-      return `(${target} is null or ${target} not like ${bind(like(text))} escape '\\')`;
-    case "starts_with":
-      return `${target} like ${bind(`${like(text).slice(1, -1)}%`)} escape '\\'`;
-    case "ends_with":
-      return `${target} like ${bind(`%${like(text).slice(1, -1)}`)} escape '\\'`;
     case "equals":
       return `${target} = ${bind(text)} collate nocase`;
     case "not_equals":
       return `(${target} is null or ${target} != ${bind(text)} collate nocase)`;
     case "eq":
       return kind === "date"
-        ? `${dateText(column)} = ${bind(text)}`
+        ? dateCondition(column, "eq", text, bind)
         : `${target} = ${bind(Number(value))}`;
     case "neq":
       return `(${target} is null or ${target} != ${bind(Number(value))})`;
@@ -66,13 +81,10 @@ export function conditionText(
     case "lte":
       return `${target} <= ${bind(Number(value))}`;
     case "before":
-      return `${dateText(column)} < ${bind(text)}`;
     case "after":
-      return `${dateText(column)} > ${bind(text)}`;
     case "on_or_before":
-      return `${dateText(column)} <= ${bind(text)}`;
     case "on_or_after":
-      return `${dateText(column)} >= ${bind(text)}`;
+      return dateCondition(column, condition.op, text, bind);
     case "is":
       if (kind === "checkbox") return `coalesce(${target}, 0) = ${bind(value === true ? 1 : 0)}`;
       return `${target} = ${bind(text)}`;
