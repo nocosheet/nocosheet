@@ -3,7 +3,6 @@ import { mutationOptions, queryOptions } from "@tanstack/react-query";
 import { fetch } from "void/client";
 
 import { type ResolvedRecordsQuery, recordsKeyOf } from "@/lib/records/query";
-import type { TrashQuery } from "@/lib/trash/query";
 import type { ViewsQuery } from "@/lib/views/query";
 import type { ViewInput, ViewPatchInput } from "@/lib/views/validation";
 
@@ -141,20 +140,13 @@ export const deleteViewMutationOptions = mutationOptions({
     ),
 });
 
-export const deletedViewsQueryOptions = (workspace: string, tableId: number, query: TrashQuery) =>
+export const deletedViewsQueryOptions = (workspace: string, tableId: number) =>
   queryOptions({
-    queryKey: workspaceKeys.viewsTrash(tableId, query),
+    queryKey: workspaceKeys.viewsTrash(tableId),
     queryFn: () =>
       unwrapFetch(
         fetch("/api/workspaces/:workspace/tables/:table/views/trash", {
           params: { workspace, table: String(tableId) },
-          query: {
-            page: query.page,
-            pageSize: query.pageSize,
-            sort: query.sort,
-            order: query.order,
-            ...(query.q ? { q: query.q } : {}),
-          },
         }),
       ),
     staleTime: 15_000,

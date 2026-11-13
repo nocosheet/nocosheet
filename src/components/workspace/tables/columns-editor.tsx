@@ -29,7 +29,7 @@ import { TRASH_RETENTION_DAYS } from "@/lib/records/retention";
 import { ColumnDialog } from "./column-dialog";
 import { columnToDraft, type ColumnDraft } from "./column-draft";
 import { ColumnsList } from "./columns-list";
-import { DeletedColumnsDialog } from "./deleted-columns-dialog";
+import { DeletedColumnsSheet } from "./deleted-columns-sheet";
 
 function useTableData(workspace: string, tableId: number) {
   return useSuspenseQuery(tableQueryOptions(workspace, tableId));
@@ -154,7 +154,7 @@ export function ColumnsEditor({ workspace, tableId }: { workspace: string; table
         onSave={save}
       />
 
-      <DeletedColumnsDialog
+      <DeletedColumnsSheet
         workspace={workspace}
         tableId={tableId}
         open={trashOpen}

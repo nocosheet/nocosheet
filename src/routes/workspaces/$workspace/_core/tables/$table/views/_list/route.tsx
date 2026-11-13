@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
 
 import { PlusIcon, Trash2Icon } from "lucide-react";
 
@@ -13,7 +13,7 @@ import { viewsPageQueryOptions } from "@/data/workspace/views";
 import { useWorkspace } from "@/hooks/use-workspace";
 import { resolveViewsQuery, validateViewsSearch } from "@/lib/views/query";
 
-export const Route = createFileRoute("/workspaces/$workspace/_core/tables/$table/views/")({
+export const Route = createFileRoute("/workspaces/$workspace/_core/tables/$table/views/_list")({
   validateSearch: validateViewsSearch,
   loaderDeps: ({ search }) => resolveViewsQuery(search),
   loader: ({ context, deps, params }) => {
@@ -59,6 +59,7 @@ function ViewsPage() {
           placeholder={<ViewsEmpty onCreate={() => setCreating(true)} />}
         />
       </WorkspaceContent>
+      <Outlet />
       {isAdmin && (
         <ViewDialog
           workspace={workspace}

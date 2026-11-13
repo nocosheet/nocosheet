@@ -33,13 +33,4 @@ export const resolveTrashQuery = (search: Partial<TrashQuery>): TrashQuery => ({
   q: search.q ?? trashSearchParams.q.defaultValue,
 });
 
-export const validateTrashSearch = (search: Record<string, unknown>): Partial<TrashQuery> => {
-  const result: Record<string, unknown> = {};
-  for (const key of Object.keys(trashSearchParams) as (keyof TrashQuery)[]) {
-    const raw = search[key];
-    if (typeof raw !== "string" && typeof raw !== "number") continue;
-    const parsed = trashSearchParams[key].parseServerSide(String(raw));
-    if (parsed !== null) result[key] = parsed;
-  }
-  return result;
-};
+export const TRASH_LIST_LIMIT = 200;

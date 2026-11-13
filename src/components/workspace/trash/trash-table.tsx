@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { type ColumnDef, functionalUpdate, useTable } from "@tanstack/react-table";
 
 import { SearchIcon } from "lucide-react";
-import { useQueryStates } from "nuqs";
 
 import { DataTable } from "@/components/shared/data-table/data-table";
 import { DataTablePagination } from "@/components/shared/data-table/data-table-pagination";
@@ -11,11 +10,11 @@ import { DataTableViewOptions } from "@/components/shared/data-table/data-table-
 import { dataTableFeatures } from "@/components/shared/data-table/features";
 import { Frame, FrameFooter } from "@/components/ui/frame";
 import { Input } from "@/components/ui/input";
-import { trashSearchParams, type TrashQuery } from "@/lib/trash/query";
+import { resolveTrashQuery, type TrashQuery } from "@/lib/trash/query";
 
 export function useTrashQuery() {
-  const [query, setQuery] = useQueryStates(trashSearchParams, { history: "replace" });
-  return [query, (patch: Partial<TrashQuery>) => void setQuery(patch)] as const;
+  const [query, setQuery] = useState<TrashQuery>(() => resolveTrashQuery({}));
+  return [query, (patch: Partial<TrashQuery>) => setQuery((previous) => ({ ...previous, ...patch }))] as const;
 }
 
 export function TrashTable<TRow extends { id: number }>({

@@ -13,7 +13,7 @@ export const workspaceKeys = {
   columnsTrash: (id: number) => [...workspaceKeys.table(id), "columns-trash"] as const,
   views: (id: number) => [...workspaceKeys.table(id), "views"] as const,
   viewList: (id: number, query: object) => [...workspaceKeys.views(id), "list", query] as const,
-  viewsTrash: (id: number, query: object) => [...workspaceKeys.views(id), "trash", query] as const,
+  viewsTrash: (id: number) => [...workspaceKeys.views(id), "trash"] as const,
   trash: (id: number) => [...workspaceKeys.table(id), "trash"] as const,
   trashList: (id: number, query: object) => [...workspaceKeys.trash(id), "list", query] as const,
   trashEntry: (id: number, entryId: number) =>
@@ -23,10 +23,7 @@ export const workspaceKeys = {
   recordOptions: (id: number, term: string) =>
     [...workspaceKeys.table(id), "options", term] as const,
   sidebar: () => [...workspaceKeys.tables(), "sidebar"] as const,
-  tablesTrash: (query?: object) =>
-    (query
-      ? [...workspaceKeys.tables(), "trash", query]
-      : [...workspaceKeys.tables(), "trash"]) as readonly unknown[],
+  tablesTrash: () => [...workspaceKeys.tables(), "trash"] as const,
   tableList: (query: object) => [...workspaceKeys.tables(), "list", query] as const,
   table: (id: number) => [...workspaceKeys.tables(), id] as const,
   mutation: (name: string) => [...workspaceKeys.all, name] as const,

@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
 
 import { PlusIcon, Trash2Icon } from "lucide-react";
 
@@ -10,7 +10,7 @@ import { tablesQueryOptions } from "@/data/workspace/tables";
 import { useWorkspace } from "@/hooks/use-workspace";
 import { resolveTablesQuery, validateTablesSearch } from "@/lib/tables/query";
 
-export const Route = createFileRoute("/workspaces/$workspace/_core/tables/")({
+export const Route = createFileRoute("/workspaces/$workspace/_core/tables/_list")({
   validateSearch: validateTablesSearch,
   loaderDeps: ({ search }) => resolveTablesQuery(search),
   loader: ({ context, deps, params }) =>
@@ -52,6 +52,7 @@ function TablesPage() {
           placeholder={<TablesEmpty workspace={workspace} />}
         />
       </WorkspaceContent>
+      <Outlet />
     </>
   );
 }

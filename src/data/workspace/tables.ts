@@ -9,7 +9,6 @@ import type {
   TableInput,
   TableUpdateInput,
 } from "@/lib/tables/validation";
-import type { TrashQuery } from "@/lib/trash/query";
 
 import { unwrapFetch } from "./api-error";
 import { workspaceKeys } from "./keys";
@@ -81,22 +80,11 @@ export const discardTableMutationOptions = mutationOptions({
     ),
 });
 
-export const deletedTablesQueryOptions = (workspace: string, query: TrashQuery) =>
+export const deletedTablesQueryOptions = (workspace: string) =>
   queryOptions({
-    queryKey: workspaceKeys.tablesTrash(query),
+    queryKey: workspaceKeys.tablesTrash(),
     queryFn: () =>
-      unwrapFetch(
-        fetch("/api/workspaces/:workspace/tables/trash", {
-          params: { workspace },
-          query: {
-            page: query.page,
-            pageSize: query.pageSize,
-            sort: query.sort,
-            order: query.order,
-            ...(query.q ? { q: query.q } : {}),
-          },
-        }),
-      ),
+      unwrapFetch(fetch("/api/workspaces/:workspace/tables/trash", { params: { workspace } })),
     staleTime: 15_000,
     retry: false,
   });

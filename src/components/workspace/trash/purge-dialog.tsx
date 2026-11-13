@@ -41,7 +41,9 @@ export function PurgeDialog({
       }}
     >
       <AlertDialogTrigger
-        render={<Button variant="ghost" size="icon-sm" aria-label={`Delete ${label} forever`} />}
+        render={
+          <Button variant="destructive-outline" size="icon-sm" aria-label={`Delete ${label} forever`} />
+        }
       >
         <Trash2Icon />
       </AlertDialogTrigger>

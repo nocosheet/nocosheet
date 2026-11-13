@@ -3,7 +3,7 @@ import { and, asc, count, db, desc, eq, inArray, isNotNull, isNull, lt, or, sql 
 
 import { physicalTableName } from "../tables/naming";
 import type { Column, Table } from "../tables/repository";
-import type { TrashQuery } from "../trash/query";
+import { TRASH_LIST_LIMIT } from "../trash/query";
 import { buildCreateView, buildDropView } from "./ddl";
 import { newViewName, physicalViewName } from "./naming";
 import type { ViewsQuery } from "./query";
@@ -196,44 +196,27 @@ export async function purgeExpiredViews(workspace: string, cutoff: Date) {
   return expired.length;
 }
 
-export async function listDeletedViews(tableId: number, query: TrashQuery) {
-  const pattern = query.q ? `%${query.q.replaceAll(/[\\%_]/g, "\\$&")}%` : null;
-  const where = and(
-    eq(viewTable.tableId, tableId),
-    isNotNull(viewTable.deletedAt),
-    pattern ? sql`${viewTable.name} like ${pattern} escape '\\'` : undefined,
-  );
-  const sortExpression =
-    query.sort === "name" ? sql`lower(${viewTable.name})` : viewTable.deletedAt;
-  const direction = query.order === "desc" ? desc : asc;
+export async function listDeletedViews(tableId: number) {
+  const rows = await db
+    .select({
+      id: viewTable.id,
+      name: viewTable.name,
+      description: viewTable.description,
+      icon: viewTable.icon,
+      deletedAt: viewTable.deletedAt,
+      deletedBy: viewTable.deletedBy,
+      deletedByName: sql<
+        string | null
+      >`(select u."name" from "user" u where u."id" = ${viewTable.deletedBy})`,
+    })
+    .from(viewTable)
+    .where(and(eq(viewTable.tableId, tableId), isNotNull(viewTable.deletedAt)))
+    .orderBy(desc(viewTable.deletedAt), asc(viewTable.id))
+    .limit(TRASH_LIST_LIMIT);
 
-  const [rows, [{ total }]] = await db.batch([
-    db
-      .select({
-        id: viewTable.id,
-        name: viewTable.name,
-        description: viewTable.description,
-        icon: viewTable.icon,
-        deletedAt: viewTable.deletedAt,
-        deletedBy: viewTable.deletedBy,
-        deletedByName: sql<
-          string | null
-        >`(select u."name" from "user" u where u."id" = ${viewTable.deletedBy})`,
-      })
-      .from(viewTable)
-      .where(where)
-      .orderBy(direction(sortExpression), asc(viewTable.id))
-      .limit(query.pageSize)
-      .offset((query.page - 1) * query.pageSize),
-    db.select({ total: count() }).from(viewTable).where(where),
-  ]);
-
-  return {
-    rows: rows.map(({ deletedBy, deletedByName, ...row }) => ({
-      ...row,
-      deletedAt: row.deletedAt?.getTime() ?? 0,
-      deletedBy: deletedBy ? { id: deletedBy, label: deletedByName } : null,
-    })),
-    total,
-  };
+  return rows.map(({ deletedBy, deletedByName, ...row }) => ({
+    ...row,
+    deletedAt: row.deletedAt?.getTime() ?? 0,
+    deletedBy: deletedBy ? { id: deletedBy, label: deletedByName } : null,
+  }));
 }

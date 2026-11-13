@@ -15,7 +15,7 @@ import {
   sql,
 } from "void/db";
 
-import type { TrashQuery } from "../trash/query";
+import { TRASH_LIST_LIMIT } from "../trash/query";
 import { buildDropView } from "../views/ddl";
 import { physicalViewName } from "../views/naming";
 import {
@@ -137,7 +137,8 @@ export async function listDeletedColumns(tableId: number) {
     })
     .from(columnTable)
     .where(and(eq(columnTable.tableId, tableId), isNotNull(columnTable.deletedAt)))
-    .orderBy(desc(columnTable.deletedAt), asc(columnTable.id));
+    .orderBy(desc(columnTable.deletedAt), asc(columnTable.id))
+    .limit(TRASH_LIST_LIMIT);
 
   return rows.map(({ deletedBy, deletedByName, ...row }) => ({
     ...row,
@@ -540,44 +541,28 @@ export async function dropTables(workspace: string, rows: { id: number; tableNam
   ] as never);
 }
 
-export async function listDeletedTables(query: TrashQuery) {
-  const pattern = query.q ? `%${query.q.replaceAll(/[\\%_]/g, "\\$&")}%` : null;
-  const where = and(
-    isNotNull(tableTable.deletedAt),
-    pattern ? or(sql`${tableTable.name} like ${pattern} escape '\\'`) : undefined,
-  );
-  const sortExpression =
-    query.sort === "name" ? sql`lower(${tableTable.name})` : tableTable.deletedAt;
-  const direction = query.order === "desc" ? desc : asc;
+export async function listDeletedTables() {
+  const rows = await db
+    .select({
+      id: tableTable.id,
+      name: tableTable.name,
+      icon: tableTable.icon,
+      deletedAt: tableTable.deletedAt,
+      deletedBy: tableTable.deletedBy,
+      deletedByName: sql<
+        string | null
+      >`(select u."name" from "user" u where u."id" = ${tableTable.deletedBy})`,
+    })
+    .from(tableTable)
+    .where(isNotNull(tableTable.deletedAt))
+    .orderBy(desc(tableTable.deletedAt), asc(tableTable.id))
+    .limit(TRASH_LIST_LIMIT);
 
-  const [rows, [{ total }]] = await db.batch([
-    db
-      .select({
-        id: tableTable.id,
-        name: tableTable.name,
-        icon: tableTable.icon,
-        deletedAt: tableTable.deletedAt,
-        deletedBy: tableTable.deletedBy,
-        deletedByName: sql<
-          string | null
-        >`(select u."name" from "user" u where u."id" = ${tableTable.deletedBy})`,
-      })
-      .from(tableTable)
-      .where(where)
-      .orderBy(direction(sortExpression), asc(tableTable.id))
-      .limit(query.pageSize)
-      .offset((query.page - 1) * query.pageSize),
-    db.select({ total: count() }).from(tableTable).where(where),
-  ]);
-
-  return {
-    rows: rows.map(({ deletedBy, deletedByName, ...row }) => ({
-      ...row,
-      deletedAt: row.deletedAt?.getTime() ?? 0,
-      deletedBy: deletedBy ? { id: deletedBy, label: deletedByName } : null,
-    })),
-    total,
-  };
+  return rows.map(({ deletedBy, deletedByName, ...row }) => ({
+    ...row,
+    deletedAt: row.deletedAt?.getTime() ?? 0,
+    deletedBy: deletedBy ? { id: deletedBy, label: deletedByName } : null,
+  }));
 }
 
 export async function findDeletedTable(id: number) {
