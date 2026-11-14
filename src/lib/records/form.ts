@@ -42,7 +42,7 @@ function toFormValue(column: FormColumn, value: unknown): FormValue {
     case "json":
       return JSON.stringify(value, null, 2);
     case "relation":
-      return String((value as { id: string | number }).id);
+      return String((value as { id: number }).id);
     default:
       return String(value as string | number);
   }

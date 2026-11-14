@@ -1,4 +1,3 @@
-import { randomUUID } from "node:crypto";
 import type { SeedContext } from "void/seed";
 
 import type { FilterCondition } from "../../src/lib/records/filters";
@@ -80,7 +79,6 @@ export type SeedTable = {
   icon: string;
   group?: string;
   description: string;
-  idType?: "increment" | "uuid";
   title: string;
   columns: SeedColumn[];
   rows: SeedRow[];
@@ -89,7 +87,6 @@ export type SeedTable = {
 
 type Seeded = {
   id: number;
-  idType: "increment" | "uuid";
   physicalName: string;
   titles: Map<string, string | number>;
 };
@@ -118,7 +115,6 @@ export async function seedTable(
   position: number,
   users: SeedUsers,
 ) {
-  const idType = def.idType ?? "increment";
   const tableName = newTableName();
   const physicalName = physicalTableName(WORKSPACE, tableName);
 
@@ -134,18 +130,17 @@ export async function seedTable(
     description: def.description,
     icon: def.icon,
     groupName: def.group ?? null,
-    idType,
     position,
     createdBy: users.admin,
     createdAt: new Date(at(-90 + position)),
     updatedAt: new Date(at(-3 - position)),
   });
 
-  db.run(buildCreateTable({ idType, physicalName }));
+  db.run(buildCreateTable(physicalName));
 
   const targets = new Map<number, RelationTarget>();
   for (const seeded of state.values())
-    targets.set(seeded.id, { physicalName: seeded.physicalName, idType: seeded.idType });
+    targets.set(seeded.id, { physicalName: seeded.physicalName });
 
   const columns = def.columns.map((spec, index) => {
     const relation = spec.relation ? state.get(spec.relation) : undefined;
@@ -221,11 +216,11 @@ export async function seedTable(
     `UPDATE ${quoteIdent(`${WORKSPACE}__table`)} SET title_column_id = ${titleId} WHERE id = ${resource.id}`,
   );
 
-  const seeded: Seeded = { id: resource.id, idType, physicalName, titles: new Map() };
+  const seeded: Seeded = { id: resource.id, physicalName, titles: new Map() };
   const writable = columns.filter(({ column }) => !column.generatedExpression);
 
   def.rows.forEach((row, index) => {
-    const id = idType === "uuid" ? randomUUID() : index + 1;
+    const id = index + 1;
     const created = at(
       -Math.round(((def.rows.length - index) * 60) / def.rows.length),
       9 + (index % 8),

@@ -824,14 +824,6 @@
           "notNull": false,
           "autoincrement": false
         },
-        "id_type": {
-          "name": "id_type",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "'increment'"
-        },
         "position": {
           "name": "position",
           "type": "integer",

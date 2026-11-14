@@ -18,7 +18,7 @@ import { SelectButton } from "@/components/ui/select";
 import type { ViewerColumn } from "./columns";
 import { useRelationItems, type RelationItem } from "./relation-items";
 
-const NONE_ITEM: RelationItem = { value: "__none__", label: "None", id: "" };
+const NONE_ITEM: RelationItem = { value: "__none__", label: "None", id: 0 };
 
 export function RelationCombobox({
   id,
@@ -48,7 +48,7 @@ export function RelationCombobox({
   const items = column.required || search.trim() ? results : [NONE_ITEM, ...results];
   const picked = useRef<RelationItem | null>(null);
 
-  const reference = current as { id: string | number; label: string | null } | null;
+  const reference = current as { id: number; label: string | null } | null;
   const found: RelationItem | null =
     value === ""
       ? column.required
@@ -58,7 +58,7 @@ export function RelationCombobox({
         (picked.current?.value === value ? picked.current : null) ??
         (reference && String(reference.id) === value
           ? { value, label: reference.label ?? `#${reference.id}`, id: reference.id }
-          : { value, label: `#${value}`, id: value }));
+          : { value, label: `#${value}`, id: Number(value) }));
   const selected = useMemo(() => found, [found?.value, found?.label]);
 
   return (

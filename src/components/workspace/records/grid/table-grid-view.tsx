@@ -27,7 +27,7 @@ export function TableGridView({
 }: {
   workspace: string;
   tableId: number;
-  onOpenRecord?: (id: string | number) => void;
+  onOpenRecord?: (id: number) => void;
 }) {
   const access = useAccess();
   const { data: table } = useSuspenseQuery(tableQueryOptions(workspace, tableId));

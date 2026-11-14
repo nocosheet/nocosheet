@@ -29,7 +29,7 @@ export function ViewGridView({
   workspace: string;
   tableId: number;
   view: ViewScope;
-  onOpenRecord?: (id: string | number) => void;
+  onOpenRecord?: (id: number) => void;
 }) {
   const access = useAccess();
   const { data: table } = useSuspenseQuery(tableQueryOptions(workspace, tableId));

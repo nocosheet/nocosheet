@@ -10,7 +10,7 @@ export function RelationCell({ value }: CellProps) {
 }
 
 export function RelationEditor({ workspace, row, column, onRowChange, onClose }: EditorProps) {
-  const current = row[column.key] as { id: string | number; label: string | null } | null;
+  const current = row[column.key] as { id: number; label: string | null } | null;
 
   return (
     <RelationCombobox

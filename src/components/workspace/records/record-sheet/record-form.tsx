@@ -177,7 +177,7 @@ export function RecordForm({
   tableName: string;
   columns: ViewerColumn[];
   record?: Record<string, unknown>;
-  recordId?: string;
+  recordId?: number;
   disabled?: boolean;
   status?: string;
   error?: Error | null;

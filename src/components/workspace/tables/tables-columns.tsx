@@ -24,8 +24,6 @@ function TableName({ id, name }: { id: number; name: string }) {
 }
 import type { TablesRow } from "./tables-table";
 
-const ID_TYPE_LABELS = { increment: "Auto-increment", uuid: "UUID" } as const;
-
 export const tablesColumns: ColumnDef<typeof dataTableFeatures, TablesRow>[] = [
   {
     id: "select",
@@ -89,14 +87,6 @@ export const tablesColumns: ColumnDef<typeof dataTableFeatures, TablesRow>[] = [
     accessorKey: "columnCount",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Columns" />,
     cell: ({ row }) => <span className="tabular-nums">{row.original.columnCount}</span>,
-  },
-  {
-    id: "idType",
-    meta: { label: "Record id" },
-    accessorKey: "idType",
-    header: "Record id",
-    enableSorting: false,
-    cell: ({ row }) => ID_TYPE_LABELS[row.original.idType],
   },
   {
     id: "updatedAt",

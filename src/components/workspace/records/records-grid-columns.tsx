@@ -13,7 +13,7 @@ import { NamedIcon } from "@/components/workspace/tables/named-icon";
 import { CellEditor, CellValue, cellMode } from "./cells";
 import type { ViewerColumn } from "./columns";
 
-export type ViewerRow = Record<string, unknown> & { id: string | number };
+export type ViewerRow = Record<string, unknown> & { id: number };
 
 export function useRecordsGridColumns<TSelected extends { rowSelection: Record<string, boolean> }>({
   table,
@@ -30,7 +30,7 @@ export function useRecordsGridColumns<TSelected extends { rowSelection: Record<s
   workspace: string;
   canEdit: boolean;
   canEditRow: (row: ViewerRow) => boolean;
-  onOpenRecord?: (id: string | number) => void;
+  onOpenRecord?: (id: number) => void;
   onCellChange: (original: ViewerRow, draft: ViewerRow, column: ViewerColumn) => void;
   selectable: boolean;
 }) {
@@ -63,9 +63,7 @@ export function useRecordsGridColumns<TSelected extends { rowSelection: Record<s
         },
         renderCell: ({ row }) => (
           <>
-            <span className="records-row-index" title={String(row.id)}>
-              {String(row.id).slice(0, 8)}
-            </span>
+            <span className="records-row-index">{row.id}</span>
             {selectable && (
               <Checkbox
                 aria-label="Select row"

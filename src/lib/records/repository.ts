@@ -1,20 +1,19 @@
 import { columnTable, tableTable } from "@db/schema";
 import { and, db, eq, inArray, isNull, sql } from "void/db";
-import { sqliteTable, text } from "void/schema-d1";
+import { integer, sqliteTable, text } from "void/schema-d1";
 
 import { NOCASE_FORMATS, SEARCHABLE_FORMATS } from "../tables/formats";
 import { physicalTableName, quoteIdent } from "../tables/naming";
 import type { Column, Table } from "../tables/repository";
 import { conditionText } from "./condition";
 import { decodeCursor, encodeCursor, type RecordCursor } from "./cursor";
-import { SYSTEM_SORT_KEYS } from "./sort-param";
 import { type FilterCondition, filterKind } from "./filters";
 import type { TypedRecordsQuery } from "./query";
 import { shapeRecord } from "./shape";
+import { SYSTEM_SORT_KEYS } from "./sort-param";
 import type { ParsedValue } from "./values";
 
 type Fragment = ReturnType<typeof sql>;
-
 
 const RECORD_OPTIONS_LIMIT = 10;
 const EXPORT_LIMIT = 10_000;
@@ -207,8 +206,8 @@ export async function findRecords(
   const keyOf = (row: Record<string, unknown>) =>
     encodeCursor(
       spec.name === "id"
-        ? [row.id as string | number]
-        : [(row[spec.name] as string | number | null) ?? null, row.id as string | number],
+        ? [row.id as number]
+        : [(row[spec.name] as string | number | null) ?? null, row.id as number],
     );
 
   const hasMore = found.length > query.pageSize;
@@ -233,7 +232,7 @@ export async function findRecord(
   workspace: string,
   table: Table,
   columns: Column[],
-  recordId: string,
+  recordId: number,
   ownerId?: string,
 ) {
   const { select, from } = await recordSource(workspace, table, columns);
@@ -290,7 +289,7 @@ export async function findRecordOptions(
   if (term) conditions.push(sql`cast(${label} as text) like ${like(term)} escape '\\'`);
   const where = conditions.length ? sql`where ${sql.join(conditions, sql` and `)}` : sql``;
 
-  return db.all<{ id: string | number; label: string | null }>(
+  return db.all<{ id: number; label: string | null }>(
     sql`select t."id" as "id", ${title ? sql`cast(${label} as text)` : sql`null`} as "label" from ${source} ${where} order by t."id" limit ${RECORD_OPTIONS_LIMIT}`,
   );
 }
@@ -325,7 +324,9 @@ export async function findBrokenLink(
 export function recordsTable(workspace: string, table: Table, names: string[] = []) {
   return sqliteTable(
     physicalTableName(workspace, table.tableName),
-    Object.fromEntries(["id", ...names].map((name) => [name, text(name)])),
+    Object.fromEntries(
+      ["id", ...names].map((name) => [name, name === "id" ? integer(name) : text(name)]),
+    ),
   );
 }
 
@@ -352,14 +353,14 @@ export async function createRecordRow(
   const [created] = (await insertRecord(workspace, table, parsed, {
     created_by: userId,
     updated_by: userId,
-  })) as { id: string | number }[];
+  })) as { id: number }[];
   return created;
 }
 
 export async function updateRecordRow(
   workspace: string,
   table: Table,
-  recordId: string,
+  recordId: number,
   parsed: ParsedValue<Column>[],
   userId: string,
   ownerId?: string,
@@ -381,7 +382,7 @@ export async function updateRecordRow(
 export async function countOwnedRecords(
   workspace: string,
   table: Table,
-  ids: (string | number)[],
+  ids: number[],
   ownerId: string,
 ) {
   const unique = [...new Set(ids)];

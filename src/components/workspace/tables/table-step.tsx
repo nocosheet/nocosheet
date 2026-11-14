@@ -1,16 +1,13 @@
 import { useForm } from "@tanstack/react-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { ArrowRightIcon, ChevronDownIcon } from "lucide-react";
+import { ArrowRightIcon } from "lucide-react";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Collapsible, CollapsiblePanel, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Field, FieldDescription, FieldError, FieldLabel } from "@/components/ui/field";
 import { Form } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Radio, RadioGroup } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 import { workspaceKeys } from "@/data/workspace/keys";
 import { createTableMutationOptions } from "@/data/workspace/tables";
@@ -27,17 +24,7 @@ type TableFormValues = {
   icon: string;
   groupName: string;
   description: string;
-  idType: "increment" | "uuid";
 };
-
-const ID_TYPES = [
-  {
-    value: "increment",
-    title: "Auto-increment number",
-    hint: "1, 2, 3… Compact and easy to read.",
-  },
-  { value: "uuid", title: "UUID", hint: "Random, unguessable ids that are safe to share." },
-] as const;
 
 export function TableStep({ onDone }: { onDone: (tableId: number) => void }) {
   const queryClient = useQueryClient();
@@ -57,7 +44,6 @@ export function TableStep({ onDone }: { onDone: (tableId: number) => void }) {
       icon: DEFAULT_TABLE_ICON,
       groupName: "",
       description: "",
-      idType: "increment",
     } as TableFormValues,
     validators: { onSubmit: formSchema<TableFormValues>(tableInputSchema) },
     onSubmit: ({ value }) => createTable.mutate({ workspace, ...value }),
@@ -146,42 +132,6 @@ export function TableStep({ onDone }: { onDone: (tableId: number) => void }) {
               </Field>
             )}
           </form.Field>
-
-          <Collapsible>
-            <CollapsibleTrigger
-              render={<Button type="button" variant="ghost" size="sm" className="-ms-2" />}
-            >
-              <ChevronDownIcon />
-              Advanced
-            </CollapsibleTrigger>
-            <CollapsiblePanel>
-              <div className="flex flex-col gap-4 pt-3">
-                <form.Field name="idType">
-                  {(field) => (
-                    <Field name={field.name}>
-                      <FieldLabel>Record id</FieldLabel>
-                      <RadioGroup
-                        value={field.state.value}
-                        onValueChange={(value) => field.handleChange(value as "increment" | "uuid")}
-                      >
-                        {ID_TYPES.map((item) => (
-                          <Label key={item.value} className="items-start gap-2">
-                            <Radio value={item.value} className="mt-0.5" />
-                            <span className="flex flex-col gap-0.5">
-                              <span className="font-medium text-sm">{item.title}</span>
-                              <span className="font-normal text-muted-foreground text-sm">
-                                {item.hint}
-                              </span>
-                            </span>
-                          </Label>
-                        ))}
-                      </RadioGroup>
-                    </Field>
-                  )}
-                </form.Field>
-              </div>
-            </CollapsiblePanel>
-          </Collapsible>
 
           {createTable.error && (
             <Alert variant="error">

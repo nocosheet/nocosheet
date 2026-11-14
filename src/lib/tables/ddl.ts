@@ -11,15 +11,7 @@ import type { ColumnValues } from "./validation";
 
 export class DdlError extends Error {}
 
-export type RelationTarget = { physicalName: string; idType: "increment" | "uuid" };
-
-export type CreateTableSpec = {
-  physicalName: string;
-  idType: "increment" | "uuid";
-};
-
-const UUID_DEFAULT =
-  "(lower(hex(randomblob(4))) || '-' || lower(hex(randomblob(2))) || '-4' || substr(lower(hex(randomblob(2))), 2) || '-' || substr('89ab', abs(random()) % 4 + 1, 1) || substr(lower(hex(randomblob(2))), 2) || '-' || lower(hex(randomblob(6))))";
+export type RelationTarget = { physicalName: string };
 
 const NOW_MS = "(cast(unixepoch('subsec') * 1000 as integer))";
 
@@ -30,9 +22,9 @@ export function columnSqliteType(
   targets: Map<number, RelationTarget>,
 ): SqliteType {
   if (column.format === "relation") {
-    const target = targets.get(Number(column.options.tableId));
-    if (!target) throw new DdlError("The linked table does not exist");
-    return target.idType === "uuid" ? "text" : "integer";
+    if (!targets.has(Number(column.options.tableId)))
+      throw new DdlError("The linked table does not exist");
+    return "integer";
   }
   return FORMATS[column.format].type as SqliteType;
 }
@@ -127,13 +119,10 @@ const trackingDefinitions = () => [
   `"updated_by" TEXT REFERENCES "user" ("id") ON DELETE SET NULL`,
 ];
 
-export function buildCreateTable(spec: CreateTableSpec) {
-  const id =
-    spec.idType === "uuid"
-      ? `"id" TEXT PRIMARY KEY NOT NULL DEFAULT ${UUID_DEFAULT}`
-      : `"id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL`;
+export function buildCreateTable(physicalName: string) {
+  const id = `"id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL`;
 
-  return `CREATE TABLE ${quoteIdent(spec.physicalName)} (\n  ${[id, ...trackingDefinitions()].join(",\n  ")}\n)`;
+  return `CREATE TABLE ${quoteIdent(physicalName)} (\n  ${[id, ...trackingDefinitions()].join(",\n  ")}\n)`;
 }
 
 export type IndexKind = "uq" | "idx";

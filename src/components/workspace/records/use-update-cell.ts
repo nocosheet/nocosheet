@@ -10,7 +10,7 @@ type Page = { rows: ViewerRow[] };
 
 const payloadOf = (column: ViewerColumn, value: unknown) => {
   if (value === undefined || value === "") return null;
-  if (column.format === "relation") return (value as { id: string | number } | null)?.id ?? null;
+  if (column.format === "relation") return (value as { id: number } | null)?.id ?? null;
   return value;
 };
 
@@ -26,11 +26,9 @@ export function useUpdateCell({
   const queryClient = useQueryClient();
   const mutation = useMutation(updateRecordMutationOptions);
 
-  const replaceRow = (recordId: string, next: ViewerRow) =>
+  const replaceRow = (recordId: number, next: ViewerRow) =>
     queryClient.setQueryData<Page>(queryKey, (page) =>
-      page
-        ? { ...page, rows: page.rows.map((row) => (String(row.id) === recordId ? next : row)) }
-        : page,
+      page ? { ...page, rows: page.rows.map((row) => (row.id === recordId ? next : row)) } : page,
     );
 
   return async (original: ViewerRow, draft: ViewerRow, column: ViewerColumn) => {
@@ -42,7 +40,7 @@ export function useUpdateCell({
     if (typeof value === "number" && Number.isNaN(value))
       return toastManager.add({ type: "error", title: `${column.name} must be a number` });
 
-    const recordId = String(original.id);
+    const recordId = original.id;
     await queryClient.cancelQueries({ queryKey });
     replaceRow(recordId, draft);
 

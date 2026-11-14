@@ -74,9 +74,6 @@ export const workspaceSchema = <W extends string = "default">(workspaceId: W = "
       titleColumnId: integer("title_column_id").references((): AnySQLiteColumn => columnTable.id, {
         onDelete: "set null",
       }),
-      idType: text("id_type", { enum: ["increment", "uuid"] })
-        .notNull()
-        .default("increment"),
       position: integer("position").notNull().default(0),
       metadata: json<Record<string, unknown>>("metadata", {}),
       createdBy: createdBy(),

@@ -14,8 +14,6 @@ import { tableQueryOptions } from "@/data/workspace/tables";
 import { ColumnsList } from "./columns-list";
 import { NamedIcon } from "./named-icon";
 
-const ID_TYPE_LABELS = { increment: "Auto-increment number", uuid: "UUID" } as const;
-
 export function TableDefinitionView({
   workspace,
   tableId,
@@ -51,9 +49,6 @@ export function TableDefinitionView({
           </SettingsRow>
           <SettingsRow title="Title column" description="Names each record and shows in links.">
             <span className="text-sm">{titleColumn?.name ?? "Records are shown by id"}</span>
-          </SettingsRow>
-          <SettingsRow title="Record id" description="How records are identified.">
-            <span className="text-sm">{ID_TYPE_LABELS[table.idType]}</span>
           </SettingsRow>
         </Card>
       </CardFrame>

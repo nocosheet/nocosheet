@@ -46,7 +46,7 @@ export function RecordsGrid<TSelected extends { rowSelection: Record<string, boo
   canEdit: boolean;
   canEditRow: (row: ViewerRow) => boolean;
   canDeleteRow: (row: ViewerRow) => boolean;
-  onOpenRecord?: (id: string | number) => void;
+  onOpenRecord?: (id: number) => void;
   onCellChange: (original: ViewerRow, draft: ViewerRow, column: ViewerColumn) => void;
   onDeleted: (count: number) => void;
   selectable?: boolean;

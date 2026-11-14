@@ -80,7 +80,7 @@ function RestoreForm({
       tableName={tableName}
       columns={columns}
       record={record}
-      recordId={String(record.id)}
+      recordId={Number(record.id)}
       status="In trash"
       error={restore.error ?? (failure ? new Error(failure.message) : null)}
       fieldErrors={fieldErrors}

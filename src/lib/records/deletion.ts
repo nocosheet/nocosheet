@@ -46,7 +46,7 @@ export type DeleteResult =
 export async function deleteRecords(
   workspace: string,
   table: Table,
-  ids: (string | number)[],
+  ids: number[],
   userId: string,
 ): Promise<DeleteResult> {
   const plan = await planDeletion(workspace, table, [...new Set(ids)]);

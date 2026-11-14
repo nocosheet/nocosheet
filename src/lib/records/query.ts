@@ -86,8 +86,5 @@ export const recordsApiSchema = z.object({
 });
 
 export const recordsDeleteSchema = z.object({
-  ids: z
-    .array(z.union([z.number().int(), z.string().min(1).max(64)]))
-    .min(1)
-    .max(100),
+  ids: z.array(z.number().int().positive()).min(1).max(100),
 });

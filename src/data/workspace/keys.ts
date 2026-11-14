@@ -7,7 +7,7 @@ export const workspaceKeys = {
   roleAssignments: () => [...workspaceKeys.roles(), "assignments"] as const,
   tables: () => [...workspaceKeys.all, "tables"] as const,
   records: (id: number, query: object) => [...workspaceKeys.table(id), "records", query] as const,
-  record: (id: number, recordId: string) =>
+  record: (id: number, recordId: number) =>
     [...workspaceKeys.table(id), "record", recordId] as const,
   recordsExport: (id: number) => [...workspaceKeys.table(id), "export"] as const,
   columnsTrash: (id: number) => [...workspaceKeys.table(id), "columns-trash"] as const,

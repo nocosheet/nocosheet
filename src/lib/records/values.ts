@@ -60,7 +60,7 @@ function baseSchema(column: ColumnLike): z.ZodType {
         .string()
         .refine((value) => !Number.isNaN(new Date(value).getTime()), "Enter a valid date and time");
     case "relation":
-      return z.union([z.number().int(), z.string().min(1).max(64)]);
+      return z.number().int().positive();
     case "json":
       return z.unknown();
     case "file":

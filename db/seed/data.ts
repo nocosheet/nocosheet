@@ -1428,7 +1428,6 @@ export const tables: SeedTable[] = [
     icon: "bug",
     group: "Delivery",
     description: "Issues reported by the team, with severity and reproduction steps.",
-    idType: "uuid",
     title: "Title",
     columns: [
       col.text("Title", { required: true }),

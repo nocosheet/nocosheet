@@ -28,14 +28,11 @@ export const iconName = z
   .nullish()
   .transform((value) => value ?? null);
 
-export const ID_TYPES = ["increment", "uuid"] as const;
-
 export const tableInputSchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(64, "Name must be 64 characters or fewer"),
   icon: iconName,
   groupName: optionalText(64),
   description: optionalText(500),
-  idType: z.enum(ID_TYPES),
 });
 
 export const tablesDeleteSchema = z.object({

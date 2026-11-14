@@ -7,7 +7,12 @@ import { recordQueryOptions } from "@/data/workspace/records";
 import { tableQueryOptions } from "@/data/workspace/tables";
 import { toFormValues } from "@/lib/records/form";
 
-import { buildViewColumns, buildViewerColumns, type ViewerColumn, type ViewScope } from "../columns";
+import {
+  buildViewColumns,
+  buildViewerColumns,
+  type ViewerColumn,
+  type ViewScope,
+} from "../columns";
 import { RecordForm } from "./record-form";
 import { RecordSheetSkeleton } from "./skeleton";
 import { useRecordForm } from "./use-record-form";
@@ -23,7 +28,7 @@ function DetailForm({
   workspace: string;
   tableId: number;
   tableName: string;
-  recordId: string;
+  recordId: number;
   record: Record<string, unknown>;
   columns: ViewerColumn[];
 }) {
@@ -53,7 +58,7 @@ export function DetailRecordSheet({
 }: {
   workspace: string;
   tableId: number;
-  recordId: string;
+  recordId: number;
   view?: ViewScope;
   onClose: () => void;
 }) {

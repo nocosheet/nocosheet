@@ -23,7 +23,7 @@ import { deleteRecordsMutationOptions } from "@/data/workspace/records";
 
 import { useRestoreRecord } from "./use-restore-record";
 
-export type DeleteRecordsPayload = { ids: (string | number)[] };
+export type DeleteRecordsPayload = { ids: number[] };
 
 export const createDeleteRecordsHandle = () => AlertDialogCreateHandle<DeleteRecordsPayload>();
 
@@ -39,7 +39,7 @@ function DeleteRecordsPopup({
   ids,
   onDeleted,
   onClose,
-}: DeleteRecordsProps & { ids: (string | number)[]; onClose: () => void }) {
+}: DeleteRecordsProps & { ids: number[]; onClose: () => void }) {
   const queryClient = useQueryClient();
   const restore = useRestoreRecord(workspace, tableId);
   const count = ids.length;
@@ -55,7 +55,7 @@ function DeleteRecordsPopup({
         predicate: (query) => query.queryKey[3] !== "record",
       });
       for (const id of ids)
-        queryClient.removeQueries({ queryKey: workspaceKeys.record(tableId, String(id)) });
+        queryClient.removeQueries({ queryKey: workspaceKeys.record(tableId, id) });
       toastManager.add({
         type: "success",
         title: `${count} ${noun} moved to trash`,
@@ -100,7 +100,7 @@ export function DeleteRecordsDialog({
   label,
   ids,
   ...props
-}: DeleteRecordsProps & { ids: (string | number)[]; label?: string }) {
+}: DeleteRecordsProps & { ids: number[]; label?: string }) {
   const [open, setOpen] = useState(false);
 
   return (

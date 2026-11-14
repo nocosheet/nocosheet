@@ -196,7 +196,6 @@ export async function listTables(query: TablesQuery) {
         icon: tableTable.icon,
         groupName: tableTable.groupName,
         description: tableTable.description,
-        idType: tableTable.idType,
         titleColumnId: tableTable.titleColumnId,
         columnCount,
         updatedAt: tableTable.updatedAt,
@@ -246,7 +245,7 @@ export async function createTable(workspace: string, body: TableValues, userId: 
   const physicalName = physicalTableName(workspace, tableName);
 
   const [, , inserted] = await db.batch([
-    db.run(sql.raw(buildCreateTable({ ...body, physicalName }))),
+    db.run(sql.raw(buildCreateTable(physicalName))),
     db.insert(resourceTable).values({ kind: "table" }),
     db
       .insert(tableTable)
@@ -257,7 +256,6 @@ export async function createTable(workspace: string, body: TableValues, userId: 
         description: body.description,
         icon: body.icon,
         groupName: body.groupName,
-        idType: body.idType,
         position: sql`(select coalesce(max(position), -1) + 1 from ${tableTable})`,
         createdBy: userId,
       })
@@ -294,7 +292,6 @@ export async function findRelationTarget(workspace: string, tableId: number) {
   return {
     id: target.id,
     physicalName: physicalTableName(workspace, target.tableName),
-    idType: target.idType,
   };
 }
 
@@ -441,7 +438,10 @@ export async function restoreColumn(workspace: string, table: Table, column: Col
     .limit(1);
 
   await db.batch([
-    db.update(columnTable).set({ deletedAt: null, deletedBy: null, position: (last?.position ?? -1) + 1 }).where(eq(columnTable.id, column.id)),
+    db
+      .update(columnTable)
+      .set({ deletedAt: null, deletedBy: null, position: (last?.position ?? -1) + 1 })
+      .where(eq(columnTable.id, column.id)),
     db.run(
       sql.raw(
         kind

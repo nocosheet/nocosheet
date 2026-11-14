@@ -14,7 +14,7 @@ export const Route = createFileRoute(
   pendingComponent: () => null,
   loader: ({ context, params }) => {
     void context.queryClient
-      .query(recordQueryOptions(params.workspace, Number(params.table), params.record))
+      .query(recordQueryOptions(params.workspace, Number(params.table), Number(params.record)))
       .catch(() => undefined);
   },
   component: RecordPage,
@@ -27,14 +27,14 @@ function RecordPage() {
   const access = useAccess();
   const tableId = Number(table);
   const view = { id: loaded.id, selectColumns: loaded.selectColumns };
-  const { data } = useQuery(recordQueryOptions(workspace, tableId, record));
+  const { data } = useQuery(recordQueryOptions(workspace, tableId, Number(record)));
 
   const owner = (data?.created_by as { id?: string } | null | undefined)?.id;
   const editable = access.canOn("update", tableId, owner);
   const sheetProps = {
     workspace,
     tableId,
-    recordId: record,
+    recordId: Number(record),
     view,
     onClose: () =>
       navigate({

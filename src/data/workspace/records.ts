@@ -32,13 +32,13 @@ export const recordsQueryOptions = (
     retry: false,
   });
 
-export const recordQueryOptions = (workspace: string, tableId: number, recordId: string) =>
+export const recordQueryOptions = (workspace: string, tableId: number, recordId: number) =>
   queryOptions({
     queryKey: workspaceKeys.record(tableId, recordId),
     queryFn: () =>
       unwrapFetch(
         fetch("/api/workspaces/:workspace/tables/:table/records/:record", {
-          params: { workspace, table: String(tableId), record: recordId },
+          params: { workspace, table: String(tableId), record: String(recordId) },
         }),
       ),
     staleTime: 15_000,
@@ -82,7 +82,7 @@ export const deleteRecordsMutationOptions = mutationOptions({
   }: {
     workspace: string;
     tableId: number;
-    ids: (string | number)[];
+    ids: number[];
   }) =>
     unwrapFetch(
       fetch("/api/workspaces/:workspace/tables/:table/records", {
@@ -103,13 +103,13 @@ export const updateRecordMutationOptions = mutationOptions({
   }: {
     workspace: string;
     tableId: number;
-    recordId: string;
+    recordId: number;
     values: Record<string, unknown>;
   }) =>
     unwrapFetch(
       fetch("/api/workspaces/:workspace/tables/:table/records/:record", {
         method: "PATCH",
-        params: { workspace, table: String(tableId), record: recordId },
+        params: { workspace, table: String(tableId), record: String(recordId) },
         body: { values },
       }),
     ),

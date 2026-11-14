@@ -6,7 +6,7 @@ import { recordOptionsQueryOptions } from "@/data/workspace/records";
 
 import type { ViewerColumn } from "./columns";
 
-export type RelationItem = { value: string; label: string; id: string | number };
+export type RelationItem = { value: string; label: string; id: number };
 
 export function useRelationItems(workspace: string, column: ViewerColumn, search: string) {
   const targetId = Number(column.options.tableId);

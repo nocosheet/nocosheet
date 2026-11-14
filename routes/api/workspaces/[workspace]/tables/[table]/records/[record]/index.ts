@@ -13,7 +13,7 @@ import { findTable, listColumns } from "@/lib/tables/repository";
 const params = z.object({
   workspace: z.string(),
   table: z.coerce.number().int().positive(),
-  record: z.string().min(1).max(64),
+  record: z.coerce.number().int().positive(),
 });
 
 export const GET = defineHandler.withValidator({ params })(async (c, { params }) => {

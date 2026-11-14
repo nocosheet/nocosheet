@@ -58,7 +58,7 @@ export function RecordsContextMenu({
   columns: ViewerColumn[];
   canEditRow: (row: ViewerRow) => boolean;
   canDeleteRow: (row: ViewerRow) => boolean;
-  onOpenRecord?: (id: string | number) => void;
+  onOpenRecord?: (id: number) => void;
   onDeleted: (count: number) => void;
   children: (onCellContextMenu: CellContextMenuHandler) => React.ReactNode;
 }) {

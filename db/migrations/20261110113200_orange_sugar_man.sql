@@ -66,7 +66,6 @@ CREATE TABLE `default__table` (
 	`icon` text,
 	`group_name` text,
 	`title_column_id` integer,
-	`id_type` text DEFAULT 'increment' NOT NULL,
 	`position` integer DEFAULT 0 NOT NULL,
 	`metadata` text DEFAULT '{}' NOT NULL,
 	`created_by` text,
