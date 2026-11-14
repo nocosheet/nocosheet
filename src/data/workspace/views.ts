@@ -57,6 +57,7 @@ export const viewRecordsQueryOptions = (
           query: {
             pageSize: query.pageSize,
             ...(query.cursor ? { cursor: query.cursor } : {}),
+            ...(query.dir === "prev" ? { dir: query.dir } : {}),
             ...(query.sort ? { sort: query.sort, order: query.order } : {}),
             ...(query.q ? { q: query.q } : {}),
             ...(query.filter ? { filter: query.filter } : {}),

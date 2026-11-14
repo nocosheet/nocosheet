@@ -18,8 +18,6 @@ export type ViewerRow = Record<string, unknown> & { id: string | number };
 export function useRecordsGridColumns<TSelected extends { rowSelection: Record<string, boolean> }>({
   table,
   byKey,
-  dataIndex,
-  rowOffset,
   workspace,
   canEdit,
   canEditRow,
@@ -29,8 +27,6 @@ export function useRecordsGridColumns<TSelected extends { rowSelection: Record<s
 }: {
   table: ReactTable<typeof dataTableFeatures, ViewerRow, TSelected>;
   byKey: ReadonlyMap<string, ViewerColumn>;
-  dataIndex: ReadonlyMap<string | number, number>;
-  rowOffset: number;
   workspace: string;
   canEdit: boolean;
   canEditRow: (row: ViewerRow) => boolean;
@@ -67,8 +63,8 @@ export function useRecordsGridColumns<TSelected extends { rowSelection: Record<s
         },
         renderCell: ({ row }) => (
           <>
-            <span className="records-row-index">
-              {rowOffset + (dataIndex.get(row.id) ?? 0) + 1}
+            <span className="records-row-index" title={String(row.id)}>
+              {String(row.id).slice(0, 8)}
             </span>
             {selectable && (
               <Checkbox
@@ -150,14 +146,12 @@ export function useRecordsGridColumns<TSelected extends { rowSelection: Record<s
     [
       visibleKey,
       byKey,
-      rowOffset,
       selection,
       canEdit,
       canEditRow,
       workspace,
       onCellChange,
       onOpenRecord,
-      dataIndex,
       selectable,
     ],
   );

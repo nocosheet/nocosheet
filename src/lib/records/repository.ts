@@ -180,8 +180,13 @@ export async function findRecords(
 ) {
   const { select, from } = await recordSource(workspace, table, columns, source);
   const condition = filterWhere(columns, query, ownerId);
-  const spec = sortSpec(columns, query);
+  const forward = sortSpec(columns, query);
+  const backward = query.dir === "prev";
+  const spec: SortSpec = backward
+    ? { ...forward, direction: forward.direction === "asc" ? "desc" : "asc" }
+    : forward;
   const cursor = query.cursor ? decodeCursor(query.cursor) : null;
+  if (backward && !cursor) throw new Error("The page cursor is invalid.");
   const limit = query.pageSize + 1;
 
   const keys = sortKeys(spec);
@@ -199,19 +204,29 @@ export async function findRecords(
     if (found.length >= limit) break;
   }
 
-  const rows = found.slice(0, query.pageSize);
-  const last = rows.at(-1);
-  const hasMore = found.length > query.pageSize;
-  const nextCursor =
-    hasMore && last
-      ? encodeCursor(
-          spec.name === "id"
-            ? [last.id as string | number]
-            : [(last[spec.name] as string | number | null) ?? null, last.id as string | number],
-        )
-      : null;
+  const keyOf = (row: Record<string, unknown>) =>
+    encodeCursor(
+      spec.name === "id"
+        ? [row.id as string | number]
+        : [(row[spec.name] as string | number | null) ?? null, row.id as string | number],
+    );
 
-  return { hasMore, nextCursor, rows: rows.map((row) => shapeRecord(row, columns)) };
+  const hasMore = found.length > query.pageSize;
+  const page = found.slice(0, query.pageSize);
+  if (backward) page.reverse();
+
+  const first = page[0];
+  const last = page.at(-1);
+  const startCursor = backward ? (hasMore ? keyOf(found[query.pageSize]) : null) : query.cursor;
+  const nextCursor = last && (backward || hasMore) ? keyOf(last) : null;
+  const prevCursor = first && startCursor ? keyOf(first) : null;
+
+  return {
+    nextCursor,
+    prevCursor,
+    startCursor: startCursor ?? null,
+    rows: page.map((row) => shapeRecord(row, columns)),
+  };
 }
 
 export async function findRecord(

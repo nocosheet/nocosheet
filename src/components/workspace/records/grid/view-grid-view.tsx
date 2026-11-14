@@ -16,7 +16,7 @@ import { useUpdateCell } from "../use-update-cell";
 import { GridToolbar } from "./grid-toolbar";
 import { SelectionBar } from "./selection-bar";
 import { useGridTable } from "./use-grid-table";
-import { useRecordsQuery } from "./use-records-query";
+import { useRecordsPaging, useRecordsQuery } from "./use-records-query";
 
 const ownerOf = (row: ViewerRow) => (row.created_by as { id?: string } | null | undefined)?.id;
 
@@ -37,7 +37,7 @@ export function ViewGridView({
     () => buildViewColumns(table, view.selectColumns),
     [table, view.selectColumns],
   );
-  const { query, setUrlQuery, paging } = useRecordsQuery(columns);
+  const { query, setUrlQuery, setCursor } = useRecordsQuery(columns);
 
   const recordsOptions = viewRecordsQueryOptions(workspace, tableId, view.id, query);
   const updateCell = useUpdateCell({ workspace, tableId, queryKey: recordsOptions.queryKey });
@@ -46,6 +46,12 @@ export function ViewGridView({
     placeholderData: keepPreviousData,
   });
   const rows = (data?.rows ?? []) as ViewerRow[];
+  const paging = useRecordsPaging({
+    data,
+    query,
+    setCursor,
+    optionsFor: (q) => viewRecordsQueryOptions(workspace, tableId, view.id, q),
+  });
 
   const grid = useGridTable({
     columns,
@@ -53,8 +59,6 @@ export function ViewGridView({
     query,
     setQuery: setUrlQuery,
     paging,
-    hasMore: data?.hasMore ?? false,
-    nextCursor: data?.nextCursor ?? null,
   });
   const queryKey = JSON.stringify(query);
   useEffect(() => {
@@ -99,7 +103,6 @@ export function ViewGridView({
           table={grid}
           columns={columns}
           rows={rows}
-          rowOffset={paging.rowOffset}
           workspace={workspace}
           canEdit={access.can("update", tableId)}
           selectable={access.can("delete", tableId)}

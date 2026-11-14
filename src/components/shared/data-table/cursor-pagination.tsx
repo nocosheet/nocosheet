@@ -30,8 +30,7 @@ export function CursorPagination<
   count: number;
   pageSizes: readonly number[];
 }) {
-  const { pageIndex, pageSize } = table.state.pagination;
-  const rowOffset = pageIndex * pageSize;
+  const { pageSize } = table.state.pagination;
 
   return (
     <div className="flex items-center justify-between gap-2">
@@ -60,10 +59,8 @@ export function CursorPagination<
             "No results"
           ) : (
             <>
-              Viewing{" "}
-              <strong className="font-medium text-foreground">
-                {rowOffset + 1}-{rowOffset + count}
-              </strong>
+              Showing <strong className="font-medium text-foreground">{count}</strong>{" "}
+              {count === 1 ? "record" : "records"}
             </>
           )}
         </p>

@@ -42,7 +42,7 @@ export function SelectionBar({
             ids={selected.map((row) => row.id)}
             onDeleted={(deleted) => {
               grid.resetRowSelection();
-              if (deleted >= pageRows && paging.canPrevious) paging.previous();
+              if (deleted >= pageRows && paging.hasPrevious) void paging.previous();
             }}
           />
         )}

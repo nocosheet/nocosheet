@@ -21,7 +21,6 @@ export function RecordsGrid<TSelected extends { rowSelection: Record<string, boo
   table,
   columns,
   rows,
-  rowOffset,
   sort,
   order,
   empty,
@@ -35,7 +34,6 @@ export function RecordsGrid<TSelected extends { rowSelection: Record<string, boo
   table: ReactTable<typeof dataTableFeatures, ViewerRow, TSelected>;
   columns: ViewerColumn[];
   rows: ViewerRow[];
-  rowOffset: number;
   sort: string | null;
   order: "asc" | "desc";
   empty: string;
@@ -49,12 +47,9 @@ export function RecordsGrid<TSelected extends { rowSelection: Record<string, boo
   const byKey = useMemo(() => new Map(columns.map((column) => [column.key, column])), [columns]);
   const selection = table.state.rowSelection;
 
-  const dataIndex = useMemo(() => new Map(rows.map((row, index) => [row.id, index])), [rows]);
   const gridColumns = useRecordsGridColumns({
     table,
     byKey,
-    dataIndex,
-    rowOffset,
     workspace,
     canEdit,
     canEditRow,

@@ -22,16 +22,12 @@ export function useGridTable({
   query,
   setQuery,
   paging,
-  hasMore,
-  nextCursor,
 }: {
   columns: ViewerColumn[];
   rows: ViewerRow[];
   query: RecordsQuery;
   setQuery: SetRecordsQuery;
   paging: RecordsPaging;
-  hasMore: boolean;
-  nextCursor: string | null;
 }) {
   const columnDefs = useMemo<ColumnDef<typeof dataTableFeatures, ViewerRow>[]>(
     () =>
@@ -52,8 +48,8 @@ export function useGridTable({
   );
 
   const pagination = useMemo<PaginationState>(
-    () => ({ pageIndex: paging.pageIndex, pageSize: query.pageSize }),
-    [paging.pageIndex, query.pageSize],
+    () => ({ pageIndex: paging.hasPrevious ? 1 : 0, pageSize: query.pageSize }),
+    [paging.hasPrevious, query.pageSize],
   );
   const targets = useMemo(
     () =>
@@ -84,7 +80,7 @@ export function useGridTable({
       autoResetPageIndex: false,
       enableMultiSort: false,
       enableRowSelection: true,
-      pageCount: paging.pageIndex + (hasMore ? 2 : 1),
+      pageCount: (paging.hasPrevious ? 1 : 0) + (paging.canNext ? 2 : 1),
       initialState: { columnVisibility: initialVisibility },
       state: {
         pagination,
@@ -98,8 +94,8 @@ export function useGridTable({
           void setQuery({ pageSize: next.pageSize as RecordsQuery["pageSize"] });
           return;
         }
-        if (next.pageIndex < pagination.pageIndex) paging.goTo(next.pageIndex);
-        else if (next.pageIndex === pagination.pageIndex + 1 && nextCursor) paging.next(nextCursor);
+        if (next.pageIndex < pagination.pageIndex) void paging.previous();
+        else if (next.pageIndex > pagination.pageIndex) paging.next();
       },
       onSortingChange: (updater) => {
         const [next] = functionalUpdate(updater, sorting);
