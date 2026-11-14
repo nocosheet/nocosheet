@@ -106,7 +106,13 @@ export function ViewGridView({
           workspace={workspace}
           canEdit={access.can("update", tableId)}
           selectable={access.can("delete", tableId)}
+          tableId={tableId}
           canEditRow={(row) => access.canOn("update", tableId, ownerOf(row))}
+          canDeleteRow={(row) => access.canOn("delete", tableId, ownerOf(row))}
+          onDeleted={(deleted) => {
+            grid.resetRowSelection();
+            if (deleted >= rows.length && paging.hasPrevious) void paging.previous();
+          }}
           onOpenRecord={onOpenRecord}
           onCellChange={(original, draft, column) => void updateCell(original, draft, column)}
           sort={query.sortKey}
