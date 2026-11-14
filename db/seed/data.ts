@@ -608,6 +608,42 @@ const tasks: SeedRow[] = taskSeeds.map(
   }),
 );
 
+const BULK_TASK_COUNT = 250;
+const bulkProjects = [...new Set(taskSeeds.map((seed) => seed[1]))];
+const bulkAssignees = team.map((member) => String(member.Name));
+const bulkStatuses = ["backlog", "to_do", "in_progress", "in_review", "done"];
+const bulkPriorities = ["low", "medium", "high", "urgent"];
+const bulkTags = ["frontend", "backend", "mobile", "design", "research", "content", "qa", "docs"];
+const bulkVerbs = ["Review", "Refactor", "Document", "Test", "Plan", "Prototype", "Polish", "Ship"];
+const bulkSubjects = [
+  "onboarding flow",
+  "search results",
+  "billing page",
+  "email templates",
+  "dashboard widgets",
+  "import wizard",
+  "audit log",
+  "notification settings",
+  "mobile layout",
+  "permissions matrix",
+];
+
+const bulkTasks: SeedRow[] = Array.from({ length: BULK_TASK_COUNT }, (_, index) => {
+  const status = bulkStatuses[(index * 7) % bulkStatuses.length];
+  return {
+    Title: `${bulkVerbs[index % bulkVerbs.length]} ${bulkSubjects[(index * 3) % bulkSubjects.length]} #${index + 1}`,
+    Project: bulkProjects[(index * 5) % bulkProjects.length],
+    Assignee: bulkAssignees[(index * 3) % bulkAssignees.length],
+    Status: status,
+    Priority: bulkPriorities[(index * 11) % bulkPriorities.length],
+    "Estimate (hours)": 1 + ((index * 13) % 24),
+    "Due date": day(-60 + ((index * 17) % 120)),
+    Done: status === "done",
+    Tags: [bulkTags[index % bulkTags.length], bulkTags[(index * 5 + 3) % bulkTags.length]],
+    Notes: index % 4 === 0 ? `Generated task ${index + 1} for pagination testing.` : undefined,
+  };
+});
+
 type InvoiceSeed = [
   number: string,
   client: string,
@@ -1292,7 +1328,7 @@ export const tables: SeedTable[] = [
       ]),
       col.long("Notes"),
     ],
-    rows: tasks,
+    rows: [...tasks, ...bulkTasks],
     views: [
       {
         name: "Open tasks",
