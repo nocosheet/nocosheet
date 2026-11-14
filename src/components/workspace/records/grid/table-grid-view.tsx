@@ -16,7 +16,6 @@ import { useUpdateCell } from "../use-update-cell";
 import { GridToolbar } from "./grid-toolbar";
 import { SelectionBar } from "./selection-bar";
 import { useGridTable } from "./use-grid-table";
-import { useGroupCollapse } from "./use-group-collapse";
 import { useRecordsQuery } from "./use-records-query";
 
 const ownerOf = (row: ViewerRow) => (row.created_by as { id?: string } | null | undefined)?.id;
@@ -52,11 +51,6 @@ export function TableGridView({
     hasMore: data?.hasMore ?? false,
     nextCursor: data?.nextCursor ?? null,
   });
-  const { collapsed, toggle, reset } = useGroupCollapse();
-
-  const groupColumn = columns.find((column) => column.key === query.group) ?? null;
-  const groups = data && "groups" in data && data.group === query.group ? data.groups : undefined;
-
   const queryKey = JSON.stringify(query);
   useEffect(() => {
     grid.resetRowSelection();
@@ -81,13 +75,7 @@ export function TableGridView({
           paging={paging}
         />
       ) : (
-        <GridToolbar
-          grid={grid}
-          columns={columns}
-          query={query}
-          setQuery={setUrlQuery}
-          onGroupChange={reset}
-        />
+        <GridToolbar grid={grid} columns={columns} query={query} />
       )}
 
       {error && (
@@ -110,10 +98,6 @@ export function TableGridView({
           workspace={workspace}
           canEdit={access.can("update", tableId)}
           canEditRow={(row) => access.canOn("update", tableId, ownerOf(row))}
-          groupBy={groupColumn}
-          groups={groups}
-          collapsed={collapsed}
-          onToggleGroup={toggle}
           onOpenRecord={onOpenRecord}
           onCellChange={(original, draft, column) => void updateCell(original, draft, column)}
           sort={query.sort}

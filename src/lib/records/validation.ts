@@ -1,6 +1,5 @@
 import { decodeCursor } from "./cursor";
 import { conditionError, filterKind, isSortableFormat } from "./filters";
-import { isGroupableColumn, isGroupableSystemKey } from "./grouping";
 import type { TypedRecordsQuery } from "./query";
 
 type QueryColumn = {
@@ -28,11 +27,6 @@ export function checkRecordsQuery(columns: QueryColumn[], query: TypedRecordsQue
     const column = byName.get(query.sort);
     if (!column || !column.isSortable || !isSortableFormat(column.format))
       return `"${query.sort}" can't be sorted.`;
-  }
-
-  if (query.group && !isGroupableSystemKey(query.group)) {
-    const column = byName.get(query.group);
-    if (!column || !isGroupableColumn(column)) return `"${query.group}" can't be grouped.`;
   }
 
   if (query.cursor && !decodeCursor(query.cursor)) return "The page cursor is invalid.";

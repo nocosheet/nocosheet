@@ -8,22 +8,17 @@ import { toColumnFilters } from "@/lib/records/column-filters";
 
 import type { ViewerColumn } from "../columns";
 import { RecordFilters } from "../record-filters";
-import { RecordGroup } from "../record-group";
 import type { GridTable } from "./use-grid-table";
-import type { RecordsQuery, SetRecordsQuery } from "./use-records-query";
+import type { RecordsQuery } from "./use-records-query";
 
 export function GridToolbar({
   grid,
   columns,
   query,
-  setQuery,
-  onGroupChange,
 }: {
   grid: GridTable;
   columns: ViewerColumn[];
   query: RecordsQuery;
-  setQuery: SetRecordsQuery;
-  onGroupChange: () => void;
 }) {
   const searchable = columns.some((column) => column.searchable);
   const [search, setSearch] = useState(query.q);
@@ -53,14 +48,6 @@ export function GridToolbar({
         columns={columns}
         value={query.filters}
         onApply={(filters) => grid.setColumnFilters(toColumnFilters(filters))}
-      />
-      <RecordGroup
-        columns={columns}
-        value={query.group}
-        onChange={(group) => {
-          onGroupChange();
-          void setQuery({ group });
-        }}
       />
       <div className="ms-auto flex items-center gap-2">
         <DataTableViewOptions table={grid} />

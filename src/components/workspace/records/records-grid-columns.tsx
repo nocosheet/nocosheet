@@ -12,13 +12,8 @@ import { NamedIcon } from "@/components/workspace/tables/named-icon";
 
 import { CellEditor, CellValue, cellMode } from "./cells";
 import type { ViewerColumn } from "./columns";
-import { GroupHeader, type GroupRow } from "./group-header";
 
 export type ViewerRow = Record<string, unknown> & { id: string | number };
-
-export type GridRow = ViewerRow | GroupRow;
-
-export const isGroupRow = (row: GridRow): row is GroupRow => "__group" in row;
 
 export function useRecordsGridColumns<TSelected extends { rowSelection: Record<string, boolean> }>({
   table,
@@ -28,8 +23,6 @@ export function useRecordsGridColumns<TSelected extends { rowSelection: Record<s
   workspace,
   canEdit,
   canEditRow,
-  groupBy,
-  onToggleGroup,
   onOpenRecord,
   onCellChange,
   selectable,
@@ -41,8 +34,6 @@ export function useRecordsGridColumns<TSelected extends { rowSelection: Record<s
   workspace: string;
   canEdit: boolean;
   canEditRow: (row: ViewerRow) => boolean;
-  groupBy: ViewerColumn | null;
-  onToggleGroup: (key: string) => void;
   onOpenRecord?: (id: string | number) => void;
   onCellChange: (original: ViewerRow, draft: ViewerRow, column: ViewerColumn) => void;
   selectable: boolean;
@@ -51,7 +42,7 @@ export function useRecordsGridColumns<TSelected extends { rowSelection: Record<s
   const visibleKey = visible.map((column) => column.id).join("|");
   const selection = table.state.rowSelection;
 
-  return useMemo<Column<GridRow>[]>(
+  return useMemo<Column<ViewerRow>[]>(
     () => [
       {
         key: "__row",
@@ -74,39 +65,34 @@ export function useRecordsGridColumns<TSelected extends { rowSelection: Record<s
             />
           );
         },
-        colSpan: (args) =>
-          args.type === "ROW" && isGroupRow(args.row) ? 1 + visible.length : undefined,
-        renderCell: ({ row }) =>
-          isGroupRow(row) ? (
-            groupBy && <GroupHeader column={groupBy} row={row} onToggle={onToggleGroup} />
-          ) : (
-            <>
-              <span className="records-row-index">
-                {rowOffset + (dataIndex.get(row.id) ?? 0) + 1}
-              </span>
-              {selectable && (
-                <Checkbox
-                  aria-label="Select row"
-                  className="records-row-check"
-                  checked={!!selection[String(row.id)]}
-                  onCheckedChange={(value) => table.getRow(String(row.id)).toggleSelected(!!value)}
-                />
-              )}
-              {onOpenRecord && (
-                <Button
-                  variant="ghost"
-                  size="icon-xs"
-                  aria-label="Open record"
-                  className="records-row-open"
-                  onClick={() => onOpenRecord(row.id)}
-                >
-                  <Maximize2Icon />
-                </Button>
-              )}
-            </>
-          ),
+        renderCell: ({ row }) => (
+          <>
+            <span className="records-row-index">
+              {rowOffset + (dataIndex.get(row.id) ?? 0) + 1}
+            </span>
+            {selectable && (
+              <Checkbox
+                aria-label="Select row"
+                className="records-row-check"
+                checked={!!selection[String(row.id)]}
+                onCheckedChange={(value) => table.getRow(String(row.id)).toggleSelected(!!value)}
+              />
+            )}
+            {onOpenRecord && (
+              <Button
+                variant="ghost"
+                size="icon-xs"
+                aria-label="Open record"
+                className="records-row-open"
+                onClick={() => onOpenRecord(row.id)}
+              >
+                <Maximize2Icon />
+              </Button>
+            )}
+          </>
+        ),
       },
-      ...visible.flatMap((column): Column<GridRow>[] => {
+      ...visible.flatMap((column): Column<ViewerRow>[] => {
         const meta = byKey.get(column.id);
         if (!meta) return [];
         const mode = canEdit ? cellMode(meta) : "readonly";
@@ -133,7 +119,7 @@ export function useRecordsGridColumns<TSelected extends { rowSelection: Record<s
                 )}
               </span>
             ),
-            editable: inline ? (row) => !isGroupRow(row) && canEditRow(row) : false,
+            editable: inline ? (row) => canEditRow(row) : false,
             editorOptions: { commitOnOutsideClick: mode === "input" },
             renderEditCell: inline
               ? (props) => (
@@ -145,7 +131,7 @@ export function useRecordsGridColumns<TSelected extends { rowSelection: Record<s
                 )
               : undefined,
             renderCell: ({ row }) =>
-              isGroupRow(row) ? null : mode === "toggle" ? (
+              mode === "toggle" ? (
                 <Checkbox
                   aria-label={meta.name}
                   checked={row[meta.key] === true}
@@ -170,8 +156,6 @@ export function useRecordsGridColumns<TSelected extends { rowSelection: Record<s
       canEditRow,
       workspace,
       onCellChange,
-      groupBy,
-      onToggleGroup,
       onOpenRecord,
       dataIndex,
       selectable,

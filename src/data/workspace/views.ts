@@ -59,7 +59,6 @@ export const viewRecordsQueryOptions = (
             ...(query.cursor ? { cursor: query.cursor } : {}),
             ...(query.sort ? { sort: query.sort, order: query.order } : {}),
             ...(query.q ? { q: query.q } : {}),
-            ...(query.group ? { group: query.group } : {}),
             ...(query.filter ? { filter: query.filter } : {}),
           },
         }),

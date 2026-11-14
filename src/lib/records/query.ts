@@ -27,7 +27,6 @@ export const recordsSearchParams = {
   order: parseAsStringLiteral(["asc", "desc"] as const).withDefault("asc"),
   q: parseAsString.withDefault(""),
   filter: parseAsString.withDefault(""),
-  group: parseAsString,
 };
 
 export type RecordsQuery = inferParserType<typeof recordsSearchParams>;
@@ -41,7 +40,6 @@ export const resolveRecordsQuery = (
   order: search.order ?? recordsSearchParams.order.defaultValue,
   q: search.q ?? recordsSearchParams.q.defaultValue,
   filter: search.filter ?? "",
-  group: search.group ?? null,
 });
 
 export type ResolvedRecordsQuery = ReturnType<typeof resolveRecordsQuery>;
@@ -52,7 +50,6 @@ export const recordsKeyOf = (query: ResolvedRecordsQuery) => ({
   sort: query.sort,
   order: query.order,
   q: query.q,
-  group: query.group,
   filter: query.filter,
 });
 
@@ -94,7 +91,6 @@ export const recordsApiSchema = z.object({
   sort: z.string().max(64).optional(),
   order: z.enum(["asc", "desc"]).optional(),
   q: z.string().max(100).optional(),
-  group: z.string().max(64).optional(),
   filter: z.string().max(2000).optional(),
 });
 

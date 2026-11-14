@@ -2,13 +2,12 @@ import { columnTable, tableTable } from "@db/schema";
 import { and, db, eq, inArray, isNull, sql } from "void/db";
 import { sqliteTable, text } from "void/schema-d1";
 
-import { NOCASE_FORMATS, SEARCHABLE_FORMATS, type SelectChoice } from "../tables/formats";
+import { NOCASE_FORMATS, SEARCHABLE_FORMATS } from "../tables/formats";
 import { physicalTableName, quoteIdent } from "../tables/naming";
 import type { Column, Table } from "../tables/repository";
 import { conditionText } from "./condition";
 import { decodeCursor, encodeCursor, type RecordCursor } from "./cursor";
 import { type FilterCondition, filterKind } from "./filters";
-import { groupKeyOf, isGroupableSystemKey } from "./grouping";
 import type { TypedRecordsQuery } from "./query";
 import { shapeRecord } from "./shape";
 import type { ParsedValue } from "./values";
@@ -42,7 +41,6 @@ async function recordSource(workspace: string, table: Table, columns: Column[], 
       });
   }
 
-  const labelled = new Set<string>();
   const selects = ['t."id" as "id"'];
   selects.push('t."created_at" as "created_at"', 't."updated_at" as "updated_at"');
   for (const name of ["created_by", "updated_by"])
@@ -55,7 +53,6 @@ async function recordSource(workspace: string, table: Table, columns: Column[], 
     if (column.format === "relation") {
       const target = targets.get(Number((column.options as { tableId?: number }).tableId));
       if (target) {
-        labelled.add(column.columnName);
         selects.push(
           `(select cast(r.${quoteIdent(target.label)} as text) from ${quoteIdent(target.physicalName)} r where r."id" = t.${quoteIdent(column.columnName)}) as ${quoteIdent(`${column.columnName}__label`)}`,
         );
@@ -64,7 +61,6 @@ async function recordSource(workspace: string, table: Table, columns: Column[], 
   }
 
   return {
-    labelled,
     select: raw(selects.join(", ")),
     from: sql`${raw(quoteIdent(source ?? physicalTableName(workspace, table.tableName)))} t`,
   };
@@ -154,23 +150,6 @@ const orderOf = (keys: Key[]) =>
     sql`, `,
   );
 
-function keysAfter(keys: Key[], cursor: RecordCursor) {
-  const terms = keys.map((key, index) => {
-    const value = cursor[index];
-    const earlier = keys.slice(0, index).map((item, at) => sql`${item.expr} is ${cursor[at]}`);
-    const later =
-      value === null
-        ? key.desc
-          ? sql`0`
-          : sql`${key.expr} is not null`
-        : key.desc
-          ? sql`(${key.expr} < ${value} or ${key.expr} is null)`
-          : sql`${key.expr} > ${value}`;
-    return sql`(${sql.join([...earlier, later], sql` and `)})`;
-  });
-  return sql`(${sql.join(terms, sql` or `)})`;
-}
-
 function seekSegments(spec: SortSpec, cursor: RecordCursor): Fragment[] {
   const ascending = spec.direction === "asc";
   const idOp = raw(ascending ? ">" : "<");
@@ -191,55 +170,6 @@ function seekSegments(spec: SortSpec, cursor: RecordCursor): Fragment[] {
   return ascending ? [after] : [after, sql`${bare} is null`];
 }
 
-type GroupSpec = { column: string; format: string; key: Fragment; orders: Fragment[] };
-
-function groupSpec(columns: Column[], name: string, labelled: Set<string>): GroupSpec | undefined {
-  const target = col(name);
-
-  if (isGroupableSystemKey(name)) {
-    const label = raw(quoteIdent(`${name}__label`));
-    return {
-      column: name,
-      format: "user",
-      key: target,
-      orders: [sql`${label} is null`, sql`${label} collate nocase`, target],
-    };
-  }
-
-  const column = columns.find((item) => item.columnName === name);
-  if (!column) return undefined;
-
-  switch (column.format) {
-    case "single_select": {
-      const choices = (column.options as { choices?: SelectChoice[] }).choices ?? [];
-      const rank = choices.length
-        ? sql`case ${target} ${sql.join(
-            choices.map((choice, index) => sql`when ${choice.value} then ${index}`),
-            sql` `,
-          )} else ${choices.length} end`
-        : sql`0`;
-      return { column: name, format: column.format, key: target, orders: [rank, target] };
-    }
-    case "checkbox": {
-      const key = sql`coalesce(${target}, 0)`;
-      return { column: name, format: column.format, key, orders: [key] };
-    }
-    case "relation": {
-      const label = raw(quoteIdent(`${name}__label`));
-      return {
-        column: name,
-        format: column.format,
-        key: target,
-        orders: labelled.has(name)
-          ? [sql`${target} is null`, sql`${label} is null`, sql`${label} collate nocase`, target]
-          : [sql`${target} is null`, target],
-      };
-    }
-    default:
-      return undefined;
-  }
-}
-
 export async function findRecords(
   workspace: string,
   table: Table,
@@ -248,74 +178,40 @@ export async function findRecords(
   ownerId?: string,
   source?: string,
 ) {
-  const { select, from, labelled } = await recordSource(workspace, table, columns, source);
+  const { select, from } = await recordSource(workspace, table, columns, source);
   const condition = filterWhere(columns, query, ownerId);
-  const grouping = query.group ? groupSpec(columns, query.group, labelled) : undefined;
   const spec = sortSpec(columns, query);
   const cursor = query.cursor ? decodeCursor(query.cursor) : null;
   const limit = query.pageSize + 1;
 
-  if (!grouping) {
-    const keys = sortKeys(spec);
-    if (cursor && cursor.length !== keys.length) throw new Error("The page cursor is invalid.");
-    const order = orderOf(keys);
-    const segments = cursor ? seekSegments(spec, cursor) : [sql`1 = 1`];
-
-    const found: Record<string, unknown>[] = [];
-    for (const segment of segments) {
-      found.push(
-        ...(await db.all<Record<string, unknown>>(
-          sql`select ${select} from ${from} where ${condition} and ${segment} order by ${order} limit ${limit - found.length}`,
-        )),
-      );
-      if (found.length >= limit) break;
-    }
-
-    const rows = found.slice(0, query.pageSize);
-    const last = rows.at(-1);
-    const hasMore = found.length > query.pageSize;
-    const nextCursor =
-      hasMore && last
-        ? encodeCursor(
-            spec.name === "id"
-              ? [last.id as string | number]
-              : [(last[spec.name] as string | number | null) ?? null, last.id as string | number],
-          )
-        : null;
-
-    return { hasMore, nextCursor, rows: rows.map((row) => shapeRecord(row, columns)) };
-  }
-
-  const keys: Key[] = [
-    ...grouping.orders.map((expr) => ({ expr: sql`(${expr})`, desc: false })),
-    ...sortKeys(spec),
-  ];
+  const keys = sortKeys(spec);
   if (cursor && cursor.length !== keys.length) throw new Error("The page cursor is invalid.");
+  const order = orderOf(keys);
+  const segments = cursor ? seekSegments(spec, cursor) : [sql`1 = 1`];
 
-  const marks = sql.join(
-    keys.map((key, index) => sql`${key.expr} as ${raw(quoteIdent(`__k${index}`))}`),
-    sql`, `,
-  );
-  const after = cursor ? keysAfter(keys, cursor) : sql`1 = 1`;
-
-  const found = await db.all<Record<string, unknown>>(
-    sql`select t.*, ${marks} from (select ${select}, count(*) over (partition by ${grouping.key}) as "__group_count" from ${from} where ${condition}) t where ${after} order by ${orderOf(keys)} limit ${limit}`,
-  );
+  const found: Record<string, unknown>[] = [];
+  for (const segment of segments) {
+    found.push(
+      ...(await db.all<Record<string, unknown>>(
+        sql`select ${select} from ${from} where ${condition} and ${segment} order by ${order} limit ${limit - found.length}`,
+      )),
+    );
+    if (found.length >= limit) break;
+  }
 
   const rows = found.slice(0, query.pageSize);
   const last = rows.at(-1);
   const hasMore = found.length > query.pageSize;
   const nextCursor =
     hasMore && last
-      ? encodeCursor(keys.map((_, index) => last[`__k${index}`] as string | number | null))
+      ? encodeCursor(
+          spec.name === "id"
+            ? [last.id as string | number]
+            : [(last[spec.name] as string | number | null) ?? null, last.id as string | number],
+        )
       : null;
 
-  const shaped = rows.map((row) => shapeRecord(row, columns));
-  const groups: Record<string, number> = {};
-  rows.forEach((row, index) => {
-    groups[groupKeyOf(grouping.format, shaped[index][grouping.column])] = Number(row.__group_count);
-  });
-  return { hasMore, nextCursor, rows: shaped, group: grouping.column, groups };
+  return { hasMore, nextCursor, rows: rows.map((row) => shapeRecord(row, columns)) };
 }
 
 export async function findRecord(
