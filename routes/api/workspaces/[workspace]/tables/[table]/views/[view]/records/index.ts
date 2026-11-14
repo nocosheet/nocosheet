@@ -5,6 +5,7 @@ import { z } from "zod";
 import { httpError } from "@/lib/http";
 import { targetsOfColumns, parseFilters } from "@/lib/records/filter-param";
 import { recordsApiSchema, resolveRecordsQuery, withFilters } from "@/lib/records/query";
+import { sortKeyOf } from "@/lib/records/sort-param";
 import { findRecords } from "@/lib/records/repository";
 import { checkRecordsQuery } from "@/lib/records/validation";
 import { authorize } from "@/lib/roles/guard";
@@ -32,7 +33,10 @@ export const GET = defineHandler.withValidator({ params, query: recordsApiSchema
   const shown = all.filter((column) => row.selectColumns.includes(column.columnName));
   const parsed = parseFilters(resolveRecordsQuery(query).filter, targetsOfColumns(shown));
   if (parsed.errors.length) throw httpError(400, parsed.errors[0]);
-  const resolved = withFilters(resolveRecordsQuery(query), parsed.filters);
+  const requested = resolveRecordsQuery(query);
+  const sort = sortKeyOf(shown, requested.sort);
+  if (sort === undefined) throw httpError(400, `"${requested.sort}" can't be sorted.`);
+  const resolved = { ...withFilters(requested, parsed.filters), sort };
 
   const problem = checkRecordsQuery(shown, resolved);
   if (problem) throw httpError(400, problem);

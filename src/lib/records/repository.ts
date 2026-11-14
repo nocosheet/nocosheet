@@ -7,6 +7,7 @@ import { physicalTableName, quoteIdent } from "../tables/naming";
 import type { Column, Table } from "../tables/repository";
 import { conditionText } from "./condition";
 import { decodeCursor, encodeCursor, type RecordCursor } from "./cursor";
+import { SYSTEM_SORT_KEYS } from "./sort-param";
 import { type FilterCondition, filterKind } from "./filters";
 import type { TypedRecordsQuery } from "./query";
 import { shapeRecord } from "./shape";
@@ -14,7 +15,6 @@ import type { ParsedValue } from "./values";
 
 type Fragment = ReturnType<typeof sql>;
 
-const SYSTEM_SORTS = ["id", "created_at", "updated_at"];
 
 const RECORD_OPTIONS_LIMIT = 10;
 const EXPORT_LIMIT = 10_000;
@@ -122,7 +122,7 @@ function sortSpec(columns: Column[], query: TypedRecordsQuery): SortSpec {
   if (!query.sort) return fallback;
   const direction = query.order === "desc" ? "desc" : "asc";
 
-  if (SYSTEM_SORTS.includes(query.sort)) return { name: query.sort, nocase: false, direction };
+  if (SYSTEM_SORT_KEYS.includes(query.sort)) return { name: query.sort, nocase: false, direction };
 
   const column = columns.find((item) => item.columnName === query.sort);
   if (!column) return fallback;

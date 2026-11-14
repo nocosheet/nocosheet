@@ -109,7 +109,7 @@ export function ViewGridView({
           canEditRow={(row) => access.canOn("update", tableId, ownerOf(row))}
           onOpenRecord={onOpenRecord}
           onCellChange={(original, draft, column) => void updateCell(original, draft, column)}
-          sort={query.sort}
+          sort={query.sortKey}
           order={query.order}
           empty={
             error

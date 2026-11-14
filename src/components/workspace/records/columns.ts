@@ -1,6 +1,7 @@
 import { CalendarClockIcon, CalendarIcon, HashIcon, UserIcon, type LucideIcon } from "lucide-react";
 
 import { filterKind, isSortableFormat } from "@/lib/records/filters";
+import { systemSortName } from "@/lib/records/sort-param";
 import { isEditableColumn } from "@/lib/records/values";
 import { FORMATS, SEARCHABLE_FORMATS, type ColumnFormat } from "@/lib/tables/formats";
 
@@ -127,9 +128,9 @@ export function buildViewerColumns(table: TableDetail): ViewerColumn[] {
 
   return [
     ...columns,
-    system("id", "Id", "id", HashIcon, 120, true),
-    system("created_at", "Created at", "created_at", CalendarClockIcon, 190, true),
-    system("updated_at", "Updated at", "updated_at", CalendarIcon, 190, true),
+    system("id", systemSortName("id"), "id", HashIcon, 120, true),
+    system("created_at", systemSortName("created_at"), "created_at", CalendarClockIcon, 190, true),
+    system("updated_at", systemSortName("updated_at"), "updated_at", CalendarIcon, 190, true),
     system("created_by", "Created by", "user", UserIcon, 160, false),
     system("updated_by", "Updated by", "user", UserIcon, 160, false),
   ];

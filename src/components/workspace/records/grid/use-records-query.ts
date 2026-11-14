@@ -6,6 +6,7 @@ import { useQueryStates } from "nuqs";
 
 import { parseFilters, serializeFilters, targetsOfColumns } from "@/lib/records/filter-param";
 import { recordsSearchParams, resolveRecordsQuery } from "@/lib/records/query";
+import { sortKeyOf } from "@/lib/records/sort-param";
 
 import type { ViewerColumn } from "../columns";
 
@@ -13,7 +14,10 @@ export function useRecordsQuery(columns: ViewerColumn[]) {
   const [urlQuery, setUrlQuery] = useQueryStates(recordsSearchParams, { history: "replace" });
 
   const resolved = resolveRecordsQuery(urlQuery);
-  const sortable = new Set(columns.filter((column) => column.sortable).map((c) => c.key));
+  const sortKey = sortKeyOf(
+    columns.filter((column) => column.sortable).map((c) => ({ columnName: c.key, name: c.name })),
+    resolved.sort,
+  );
 
   const nameByKey = new Map(columns.map((column) => [column.key, column.name]));
   const { filters } = parseFilters(
@@ -29,7 +33,8 @@ export function useRecordsQuery(columns: ViewerColumn[]) {
     ...resolved,
     filters,
     filter: serializeFilters(filters, (key) => nameByKey.get(key) ?? key),
-    sort: resolved.sort && sortable.has(resolved.sort) ? resolved.sort : null,
+    sort: sortKey ? (nameByKey.get(sortKey) ?? null) : null,
+    sortKey: sortKey ?? null,
   };
 
   const setQuery = (values: { [K in keyof typeof urlQuery]?: (typeof urlQuery)[K] | null }) =>

@@ -64,8 +64,8 @@ export function useGridTable({
   const columnFilters = useMemo(() => toColumnFilters(query.filters), [filtersKey]);
 
   const sorting = useMemo<SortingState>(
-    () => (query.sort ? [{ id: query.sort, desc: query.order === "desc" }] : []),
-    [query.sort, query.order],
+    () => (query.sortKey ? [{ id: query.sortKey, desc: query.order === "desc" }] : []),
+    [query.sortKey, query.order],
   );
 
   return useTable(
@@ -99,9 +99,10 @@ export function useGridTable({
       },
       onSortingChange: (updater) => {
         const [next] = functionalUpdate(updater, sorting);
-        const sort = next?.id ?? null;
+        const sortKey = next?.id ?? null;
         const order = next?.desc ? "desc" : "asc";
-        if (sort === query.sort && (sort === null || order === query.order)) return;
+        if (sortKey === query.sortKey && (sortKey === null || order === query.order)) return;
+        const sort = columns.find((column) => column.key === sortKey)?.name ?? null;
         void setQuery({ sort, order });
       },
       onColumnFiltersChange: (updater) => {

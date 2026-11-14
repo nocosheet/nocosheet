@@ -1,4 +1,5 @@
 import { decodeCursor } from "./cursor";
+import { SYSTEM_SORT_KEYS } from "./sort-param";
 import { conditionError, filterKind, isSortableFormat } from "./filters";
 import type { TypedRecordsQuery } from "./query";
 
@@ -10,7 +11,6 @@ type QueryColumn = {
   isSortable: boolean;
 };
 
-const SYSTEM_SORTS = ["id", "created_at", "updated_at"];
 
 export function checkRecordsQuery(columns: QueryColumn[], query: TypedRecordsQuery) {
   const byName = new Map(columns.map((column) => [column.columnName, column]));
@@ -23,7 +23,7 @@ export function checkRecordsQuery(columns: QueryColumn[], query: TypedRecordsQue
     if (error) return `${column.name}: ${error}`;
   }
 
-  if (query.sort && !SYSTEM_SORTS.includes(query.sort)) {
+  if (query.sort && !SYSTEM_SORT_KEYS.includes(query.sort)) {
     const column = byName.get(query.sort);
     if (!column || !column.isSortable || !isSortableFormat(column.format))
       return `"${query.sort}" can't be sorted.`;

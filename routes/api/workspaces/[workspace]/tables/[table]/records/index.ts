@@ -12,6 +12,7 @@ import {
   resolveRecordsQuery,
   withFilters,
 } from "@/lib/records/query";
+import { sortKeyOf } from "@/lib/records/sort-param";
 import { countOwnedRecords, createRecordRow, findRecords } from "@/lib/records/repository";
 import { checkRecordsQuery } from "@/lib/records/validation";
 import { findMissingRequired, parseRecordValues, recordPatchSchema } from "@/lib/records/values";
@@ -30,7 +31,10 @@ export const GET = defineHandler.withValidator({ params, query: recordsApiSchema
   const columns = await listColumns(table.id);
   const parsed = parseFilters(resolveRecordsQuery(query).filter, targetsOfColumns(columns));
   if (parsed.errors.length) throw httpError(400, parsed.errors[0]);
-  const resolved = withFilters(resolveRecordsQuery(query), parsed.filters);
+  const requested = resolveRecordsQuery(query);
+  const sort = sortKeyOf(columns, requested.sort);
+  if (sort === undefined) throw httpError(400, `"${requested.sort}" can't be sorted.`);
+  const resolved = { ...withFilters(requested, parsed.filters), sort };
 
   const problem = checkRecordsQuery(columns, resolved);
   if (problem) throw httpError(400, problem);
